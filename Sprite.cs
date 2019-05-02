@@ -15,7 +15,16 @@ namespace VCS
         public string Filename { get; }
         private Rect _SrcRect;
         public Rect SrcRect { get { return _SrcRect; } set { this._SrcRect = value; this.Viewport.ForceUpdate(); } }
-        public Bitmap Bitmap { get; set; }
+        private Bitmap _Bitmap;
+        public Bitmap Bitmap
+        {
+            get { return _Bitmap; }
+            set {
+                this._Bitmap = value;
+                value.Renderer = this.Viewport.Renderer;
+                this.SrcRect = new Rect(value.Width, value.Height);
+            }
+        }
         private int _X = 0;
         public int X { get { return _X; } set { this._X = value; this.Viewport.ForceUpdate(); } }
         private int _Y = 0;
@@ -43,39 +52,26 @@ namespace VCS
         public Color Color { get { return _Color; } set { this._Color = value;  this.Viewport.ForceUpdate(); } }
 
         public Sprite(Viewport Viewport, string Filename)
+            : this(Viewport)
         {
-            this.Viewport = Viewport;
-            this.Viewport.Sprites.Add(this);
-            this.Bitmap = new Bitmap(this.Viewport.Renderer, Filename);
+            this.Bitmap = new Bitmap(Filename);
             this.SrcRect = new Rect(this.Bitmap.Width, this.Bitmap.Height);
-            this.Viewport.ForceUpdate();
-        }
-
-        public Sprite(Viewport Viewport, int Width, int Height)
-        {
-            this.Viewport = Viewport;
-            this.Viewport.Sprites.Add(this);
-            this.Bitmap = new Bitmap(this.Viewport.Renderer, Width, Height);
-            this.SrcRect = new Rect(this.Bitmap.Width, this.Bitmap.Height);
-            this.Viewport.ForceUpdate();
         }
 
         public Sprite(Viewport Viewport, Size Size)
+            : this(Viewport, Size.Width, Size.Height) { }
+        public Sprite(Viewport Viewport, int Width, int Height)
+            : this(Viewport)
         {
-            this.Viewport = Viewport;
-            this.Viewport.Sprites.Add(this);
-            this.Bitmap = new Bitmap(this.Viewport.Renderer, Size);
+            this.Bitmap = new Bitmap(Width, Height);
             this.SrcRect = new Rect(this.Bitmap.Width, this.Bitmap.Height);
-            this.Viewport.ForceUpdate();
         }
 
         public Sprite(Viewport Viewport, Bitmap bmp)
+            : this(Viewport)
         {
-            this.Viewport = Viewport;
-            this.Viewport.Sprites.Add(this);
             this.Bitmap = bmp;
             this.SrcRect = new Rect(this.Bitmap.Width, this.Bitmap.Height);
-            this.Viewport.ForceUpdate();
         }
 
         public Sprite(Viewport Viewport)

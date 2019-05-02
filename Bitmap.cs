@@ -11,47 +11,42 @@ namespace VCS
 {
     public class Bitmap
     {
-        public IntPtr Surface;
-        public SDL_Surface SurfaceObject;
+        protected IntPtr _Surface;
+        public IntPtr Surface { get { return _Surface; } }
+        protected SDL_Surface _SurfaceObject;
+        public SDL_Surface SurfaceObject { get { return _SurfaceObject; } }
         public int Width { get { return this.SurfaceObject.w; } }
         public int Height { get { return this.SurfaceObject.h; } }
-        public bool Disposed { get; set; } = false;
-        public Renderer Renderer { get; set; }
-        public Font Font { get; set; }
+        protected bool _Disposed = false;
+        public bool Disposed { get { return _Disposed; } }
+        public Renderer Renderer;
+        public Font Font;
 
-        public Bitmap(Renderer Renderer, string Filename)
+        public Bitmap(string Filename)
         {
-            this.Renderer = Renderer;
-            this.Surface = SDL2.SDL_image.IMG_Load(Filename);
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            _Surface = SDL2.SDL_image.IMG_Load(Filename);
+            _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         }
 
-        public Bitmap(Renderer Renderer, int Width, int Height)
+        public Bitmap(Size Size)
+            : this(Size.Width, Size.Height) { }
+        public Bitmap(int Width, int Height)
         {
-            this.Renderer = Renderer;
-            this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            _Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+            _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         }
 
-        public Bitmap(Renderer Renderer, Size Size)
+        public Bitmap(IntPtr Surface)
         {
-            this.Renderer = Renderer;
-            this.Surface = SDL_CreateRGBSurface(0, Size.Width, Size.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-        }
-
-        public Bitmap(Renderer Renderer, IntPtr Surface)
-        {
-            this.Renderer = Renderer;
-            this.Surface = Surface;
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            _Surface = Surface;
+            _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         }
 
         public void Dispose()
         {
             SDL_FreeSurface(this.Surface);
-            this.Disposed = true;
-            this.Renderer.ForceUpdate();
+            _Disposed = true;
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         public override string ToString()
@@ -64,9 +59,9 @@ namespace VCS
             if (this.Surface != null)
             {
                 SDL_FreeSurface(this.Surface);
-                this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-                this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-                this.Renderer.ForceUpdate();
+                _Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+                _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+                if (this.Renderer != null) this.Renderer.ForceUpdate();
             }
         }
 
@@ -92,7 +87,7 @@ namespace VCS
             Marshal.WriteByte(SurfaceObject.pixels, Offset + 1,     g);
             Marshal.WriteByte(SurfaceObject.pixels, Offset + 2, e ? b : r);
             Marshal.WriteByte(SurfaceObject.pixels, Offset + 3,     a);
-            this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         #region GetPixel Overloads
@@ -149,15 +144,15 @@ namespace VCS
             {
                 double fact = ((double) x - x1) / (x2 - x1);
                 int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
-                SetPixel(x, y, r, g, b, a);
+                if (y >= 0) SetPixel(x, y, r, g, b, a);
             }
             for (int y = y1; y <= y2; y++)
             {
                 double fact = ((double) y - y1) / (y2 - y1);
                 int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
-                SetPixel(x, y, r, g, b, a);
+                if (x >= 0) SetPixel(x, y, r, g, b, a);
             }
-            this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         #region DrawCircle
@@ -206,7 +201,7 @@ namespace VCS
                     err += dx - (Radius << 1);
                 }
             }
-            this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         #region DrawRect Overloads
@@ -253,7 +248,7 @@ namespace VCS
             DrawLine(X, Y, X, Y + Height - 1, r, g, b, a);
             DrawLine(X, Y + Height - 1, X + Width - 1, Y + Height - 1, r, g, b, a);
             DrawLine(X + Width - 1, Y, X + Width - 1, Y + Height - 1, r, g, b, a);
-            this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         #region FillRect Overloads
@@ -298,36 +293,8 @@ namespace VCS
         {
             SDL_Rect Rect = new Rect(X, Y, Width, Height).SDL_Rect;
             SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
-            this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
-
-        #region Old Build
-        /*public void Build(int X, int Y, Bitmap Src, Rect SrcRect)
-        {
-            this.Build(X, Y, Src, SrcRect.X, SrcRect.Y, SrcRect.Width, SrcRect.Height);
-        }
-        public void Build(Point p, Bitmap Src, Rect SrcRect)
-        {
-            this.Build(p.X, p.Y, Src, SrcRect.X, SrcRect.Y, SrcRect.Width, SrcRect.Height);
-        }
-        public void Build(Point p, Bitmap Src, int RX, int RY, int RWidth, int RHeight)
-        {
-            this.Build(p.X, p.Y, Src, RX, RY, RWidth, RHeight);
-        }
-        #endregion
-        public void Build(int X, int Y, Bitmap Src, int RX, int RY, int RWidth, int RHeight)
-        {
-            for (int x = RX; x < RX + RWidth; x++)
-            {
-                for (int y = RY; y < RY + RHeight; y++)
-                {
-                    Console.WriteLine($"X: {x} Y: {y} {Src.GetPixel(x, y)}");
-                    this.SetPixel(X + x - RX, Y + y - RY, Src.GetPixel(x, y));
-                }
-            }
-            this.Renderer.ForceUpdate();
-        }*/
-        #endregion
 
         #region Build Overloads
         public void Build(Rect DestRect, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
@@ -425,7 +392,8 @@ namespace VCS
             List<string> Lines = Text.Split('\n').ToList();
             IntPtr SDL_Font = this.Font.SDL_Font;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
-            Size Size = new Size(0, Lines.Count * 16);
+            int Height = TTF_FontHeight(SDL_Font);
+            Size Size = new Size(0, (Lines.Count + 1) * Height);
             foreach (string Line in Lines)
             {
                 int w;
@@ -433,12 +401,12 @@ namespace VCS
                 TTF_SizeText(SDL_Font, Line, out w, out h);
                 if (w > Size.Width) Size.Width = w;
             }
-            Bitmap TextBitmap = new Bitmap(this.Renderer, Size);
+            Bitmap TextBitmap = new Bitmap(Size);
             for (int i = 0; i < Lines.Count; i++)
             {
                 if (string.IsNullOrEmpty(Lines[i])) continue;
-                Bitmap TempBmp = new Bitmap(this.Renderer, TTF_RenderText_Solid(SDL_Font, Lines[i], c.SDL_Color));
-                TextBitmap.Build(0, i * 16, TempBmp);
+                Bitmap TempBmp = new Bitmap(TTF_RenderText_Solid(SDL_Font, Lines[i], c.SDL_Color));
+                TextBitmap.Build(0, i * Height, TempBmp);
                 TempBmp.Dispose();
             }
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));

@@ -26,11 +26,11 @@ namespace VCS
             TTF_Init();
         }
 
-        static int OldMouseX = -1;
-        static int OldMouseY = -1;
-        static bool LeftDown = false;
-        static bool MiddleDown = false;
-        static bool RightDown = false;
+        private static int OldMouseX = -1;
+        private static int OldMouseY = -1;
+        private static bool LeftDown = false;
+        private static bool MiddleDown = false;
+        private static bool RightDown = false;
 
         public static void Update()
         {
@@ -95,22 +95,12 @@ namespace VCS
                             }
                             break;
                         case SDL_EventType.SDL_KEYDOWN:
-                            SDL_Keycode sym = e.key.keysym.sym;
-                            if (sym == SDL_Keycode.SDLK_LCTRL) { Input.LCtrl = true; }
-                            else if (sym == SDL_Keycode.SDLK_RCTRL) { Input.RCtrl = true; }
-                            else if (sym == SDL_Keycode.SDLK_LSHIFT) { Input.LShift = true; }
-                            else if (sym == SDL_Keycode.SDLK_RSHIFT) { Input.RShift = true; }
-                            else if (sym == SDL_Keycode.SDLK_LALT) { Input.LAlt = true; }
-                            else if (sym == SDL_Keycode.SDLK_RALT) { Input.RAlt = true; }
+                            SDL_Keycode sym1 = e.key.keysym.sym;
+                            Input.Register(sym1, true);
                             break;
                         case SDL_EventType.SDL_KEYUP:
-                            SDL_Keycode s = e.key.keysym.sym;
-                            if (s == SDL_Keycode.SDLK_LCTRL) { Input.LCtrl = false; }
-                            else if (s == SDL_Keycode.SDLK_RCTRL) { Input.RCtrl = false; }
-                            else if (s == SDL_Keycode.SDLK_LSHIFT) { Input.LShift = false; }
-                            else if (s == SDL_Keycode.SDLK_RSHIFT) { Input.RShift = false; }
-                            else if (s == SDL_Keycode.SDLK_LALT) { Input.LAlt = false; }
-                            else if (s == SDL_Keycode.SDLK_RALT) { Input.RAlt = false; }
+                            SDL_Keycode sym2 = e.key.keysym.sym;
+                            Input.Register(sym2, false);
                             break;
                     }
                 }
@@ -126,6 +116,7 @@ namespace VCS
                 {
                     Forms.RemoveAt(i);
                 }
+                Input.IterationEnd();
             }
         }
 

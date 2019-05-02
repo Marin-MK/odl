@@ -17,6 +17,10 @@ namespace VCS
         {
             this.Name = Name;
             this.Size = Size;
+            if (this.SDL_Font == IntPtr.Zero)
+            {
+                throw new Exception("Invalid font: '" + this.Name + "'");
+            }
         }
 
         public Font Clone()

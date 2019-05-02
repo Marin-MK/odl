@@ -20,9 +20,21 @@ namespace VCS
         public bool Disposed { get; set; } = false;
         public bool Visible { get; set; } = true;
 
-        public Viewport(Renderer Renderer, int Width, int Height)
+        #region Constructor Overloads
+        public Viewport(Renderer Renderer, Point p, Size s)
+            : this(Renderer, p.X, p.Y, s.Width, s.Height) { }
+        public Viewport(Renderer Renderer, Point p, int Width, int Height)
+            : this(Renderer, p.X, p.Y, Width, Height) { }
+        public Viewport(Renderer Renderer, int X, int Y, Size s)
+            : this(Renderer, X, Y, s.Width, s.Height) { }
+        public Viewport(Renderer Renderer, Rect rect)
+            : this(Renderer, rect.X, rect.Y, rect.Width, rect.Height) { }
+        #endregion
+        public Viewport(Renderer Renderer, int X, int Y, int Width, int Height)
         {
             this.Renderer = Renderer;
+            this.X = X;
+            this.Y = Y;
             this.Width = Width;
             this.Height = Height;
             this.Renderer.Viewports.Add(this);
