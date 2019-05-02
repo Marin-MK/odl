@@ -10,6 +10,6 @@ This library implements functionality very similar to RGSS (Ruby Game Scripting 
 <li>SDL2 (2.0.7 used)
 <li>SDL2_image (2.0.2 used)
 <li>SDL2_ttf (2.0.14 used)
-<li><a href="https://github.com/flibitijibibo/SDL2-CS">SDL2-CS
+<li><a href="https://github.com/flibitijibibo/SDL2-CS">SDL2-CS</a>
 <li>zlib (1.2.11 used)
 </list>
