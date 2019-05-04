@@ -83,7 +83,7 @@ namespace ODL
 
         public void Dispose()
         {
-            this.Bitmap.Dispose();
+            if (this.Bitmap != null) this.Bitmap.Dispose();
             this.Disposed = true;
             this.Viewport.ForceUpdate();
         }
