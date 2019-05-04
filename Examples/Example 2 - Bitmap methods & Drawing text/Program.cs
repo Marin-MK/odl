@@ -1,5 +1,5 @@
 ﻿using System;
-using VCS;
+using ODL;
 
 namespace Examples
 {
@@ -10,9 +10,10 @@ namespace Examples
             // Initializes SDL2
             Graphics.Start();
             // Creates the main form
-            CustomForm f = new CustomForm();
-            // So long as the main form hasn't been closed, keep updating
-            while (!f.Closed)
+            CustomWindow w = new CustomWindow();
+            w.Show();
+            // So long as there are unclosed windows, keep updating
+            while (Graphics.CanUpdate())
             {
                 // Updates SDL2 and all sprites when necessary
                 Graphics.Update();
@@ -22,11 +23,11 @@ namespace Examples
         }
     }
 
-    class CustomForm : Form
+    class CustomWindow : Window
     {
         Sprite canvas;
 
-        public CustomForm()
+        public CustomWindow()
         {
             // Initializes the base form.
             base.Initialize();

@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SDL2.SDL;
 
-namespace VCS
+namespace ODL
 {
     public class Color
     {
@@ -34,6 +30,11 @@ namespace VCS
         public byte Alpha { get; set; } = 255;
 
         public Color(byte Red, byte Green, byte Blue, byte Alpha = 255)
+        {
+            this.Set(Red, Green, Blue, Alpha);
+        }
+
+        public void Set(byte Red, byte Green, byte Blue, byte Alpha = 255)
         {
             this.Red = Red;
             this.Green = Green;

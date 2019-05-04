@@ -1,5 +1,5 @@
 ﻿using System;
-using VCS;
+using ODL;
 
 namespace Examples
 {
@@ -10,9 +10,10 @@ namespace Examples
             // Initializes SDL2
             Graphics.Start();
             // Creates the main form
-            CustomForm f = new CustomForm();
-            // So long as the main form hasn't been closed, keep updating
-            while (!f.Closed)
+            CustomWindow w = new CustomWindow();
+            w.Show();
+            // So long as there are unclosed windows, keep updating
+            while (Graphics.CanUpdate())
             {
                 // Updates SDL2 and all sprites when necessary
                 Graphics.Update();
@@ -27,9 +28,9 @@ namespace Examples
     // This can also used to re-assign a sprite another bitmap,
     // even if it already had one. Just make sure to dispose the old
     // one before you do this.
-    class CustomForm : Form
+    class CustomWindow : Window
     {
-        public CustomForm()
+        public CustomWindow()
         {
             // Initializes the base form.
             base.Initialize();
@@ -80,7 +81,7 @@ namespace Examples
             // you won't see the sprite at all.
             // Since we set the viewport's width to 50 and the sprite's x to 50, it completely
             // goes out of bounds of the viewport, and you won't see it at all.
-            
+
             // Finished initialization of this Form and invokes the OnLoaded event.
             base.Start();
         }

@@ -1,22 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SDL2.SDL_ttf;
 
-namespace VCS
+namespace ODL
 {
     public class Font
     {
-        public string Name { get; set; }
-        public int Size { get; set; } = 12;
-        public IntPtr SDL_Font { get { return TTF_OpenFont(this.Name + ".ttf", this.Size); } }
+        private string _Name;
+        public string Name { get { return _Name; } set { _Name = value; UpdateFont(); } }
+        private int _Size;
+        public int Size { get { return _Size; } set { _Size = value; UpdateFont(); } }
+        private IntPtr _font;
+        public IntPtr SDL_Font { get { return _font; } }
 
-        public Font(string Name, int Size)
+        public Font(string Name, int Size = 12)
         {
-            this.Name = Name;
-            this.Size = Size;
+            _Name = Name;
+            _Size = Size;
+            UpdateFont();
+        }
+
+        private void UpdateFont()
+        {
+            if (this.SDL_Font != null) TTF_CloseFont(this.SDL_Font);
+            _font = TTF_OpenFont(this.Name + ".ttf", this.Size);
             if (this.SDL_Font == IntPtr.Zero)
             {
                 throw new Exception("Invalid font: '" + this.Name + "'");

@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using static SDL2.SDL;
 using static SDL2.SDL_ttf;
 
-namespace VCS
+namespace ODL
 {
     public class Bitmap
     {
@@ -160,12 +158,10 @@ namespace VCS
         {
             DrawCircle(c.X, c.Y, Radius, color.Red, color.Green, color.Blue, color.Alpha);
         }
-
         public void DrawCircle(int ox, int oy, int Radius, Color c)
         {
             DrawCircle(ox, oy, Radius, c.Red, c.Green, c.Blue, c.Alpha);
         }
-
         public void DrawCircle(Point c, int Radius, byte r, byte g, byte b, byte a = 255)
         {
             DrawCircle(c.X, c.Y, Radius, r, g, b, a);
@@ -194,6 +190,53 @@ namespace VCS
                     err += dy;
                     dy += 2;
                 }
+                if (err > 0)
+                {
+                    x--;
+                    dx += 2;
+                    err += dx - (Radius << 1);
+                }
+            }
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
+        }
+
+        #region FillCircle
+        public void FillCircle(Point c, int Radius, Color color)
+        {
+            FillCircle(c.X, c.Y, Radius, color.Red, color.Green, color.Blue, color.Alpha);
+        }
+        public void FillCircle(int ox, int oy, int Radius, Color c)
+        {
+            FillCircle(ox, oy, Radius, c.Red, c.Green, c.Blue, c.Alpha);
+        }
+        public void FillCircle(Point c, int Radius, byte r, byte g, byte b, byte a = 255)
+        {
+            FillCircle(c.X, c.Y, Radius, r, g, b, a);
+        }
+        #endregion
+        public void FillCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
+        {
+            int x = Radius - 1;
+            int y = 0;
+            int dx = 1;
+            int dy = 1;
+            int err = dx - (Radius << 1);
+            while (x >= y)
+            {
+                for (int i = ox - x; i <= ox + x; i++)
+                {
+                    SetPixel(i, oy + y, r, g, b, a);
+                    SetPixel(i, oy - y, r, g, b, a);
+                }
+                for (int i = oy - y; i <= ox + y; i++)
+                {
+                    SetPixel(i, oy + x, r, g, b, a);
+                    SetPixel(i, oy - x, r, g, b, a);
+                }
+
+                y++;
+                err += dy;
+                dy += 2;
                 if (err > 0)
                 {
                     x--;
@@ -410,7 +453,6 @@ namespace VCS
                 TempBmp.Dispose();
             }
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
-            TTF_CloseFont(SDL_Font);
         }
     }
 

@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 using static SDL2.SDL;
 
-namespace VCS
+namespace ODL
 {
-    public class Form
+    public class Window
     {
         protected Viewport _Viewport;
         public Viewport Viewport { get { return _Viewport; } }
@@ -21,7 +13,9 @@ namespace VCS
         protected Renderer _Renderer;
         public Renderer Renderer { get { return _Renderer; } }
 
-        protected string _Text = "New Form";
+        protected Window _Parent;
+        public Window Parent { get { return _Parent; } }
+        protected string _Text = "New Window";
         public string Text { get { return _Text; } }
         protected Bitmap _Icon;
         public Bitmap Icon { get { return _Icon; } }
@@ -35,12 +29,16 @@ namespace VCS
         public int Height { get { return _Height; } }
         protected bool _Resizable = true;
         public bool Resizable { get { return _Resizable; } }
+        public bool Focus;
         protected bool _Disposed = false;
         public bool Disposed { get { return _Disposed; } }
         protected bool _Closed = false;
         public bool Closed { get { return _Closed; } }
+        protected int _Screen = 0;
+        public int Screen { get { return _Screen; } }
 
         protected Color _BackgroundColor = new Color(0, 0, 0);
+        public Color BackgroundColor { get { return _BackgroundColor; } }
         protected Sprite _BackgroundSprite;
 
         public EventHandler<TimeEventArgs> OnLoaded;
@@ -48,30 +46,35 @@ namespace VCS
         public EventHandler<ClosedEventArgs> OnClosed;
         public EventHandler<MouseEventArgs> OnMouseMoving;
         public EventHandler<MouseEventArgs> OnMouseDown;
-        public EventHandler<MouseEventArgs> OnMouseUp;
         public EventHandler<MouseEventArgs> OnMousePress;
-        public EventHandler<TickEventArgs> OnTick;
+        public EventHandler<MouseEventArgs> OnMouseUp;
+        public EventHandler<EventArgs> OnTick;
+        public EventHandler<FocusEventArgs> OnFocusGained;
+        public EventHandler<FocusEventArgs> OnFocusLost;
 
         private DateTime _StartTime;
         private bool Init = false;
 
-        public Form()
+        public Window(Window Parent = null)
         {
-            this.OnLoaded = new EventHandler<TimeEventArgs>(Form_Loaded);
-            this.OnClosing = new EventHandler<ClosingEventArgs>(Form_Closing);
-            this.OnClosed = new EventHandler<ClosedEventArgs>(Form_Closed);
-            this.OnMouseMoving = new EventHandler<MouseEventArgs>(Form_MouseMoving);
-            this.OnMouseDown = new EventHandler<MouseEventArgs>(Form_MouseDown);
-            this.OnMouseUp = new EventHandler<MouseEventArgs>(Form_MouseUp);
-            this.OnMousePress = new EventHandler<MouseEventArgs>(Form_MousePress);
-            this.OnTick = new EventHandler<TickEventArgs>(Form_Tick);
+            _Parent = Parent;
+            this.OnLoaded = new EventHandler<TimeEventArgs>(Window_Loaded);
+            this.OnClosing = new EventHandler<ClosingEventArgs>(Window_Closing);
+            this.OnClosed = new EventHandler<ClosedEventArgs>(Window_Closed);
+            this.OnMouseMoving = new EventHandler<MouseEventArgs>(Window_MouseMoving);
+            this.OnMouseDown = new EventHandler<MouseEventArgs>(Window_MouseDown);
+            this.OnMouseUp = new EventHandler<MouseEventArgs>(Window_MouseUp);
+            this.OnMousePress = new EventHandler<MouseEventArgs>(Window_MousePress);
+            this.OnTick = new EventHandler<EventArgs>(Window_Tick);
+            this.OnFocusGained = new EventHandler<FocusEventArgs>(Window_FocusGained);
+            this.OnFocusLost = new EventHandler<FocusEventArgs>(Window_FocusLost);
 
-            if (this.GetType() == typeof(Form)) { Initialize(); }
+            if (this.GetType() == typeof(Window)) { Initialize(); }
         }
 
         public void Initialize()
         {
-            if (Graphics.Forms.Contains(this)) return;
+            if (Graphics.Windows.Contains(this)) return;
             _StartTime = DateTime.Now;
             _SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                 this.Width, this.Height, SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI);
@@ -96,11 +99,11 @@ namespace VCS
             _BackgroundSprite = new Sprite(bgvp, this.Width, this.Height);
             _BackgroundSprite.Name = "Background";
             _BackgroundSprite.Z = -999999999;
-            _BackgroundSprite.Bitmap.FillRect(0, 0, this.Width, this.Height, _BackgroundColor);
+            _BackgroundSprite.Bitmap.FillRect(0, 0, this.Width, this.Height, this.BackgroundColor);
 
-            Graphics.Forms.Add(this);
+            Graphics.AddWindow(this);
             Init = true;
-            if (this.GetType() == typeof(Form)) Start();
+            if (this.GetType() == typeof(Window)) Start();
         }
 
         public void Start()
@@ -140,61 +143,79 @@ namespace VCS
         {
             Bitmap bmp = new Bitmap(filename);
             _Icon = bmp;
-            if (Initialized())
-            {
-                SetIcon(bmp);
-            }
+            if (Initialized()) SetIcon(bmp);
         }
         public void SetIcon(Bitmap bmp)
         {
             if (_Icon != null) _Icon.Dispose();
             _Icon = bmp;
+            if (Initialized()) SDL_SetWindowIcon(this.SDL_Window, _Icon.Surface);
+        }
+
+        public void SetPosition(int X, int Y)
+        {
+            _X = X + Graphics.Screens[this.Screen].X;
+            _Y = Y + Graphics.Screens[this.Screen].Y;
             if (Initialized())
             {
-                SDL_SetWindowIcon(this.SDL_Window, _Icon.Surface);
+                int oldscreen = this.Screen;
+                SDL_SetWindowPosition(this.SDL_Window, _X, _Y);
+                _Screen = SDL_GetWindowDisplayIndex(this.SDL_Window);
+                if (_Screen != oldscreen)
+                {
+                    _X -= Graphics.Screens[_Screen].X;
+                    _Y -= Graphics.Screens[_Screen].Y;
+                }
             }
         }
 
-        public void Form_Closing(object sender, ClosingEventArgs e)
+        public void SetScreen(int screen)
         {
-
+            int displaycount = SDL_GetNumVideoDisplays();
+            if (screen >= displaycount)
+            {
+                throw new Exception($"Cannot set window to screen {screen} as it exceeds the screen count.");
+            }
+            _X = Graphics.Screens[screen].X + this.X;
+            _Y = Graphics.Screens[screen].Y + this.Y;
+            if (Initialized()) this.SetPosition(_X, _Y);
         }
 
-        public void Form_Closed(object sender, ClosedEventArgs e)
-        {
-            _Closed = true;
-        }
-
-        // Called by Initialize();
-        public void Form_Loaded(object sender, TimeEventArgs e)
+        public void Show()
         {
             SDL_ShowWindow(this.SDL_Window);
         }
 
-        public void Form_MouseMoving(object sender, MouseEventArgs e)
+        public void ForceFocus()
         {
-            
+            Focus = true;
+            SDL_RaiseWindow(this.SDL_Window);
         }
 
-        public void Form_MouseDown(object sender, MouseEventArgs e)
+        public void Window_Closing(object sender, ClosingEventArgs e) { }
+
+        public void Window_Closed(object sender, ClosedEventArgs e)
         {
-            
+            _Closed = true;
         }
+        
+        public void Window_Loaded(object sender, TimeEventArgs e) { }
 
-        public void Form_MouseUp(object sender, MouseEventArgs e)
-        {
-            
-        }
+        public void Window_MouseMoving(object sender, MouseEventArgs e) { }
 
-        public void Form_MousePress(object sender, MouseEventArgs e)
-        {
+        public void Window_MouseDown(object sender, MouseEventArgs e) { }
 
-        }
+        public void Window_MouseUp(object sender, MouseEventArgs e) { }
 
-        public void Form_Tick(object sender, TickEventArgs e)
+        public void Window_MousePress(object sender, MouseEventArgs e) { }
+
+        public void Window_Tick(object sender, EventArgs e)
         {
             this.Renderer.Update(false);
         }
+
+        private void Window_FocusGained(object sender, FocusEventArgs e) { }
+        private void Window_FocusLost(object sender, FocusEventArgs e) { }
 
         public void Update()
         {
@@ -218,11 +239,6 @@ namespace VCS
             }
         }
 
-        public Color GetBackgroundColor()
-        {
-            return _BackgroundColor;
-        }
-
         public void SetBackgroundColor(byte r, byte g, byte b, byte a = 255)
         {
             SetBackgroundColor(new Color(r, g, b, a));
@@ -230,8 +246,11 @@ namespace VCS
         public void SetBackgroundColor(Color c)
         {
             _BackgroundColor = c;
-            Sprite bg = this.Renderer.Viewports[1].Sprites[0];
-            bg.Bitmap.FillRect(0, 0, bg.Bitmap.Width, bg.Bitmap.Height, c);
+            if (Initialized())
+            {
+                Sprite bg = this.Renderer.Viewports[1].Sprites[0];
+                bg.Bitmap.FillRect(0, 0, bg.Bitmap.Width, bg.Bitmap.Height, c);
+            }
         }
     }
 }

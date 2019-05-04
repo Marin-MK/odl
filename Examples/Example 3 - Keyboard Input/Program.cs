@@ -1,5 +1,5 @@
 ﻿using System;
-using VCS;
+using ODL;
 using static SDL2.SDL;
 
 namespace Examples
@@ -11,9 +11,10 @@ namespace Examples
             // Initializes SDL2
             Graphics.Start();
             // Creates the main form
-            CustomForm f = new CustomForm();
-            // So long as the main form hasn't been closed, keep updating
-            while (!f.Closed)
+            CustomWindow w = new CustomWindow();
+            w.Show();
+            // So long as there are unclosed windows, keep updating
+            while (Graphics.CanUpdate())
             {
                 // Updates SDL2 and all sprites when necessary
                 Graphics.Update();
@@ -25,13 +26,13 @@ namespace Examples
 
     // This example creates a circle and allows you to move it with the arrow keys.
     // Pressing Enter (Return) moves the circle to a random location.
-    class CustomForm : Form
+    class CustomWindow : Window
     {
         Random rand = new Random();
 
         Sprite circle;
 
-        public CustomForm()
+        public CustomWindow()
         {
             // Initializes the base form.
             base.Initialize();
@@ -52,7 +53,7 @@ namespace Examples
         // Main update method that's called thousands of times per second.
         // Avoid heavy processing in here because it might severely impact performance.
         // Make sure that if something doesn't need to be run thousands of times per second, it isn't.
-        public void Tick(object sender, TickEventArgs e)
+        public void Tick(object sender, EventArgs e)
         {
             // Fires once when the key is pushed down
             if (Input.Trigger(SDL_Keycode.SDLK_RETURN))
@@ -87,9 +88,7 @@ namespace Examples
             }
         }
 
-        /// <summary>
-        /// Repositions the circle sprite based on a random value.
-        /// </summary>
+        // Repositions the circle sprite based on a random value.
         public void RepositionCircle()
         {
             // Generates a random number between 0 and the width minus the circle's width/height.

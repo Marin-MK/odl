@@ -1,5 +1,5 @@
 ﻿using System;
-using VCS;
+using ODL;
 
 namespace Examples
 {
@@ -10,9 +10,10 @@ namespace Examples
             // Initializes SDL2
             Graphics.Start();
             // Creates the main form
-            CustomForm f = new CustomForm();
-            // So long as the main form hasn't been closed, keep updating
-            while (!f.Closed)
+            CustomWindow w = new CustomWindow();
+            w.Show();
+            // So long as there are unclosed windows, keep updating
+            while (Graphics.CanUpdate())
             {
                 // Updates SDL2 and all sprites when necessary
                 Graphics.Update();
@@ -32,11 +33,11 @@ namespace Examples
     //       See instead (not C# and therefore needs to be ported first):
     //       https://www.freepascal-meets-sdl.net/a-custom-mouse-cursor/
 
-    class CustomForm : Form
+    class CustomWindow : Window
     {
         Sprite circle;
 
-        public CustomForm()
+        public CustomWindow()
         {
             // Initializes the base form.
             base.Initialize();

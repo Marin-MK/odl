@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SDL2.SDL;
 
-namespace VCS
+namespace ODL
 {
     public class Renderer
     {
@@ -103,26 +100,6 @@ namespace VCS
             }
             SDL_DestroyRenderer(this.SDL_Renderer);
             this.Disposed = true;
-        }
-
-        public void PrintHierarchy()
-        {
-            StringBuilder sb = new StringBuilder();
-            this.Viewports.Sort(delegate (Viewport vp1, Viewport vp2) { return vp1.Z.CompareTo(vp2.Z); });
-            for (int i = 0; i < this.Viewports.Count; i++)
-            {
-                sb.Append($"- Viewport ");
-                if (!string.IsNullOrEmpty(Viewports[i].Name)) sb.Append($"({Viewports[i].Name}) ");
-                sb.AppendLine($"Z: {Viewports[i].Z}");
-                Viewports[i].Sprites.Sort(delegate (Sprite s1, Sprite s2) { return s1.Z.CompareTo(s2.Z); });
-                for (int j = 0; j < Viewports[i].Sprites.Count; j++)
-                {
-                    sb.Append($"    - Sprite ");
-                    if (!string.IsNullOrEmpty(Viewports[i].Sprites[j].Name)) sb.Append($"({Viewports[i].Sprites[j].Name}) ");
-                    sb.AppendLine($"Z: {Viewports[i].Sprites[j].Z}");
-                }
-            }
-            Console.WriteLine(sb.ToString());
         }
     }
 }

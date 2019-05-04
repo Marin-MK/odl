@@ -1,5 +1,5 @@
 ﻿using System;
-using VCS;
+using ODL;
 
 namespace Examples
 {
@@ -10,9 +10,10 @@ namespace Examples
             // Initializes SDL2
             Graphics.Start();
             // Creates the main form
-            CustomForm f = new CustomForm();
-            // So long as the main form hasn't been closed, keep updating
-            while (!f.Closed)
+            CustomWindow w = new CustomWindow();
+            w.Show();
+            // So long as there are unclosed windows, keep updating
+            while (Graphics.CanUpdate())
             {
                 // Updates SDL2 and all sprites when necessary
                 Graphics.Update();
@@ -26,11 +27,11 @@ namespace Examples
     // Demonstrates the Sprite#Angle, Sprite#MirrorX
     // and Sprite#MirrorY properties.
     // Also explains all the other methods I haven't covered yet.
-    class CustomForm : Form
+    class CustomWindow : Window
     {
         Sprite line;
 
-        public CustomForm()
+        public CustomWindow()
         {
             // Initializes the base form.
             base.Initialize();
@@ -84,12 +85,12 @@ namespace Examples
 
             // Call Tick every tick.
             this.OnTick += Tick;
-            
+
             // Finished initialization of this Form and invokes the OnLoaded event.
             base.Start();
         }
 
-        public void Tick(object sender, TickEventArgs e)
+        public void Tick(object sender, EventArgs e)
         {
             // Every tick, change the angle of the line.
             line.Angle += 1;

@@ -1,77 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SDL2.SDL;
 
-namespace VCS
+namespace ODL
 {
     public class Rect
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public SDL_Rect SDL_Rect
+        public int X { get { return SDL_Rect.x; } }
+        public int Y { get { return SDL_Rect.y; } }
+        public int Width { get { return SDL_Rect.w; } }
+        public int Height { get { return SDL_Rect.h; } }
+        private SDL_Rect _rect;
+        public SDL_Rect SDL_Rect { get { return _rect; } }
+
+        public Rect(Point p, Size s)
+            : this(p.X, p.Y, s.Width, s.Height) { }
+
+        public Rect(int X, int Y, Size s)
+            : this(X, Y, s.Width, s.Height) { }
+
+        public Rect(Point p, int Width, int Height)
+            : this(p.X, p.Y, Width, Height) { }
+
+        public Rect(Size s)
+            : this(0, 0, s.Width, s.Height) { }
+
+        public Rect(int Width, int Height)
+            : this(0, 0, Width, Height) { }
+
+        public Rect(SDL_Rect r)
         {
-            get
-            {
-                SDL_Rect Rect = new SDL_Rect();
-                Rect.x = this.X;
-                Rect.y = this.Y;
-                Rect.w = this.Width;
-                Rect.h = this.Height;
-                return Rect;
-            }
+            _rect = r;
         }
 
         public Rect(int X, int Y, int Width, int Height)
         {
-            this.X = X;
-            this.Y = Y;
-            this.Width = Width;
-            this.Height = Height;
-        }
-
-        public Rect(Point p, Size s)
-        {
-            this.X = p.X;
-            this.Y = p.Y;
-            this.Width = s.Width;
-            this.Height = s.Height;
-        }
-
-        public Rect(int X, int Y, Size s)
-        {
-            this.X = X;
-            this.Y = Y;
-            this.Width = s.Width;
-            this.Height = s.Height;
-        }
-
-        public Rect(Point p, int Width, int Height)
-        {
-            this.X = p.X;
-            this.Y = p.Y;
-            this.Width = Width;
-            this.Height = Height;
-        }
-
-        public Rect(Size s)
-        {
-            this.X = 0;
-            this.Y = 0;
-            this.Width = s.Width;
-            this.Height = s.Height;
-        }
-
-        public Rect(int Width, int Height)
-        {
-            this.X = 0;
-            this.Y = 0;
-            this.Width = Width;
-            this.Height = Height;
+            _rect = new SDL_Rect();
+            _rect.x = X;
+            _rect.y = Y;
+            _rect.w = Width;
+            _rect.h = Height;
         }
 
         public bool Contains(int X, int Y)

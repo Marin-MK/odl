@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace VCS
+namespace ODL
 {
     public class TimeEventArgs : EventArgs
     {
-        public TimeSpan Duration { get; set; }
+        public TimeSpan Duration;
 
         public TimeEventArgs(TimeSpan Duration)
         {
@@ -18,14 +14,11 @@ namespace VCS
 
     public class ClosingEventArgs : EventArgs
     {
-        public Exception Error { get; set; } = null;
-        public bool Cancel { get; set; } = false;
+        public Exception Error = null;
+        public bool Cancel = false;
         public bool CausedByException { get { return this.Error != null; } }
 
-        public ClosingEventArgs()
-        {
-            
-        }
+        public ClosingEventArgs() { }
 
         public ClosingEventArgs(Exception Error)
         {
@@ -35,7 +28,7 @@ namespace VCS
 
     public class ClosedEventArgs : EventArgs
     {
-        public Exception Error { get; set; } = null;
+        public Exception Error = null;
         public bool CausedByException { get { return this.Error != null; } }
 
         public ClosedEventArgs()
@@ -58,23 +51,32 @@ namespace VCS
 
     public class MouseEventArgs : EventArgs
     {
-        public int OldX { get; set; }
-        public int OldY { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-        public bool LeftButton { get; }
-        public bool MiddleButton { get; }
-        public bool RightButton { get; }
+        public int OldX;
+        public int OldY;
+        public int X;
+        public int Y;
+        public bool OldLeftButton;
+        public bool LeftButton;
+        public bool OldRightButton;
+        public bool RightButton;
+        public bool OldMiddleButton;
+        public bool MiddleButton;
 
-        public MouseEventArgs(int OldX, int OldY, int X, int Y, bool LeftButton, bool MiddleButton, bool RightButton)
+        public MouseEventArgs(int OldX, int OldY, int X, int Y,
+                bool OldLeftButton, bool LeftButton,
+                bool OldRightButton, bool RightButton,
+                bool OldMiddleButton, bool MiddleButton)
         {
             this.OldX = OldX;
             this.OldY = OldY;
             this.X = X;
             this.Y = Y;
+            this.OldLeftButton = OldLeftButton;
             this.LeftButton = LeftButton;
-            this.MiddleButton = MiddleButton;
+            this.OldRightButton = OldRightButton;
             this.RightButton = RightButton;
+            this.OldMiddleButton = OldMiddleButton;
+            this.MiddleButton = MiddleButton;
         }
 
         public bool Over(Sprite s)
@@ -114,31 +116,13 @@ namespace VCS
         }
     }
 
-    public class LocationEventArgs : EventArgs
+    public class FocusEventArgs : EventArgs
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public bool Focus;
 
-        public LocationEventArgs(int X, int Y)
+        public FocusEventArgs(bool Focus)
         {
-            this.X = X;
-            this.Y = Y;
-        }
-
-        public LocationEventArgs(Point p)
-        {
-            this.X = p.X;
-            this.Y = p.Y;
-        }
-    }
-
-    public class TickEventArgs : EventArgs
-    {
-        public SDL2.SDL.SDL_Event e { get; set; }
-
-        public TickEventArgs(SDL2.SDL.SDL_Event e)
-        {
-            this.e = e;
+            this.Focus = Focus;
         }
     }
 }
