@@ -1,6 +1,8 @@
-<h1>Visual C#</h1>
+<h1>Object-Oriented DirectMedia Layer (ODL)</h1>
 
-This library implements functionality very similar to RGSS (Ruby Game Scripting System) which is used by Ruby in RPG Maker XP/VX Ace. This was just an experiment to mimick RGSS's functionality in C#. Although I'm not working on it anymore, I wanted to make it open source and I'll likely accept bug fixes.
+This library implements all the major SDL2 components in an Object-Oriented fashion. Surfaces are Bitmaps, Sprites manage Bitmaps, Viewports delimit Sprites, and Windows manage Viewports.
+
+The implementation of all the classes is based on RGSS (Ruby Game Scripting System), but there's quite a few differences.
 
 <h2>Dependencies</h2>
 
@@ -13,3 +15,5 @@ This library implements functionality very similar to RGSS (Ruby Game Scripting 
 <li><a href="https://github.com/flibitijibibo/SDL2-CS">SDL2-CS</a>
 <li>zlib (1.2.11 used)
 </list>
+
+If using ILMerge to merge your libraries, only old.dll and SDL2-CS.dll can be merged together.
