@@ -25,15 +25,13 @@ namespace Examples
 
     class CustomWindow : Window
     {
-        Sprite canvas;
-
         public CustomWindow()
         {
             // Initializes the base form.
             base.Initialize();
 
             // Create a new sprite with a bitmap as big as the screen.
-            canvas = new Sprite(this.Viewport, new Size(this.Width, this.Height));
+            Sprite canvas = new Sprite(this.Viewport, new Size(this.Width, this.Height));
 
             // Draw a circle at (x,y) = (32,32) with radius 32 (meaning a 64x64 circle)
             canvas.Bitmap.DrawCircle(32, 32, 32, Color.WHITE);
@@ -56,12 +54,12 @@ namespace Examples
             // Note: This particular font does not support any special or accented characters.
             //       If such characters don't show up with your font, make sure your font does actually
             //       support/implement those characters to begin with.
-            canvas.Bitmap.DrawText("Hello world!\nThis is a new line.", new Point(10, 80), Color.WHITE);
+            canvas.Bitmap.DrawText("Hello world!", new Point(10, 80), Color.WHITE);
 
             // Increase the font size despite already having created the font (works with changing font name too)
             canvas.Bitmap.Font.Size = 60;
             canvas.Bitmap.DrawText("These are some draw options.", new Point(10, 160), Color.WHITE,
-                DrawOptions.Bold | DrawOptions.Underlined | DrawOptions.Strikethrough | DrawOptions.Italic);
+                DrawOptions.Bold | DrawOptions.Underlined | DrawOptions.Strikethrough | DrawOptions.Italic | DrawOptions.CenterAlign);
 
             // Finished initialization of this Form and invokes the OnLoaded event.
             base.Start();

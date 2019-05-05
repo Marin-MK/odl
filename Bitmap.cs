@@ -272,6 +272,22 @@ namespace ODL
         {
             DrawRect(Point.X, Point.Y, Width, Height, r, g, b, a);
         }
+        public void DrawRect(Size size, byte r, byte g, byte b, byte a = 255)
+        {
+            this.DrawRect(0, 0, size, r, g, b, a);
+        }
+        public void DrawRect(Size size, Color c)
+        {
+            this.DrawRect(0, 0, size, c);
+        }
+        public void DrawRect(int Width, int Height, byte r, byte g, byte b, byte a = 255)
+        {
+            this.DrawRect(0, 0, Width, Height, r, g, b, a);
+        }
+        public void DrawRect(int Width, int Height, Color c)
+        {
+            this.DrawRect(0, 0, Width, Height, c);
+        }
         public void DrawRect(int X, int Y, Size Size, Color c)
         {
             DrawRect(X, Y, Size.Width, Size.Height, c.Red, c.Green, c.Blue, c.Alpha);
@@ -318,6 +334,22 @@ namespace ODL
         public void FillRect(Point Point, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             FillRect(Point.X, Point.Y, Width, Height, r, g, b, a);
+        }
+        public void FillRect(Size size, byte r, byte g, byte b, byte a = 255)
+        {
+            this.FillRect(0, 0, size, r, g, b, a);
+        }
+        public void FillRect(Size size, Color c)
+        {
+            this.FillRect(0, 0, size, c);
+        }
+        public void FillRect(int Width, int Height, byte r, byte g, byte b, byte a = 255)
+        {
+            this.FillRect(0, 0, Width, Height, r, g, b, a);
+        }
+        public void FillRect(int Width, int Height, Color c)
+        {
+            this.FillRect(0, 0, Width, Height, c);
         }
         public void FillRect(int X, int Y, Size Size, Color c)
         {
@@ -416,52 +448,61 @@ namespace ODL
             SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
         }
 
+        public Size TextSize(string Text, DrawOptions DrawOptions = 0)
+        {
+            IntPtr SDL_Font = this.Font.SDL_Font;
+            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
+            int w, h;
+            TTF_SizeText(SDL_Font, Text, out w, out h);
+            return new Size(w, h);
+        }
+
         #region DrawText Overloads
-        public void DrawText(string Text, int X, int Y, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.Normal)
+        public void DrawText(string Text, int X, int Y, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, X, Y, new Color(R, G, B, A), DrawOptions);
         }
-        public void DrawText(string Text, Point p, Color c, DrawOptions DrawOptions = DrawOptions.Normal)
+        public void DrawText(string Text, Point p, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, p.X, p.Y, c, DrawOptions);
         }
-        public void DrawText(string Text, Point p, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.Normal)
+        public void DrawText(string Text, Point p, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, p.X, p.Y, new Color(R, G, B, A), DrawOptions);
         }
         #endregion
-        public void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.Normal)
+        public void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
-            List<string> Lines = Text.Split('\n').ToList();
             IntPtr SDL_Font = this.Font.SDL_Font;
+            bool solid = (DrawOptions & DrawOptions.Solid) == DrawOptions.Solid;
+            bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
+            bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
+            bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
+            if (leftalign && centeralign || leftalign && rightalign || centeralign && rightalign)
+            {
+                throw new Exception("Multiple alignments specified in DrawText DrawOptions - can only contain one alignment setting");
+            }
+            if (!leftalign && !centeralign && !rightalign) leftalign = true;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
-            int Height = TTF_FontHeight(SDL_Font);
-            Size Size = new Size(0, (Lines.Count + 1) * Height);
-            foreach (string Line in Lines)
-            {
-                int w;
-                int h;
-                TTF_SizeText(SDL_Font, Line, out w, out h);
-                if (w > Size.Width) Size.Width = w;
-            }
-            Bitmap TextBitmap = new Bitmap(Size);
-            for (int i = 0; i < Lines.Count; i++)
-            {
-                if (string.IsNullOrEmpty(Lines[i])) continue;
-                Bitmap TempBmp = new Bitmap(TTF_RenderText_Solid(SDL_Font, Lines[i], c.SDL_Color));
-                TextBitmap.Build(0, i * Height, TempBmp);
-                TempBmp.Dispose();
-            }
+            Bitmap TextBitmap;
+            if (solid) TextBitmap = new Bitmap(TTF_RenderText_Solid(  SDL_Font, Text, c.SDL_Color));
+            else       TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
+            if (centeralign) X -= TextBitmap.Width / 2;
+            if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
+            TextBitmap.Dispose();
         }
     }
 
     public enum DrawOptions
     {
-        Normal        = 0,
         Bold          = 1,
         Italic        = 2,
         Underlined    = 4,
-        Strikethrough = 8
+        Strikethrough = 8,
+        Solid         = 16,
+        LeftAlign     = 32,
+        CenterAlign   = 64,
+        RightAlign    = 128
     }
 }
