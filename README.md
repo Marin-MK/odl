@@ -16,4 +16,4 @@ The implementation of all the classes is based on RGSS (Ruby Game Scripting Syst
 <li>zlib (1.2.11 used)
 </list>
 
-If using ILMerge to merge your libraries, only old.dll and SDL2-CS.dll can be merged together.
+If using ILMerge to merge your libraries, only odl.dll and SDL2-CS.dll can be merged together.
