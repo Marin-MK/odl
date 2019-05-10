@@ -6,6 +6,9 @@ namespace ODL
 {
     public static class Input
     {
+        public static IntPtr CursorSurface = IntPtr.Zero;
+        public static SDL_SystemCursor SystemCursor;
+
         public static List<long> OldKeysDown = new List<long>();
         public static List<long> KeysDown = new List<long>();
 
@@ -37,6 +40,35 @@ namespace ODL
         {
             long key = Convert.ToInt64(code);
             return KeysDown.Contains(key);
+        }
+
+        public static void StartTextInput()
+        {
+            SDL_StartTextInput();
+        }
+
+        public static bool TextInputActive()
+        {
+            return SDL_IsTextInputActive() == SDL_bool.SDL_TRUE;
+        }
+
+        public static void StopTextInput()
+        {
+            SDL_StopTextInput();
+        }
+
+        public static void SetCursor(SDL_SystemCursor Cursor)
+        {
+            if (SystemCursor != Cursor)
+            {
+                if (CursorSurface != IntPtr.Zero)
+                {
+                    SDL_FreeCursor(CursorSurface);
+                }
+                CursorSurface = SDL_CreateSystemCursor(Cursor);
+                SystemCursor = Cursor;
+                SDL_SetCursor(CursorSurface);
+            }
         }
     }
 }

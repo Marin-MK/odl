@@ -9,41 +9,39 @@ namespace ODL
 {
     public class Bitmap
     {
-        protected IntPtr _Surface;
-        public IntPtr Surface { get { return _Surface; } }
-        protected SDL_Surface _SurfaceObject;
-        public SDL_Surface SurfaceObject { get { return _SurfaceObject; } }
+        public IntPtr Surface { get; protected set; }
+        public SDL_Surface SurfaceObject { get; protected set; }
         public int Width { get { return this.SurfaceObject.w; } }
         public int Height { get { return this.SurfaceObject.h; } }
-        protected bool _Disposed = false;
-        public bool Disposed { get { return _Disposed; } }
+        public bool Disposed { get; protected set; }
         public Renderer Renderer;
         public Font Font;
 
         public Bitmap(string Filename)
         {
-            _Surface = SDL2.SDL_image.IMG_Load(Filename);
-            _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Surface = SDL2.SDL_image.IMG_Load(Filename);
+            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         }
 
         public Bitmap(Size Size)
             : this(Size.Width, Size.Height) { }
         public Bitmap(int Width, int Height)
         {
-            _Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-            _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         }
 
         public Bitmap(IntPtr Surface)
         {
-            _Surface = Surface;
-            _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Surface = Surface;
+            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         }
 
         public void Dispose()
         {
+            if (this.Font != null) this.Font.Dispose();
             SDL_FreeSurface(this.Surface);
-            _Disposed = true;
+            this.Disposed = true;
             if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
@@ -57,8 +55,8 @@ namespace ODL
             if (this.Surface != null)
             {
                 SDL_FreeSurface(this.Surface);
-                _Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-                _SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+                this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+                this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
                 if (this.Renderer != null) this.Renderer.ForceUpdate();
             }
         }
@@ -113,7 +111,7 @@ namespace ODL
         }
         public void DrawLine(Point p1, Point p2, byte r, byte g, byte b, byte a = 255)
         {
-            DrawLine(p1.X, p1.X, p2.X, p2.Y, r, g, b, a);
+            DrawLine(p1.X, p1.Y, p2.X, p2.Y, r, g, b, a);
         }
         public void DrawLine(Point p1, int x2, int y2, Color c)
         {
@@ -138,19 +136,38 @@ namespace ODL
         #endregion
         public void DrawLine(int x1, int y1, int x2, int y2, byte r, byte g, byte b, byte a = 255)
         {
-            for (int x = x1; x <= x2; x++)
+            for (int x = x1 > x2 ? x2 : x1; (x1 > x2) ? (x <= x1) : (x <= x2); x++)
             {
-                double fact = ((double) x - x1) / (x2 - x1);
-                int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
+                double fact = ((double)x - x1) / (x2 - x1);
+                int y = (int)Math.Round(y1 + ((y2 - y1) * fact));
                 if (y >= 0) SetPixel(x, y, r, g, b, a);
             }
-            for (int y = y1; y <= y2; y++)
+            int sy = y1 > y2 ? y2 : y1;
+            for (int y = y1 > y2 ? y2 : y1; (y1 > y2) ? (y <= y1) : (y <= y2); y++)
             {
                 double fact = ((double) y - y1) / (y2 - y1);
                 int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
                 if (x >= 0) SetPixel(x, y, r, g, b, a);
             }
             if (this.Renderer != null) this.Renderer.ForceUpdate();
+        }
+
+        #region DrawLines Overloads
+        public void DrawLines(Color c, params Point[] points)
+        {
+            this.DrawLines(c.Red, c.Green, c.Blue, c.Alpha, points);
+        }
+        public void DrawLines(byte r, byte g, byte b, params Point[] points)
+        {
+            this.DrawLines(r, g, b, 255, points);
+        }
+        #endregion
+        public void DrawLines(byte r, byte g, byte b, byte a, params Point[] points)
+        {
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                this.DrawLine(points[i], points[i + 1], r, g, b, a);
+            }
         }
 
         #region DrawCircle
@@ -473,6 +490,11 @@ namespace ODL
         #endregion
         public void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
+            if (this.Font == null)
+            {
+                throw new Exception("No Font specified for this Bitmap.");
+            }
+            if (Text == "") return;
             IntPtr SDL_Font = this.Font.SDL_Font;
             bool solid = (DrawOptions & DrawOptions.Solid) == DrawOptions.Solid;
             bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;

@@ -4,8 +4,8 @@ namespace ODL
 {
     public class Point
     {
-        public int X { get; set; } 
-        public int Y { get; set; }
+        public int X;
+        public int Y;
 
         public Point(int X, int Y)
         {

@@ -5,16 +5,16 @@ namespace ODL
 {
     public class Viewport
     {
-        public string Name { get; set; }
-        public Renderer Renderer { get; set; }
-        public List<Sprite> Sprites { get; set; } = new List<Sprite>();
-        public int X { get; set; } = 0;
-        public int Y { get; set; } = 0;
-        public int Z { get; set; } = 0;
-        public int Width { get; set; } = -1;
-        public int Height { get; set; } = -1;
-        public bool Disposed { get; set; } = false;
-        public bool Visible { get; set; } = true;
+        public string Name;
+        public Renderer Renderer;
+        public List<Sprite> Sprites = new List<Sprite>();
+        public int X = 0;
+        public int Y = 0;
+        public int Z = 0;
+        public int Width = -1;
+        public int Height = -1;
+        public bool Disposed { get; protected set; } = false;
+        public bool Visible = true;
 
         #region Constructor Overloads
         public Viewport(Renderer Renderer, Point p, Size s)

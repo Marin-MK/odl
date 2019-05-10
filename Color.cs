@@ -24,10 +24,10 @@ namespace ODL
                 return c;
             }
         }
-        public byte Red { get; set; }
-        public byte Green { get; set; }
-        public byte Blue { get; set; }
-        public byte Alpha { get; set; } = 255;
+        public byte Red;
+        public byte Green;
+        public byte Blue;
+        public byte Alpha = 255;
 
         public Color(byte Red, byte Green, byte Blue, byte Alpha = 255)
         {

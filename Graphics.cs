@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Runtime.InteropServices;
+using System.Text;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
 using static SDL2.SDL_ttf;
@@ -31,6 +32,7 @@ namespace ODL
                 }
                 Screens.Add(new Rect(r));
             }
+            SDL_StopTextInput();
         }
 
         public static void AddWindow(Window w)
@@ -84,8 +86,15 @@ namespace ODL
             // Update all the windows
             Windows.ForEach(w =>
             {
-                
                 if (w != null) w.OnTick.Invoke(w, new EventArgs());
+                if (w.Focus && (LeftDown || MiddleDown || RightDown))
+                {
+                    w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                            OldMouseX, OldMouseY,
+                                            oldleftdown, LeftDown,
+                                            oldrightdown, RightDown,
+                                            oldmiddledown, MiddleDown));
+                }
             });
 
             // Update button key states
@@ -98,6 +107,7 @@ namespace ODL
             {
                 if (e.window.windowID == 0) return;
                 int idx = Convert.ToInt32(e.window.windowID) - 1;
+                if (idx >= Windows.Count) return;
                 Window w = Windows[idx] as Window;
                 // After closing a window, there are still a few more events like losing focus;
                 // We can skip these as the window was already destroyed.
@@ -187,23 +197,49 @@ namespace ODL
                                         oldmiddledown, MiddleDown));
                             }
                             break;
+                        case SDL_EventType.SDL_MOUSEWHEEL:
+                            w.OnMouseWheel.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                    OldMouseX, OldMouseY,
+                                    oldleftdown, LeftDown,
+                                    oldrightdown, RightDown,
+                                    oldmiddledown, MiddleDown,
+                                    e.wheel.y));
+                            break;
                         case SDL_EventType.SDL_KEYDOWN:
                             SDL_Keycode sym1 = e.key.keysym.sym;
                             Input.Register(sym1, true);
+                            string txt = "";
+                            bool backspace = false;
+                            if (sym1 == SDL_Keycode.SDLK_RETURN) txt = "\n";
+                            if (sym1 == SDL_Keycode.SDLK_BACKSPACE) backspace = true;
+                            if (txt.Length > 0 || backspace)
+                            {
+                                w.OnTextInput.Invoke(w, new TextInputEventArgs(txt, backspace));
+                            }
                             break;
                         case SDL_EventType.SDL_KEYUP:
                             SDL_Keycode sym2 = e.key.keysym.sym;
                             Input.Register(sym2, false);
                             break;
+                        case SDL_EventType.SDL_TEXTINPUT:
+                            byte[] bytes = new byte[32];
+                            unsafe
+                            {
+                                byte* ptr = e.text.text;
+                                byte* data = ptr;
+                                int i = 0;
+                                while (*data != 0)
+                                {
+                                    bytes[i] = *data;
+                                    data++;
+                                    i++;
+                                }
+                            }
+                            string text = "";
+                            foreach (char c in Encoding.UTF8.GetChars(bytes)) text += c;
+                            w.OnTextInput.Invoke(w, new TextInputEventArgs(text.TrimEnd('\x00')));
+                            break;
                     }
-                }
-                if (w.Focus && (LeftDown || MiddleDown || RightDown))
-                {
-                    w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                            e.motion.x, e.motion.y,
-                                            oldleftdown, LeftDown,
-                                            oldrightdown, RightDown,
-                                            oldmiddledown, MiddleDown));
                 }
             }
         }

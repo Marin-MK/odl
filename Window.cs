@@ -6,39 +6,24 @@ namespace ODL
 {
     public class Window
     {
-        protected Viewport _Viewport;
-        public Viewport Viewport { get { return _Viewport; } }
-        protected IntPtr _SDL_Window;
-        public IntPtr SDL_Window { get { return _SDL_Window; } }
-        protected Renderer _Renderer;
-        public Renderer Renderer { get { return _Renderer; } }
+        public Viewport Viewport { get; protected set; }
+        public IntPtr SDL_Window { get; protected set; }
+        public Renderer Renderer { get; protected set; }
 
-        protected Window _Parent;
-        public Window Parent { get { return _Parent; } }
-        protected string _Text = "New Window";
-        public string Text { get { return _Text; } }
-        protected Bitmap _Icon;
-        public Bitmap Icon { get { return _Icon; } }
-        protected int _X = -1;
-        public int X { get { return _X; } }
-        protected int _Y = -1;
-        public int Y { get { return _Y; } }
-        protected int _Width = 640;
-        public int Width { get { return _Width; } }
-        protected int _Height = 480;
-        public int Height { get { return _Height; } }
-        protected bool _Resizable = true;
-        public bool Resizable { get { return _Resizable; } }
+        public Window Parent { get; protected set; }
+        public string Text { get; protected set; } = "New Window";
+        public Bitmap Icon { get; protected set; }
+        public int X { get; protected set; } = -1;
+        public int Y { get; protected set; } = -1;
+        public int Width { get; protected set; } = 640;
+        public int Height { get; protected set; } = 480;
+        public bool Resizable { get; protected set; } = true;
         public bool Focus;
-        protected bool _Disposed = false;
-        public bool Disposed { get { return _Disposed; } }
-        protected bool _Closed = false;
-        public bool Closed { get { return _Closed; } }
-        protected int _Screen = 0;
-        public int Screen { get { return _Screen; } }
+        public bool Disposed { get; protected set; } = false;
+        public bool Closed { get; protected set; } = false;
+        public int Screen { get; protected set; } = 0;
 
-        protected Color _BackgroundColor = new Color(0, 0, 0);
-        public Color BackgroundColor { get { return _BackgroundColor; } }
+        public Color BackgroundColor { get; protected set; } = new Color(0, 0, 0);
         protected Sprite _BackgroundSprite;
 
         public EventHandler<TimeEventArgs> OnLoaded;
@@ -48,26 +33,30 @@ namespace ODL
         public EventHandler<MouseEventArgs> OnMouseDown;
         public EventHandler<MouseEventArgs> OnMousePress;
         public EventHandler<MouseEventArgs> OnMouseUp;
+        public EventHandler<MouseEventArgs> OnMouseWheel;
         public EventHandler<EventArgs> OnTick;
         public EventHandler<FocusEventArgs> OnFocusGained;
         public EventHandler<FocusEventArgs> OnFocusLost;
+        public EventHandler<TextInputEventArgs> OnTextInput;
 
         private DateTime _StartTime;
         private bool Init = false;
 
         public Window(Window Parent = null)
         {
-            _Parent = Parent;
+            this.Parent = Parent;
             this.OnLoaded = new EventHandler<TimeEventArgs>(Window_Loaded);
             this.OnClosing = new EventHandler<ClosingEventArgs>(Window_Closing);
             this.OnClosed = new EventHandler<ClosedEventArgs>(Window_Closed);
             this.OnMouseMoving = new EventHandler<MouseEventArgs>(Window_MouseMoving);
             this.OnMouseDown = new EventHandler<MouseEventArgs>(Window_MouseDown);
-            this.OnMouseUp = new EventHandler<MouseEventArgs>(Window_MouseUp);
             this.OnMousePress = new EventHandler<MouseEventArgs>(Window_MousePress);
+            this.OnMouseUp = new EventHandler<MouseEventArgs>(Window_MouseUp);
+            this.OnMouseWheel = new EventHandler<MouseEventArgs>(Window_MouseWheel);
             this.OnTick = new EventHandler<EventArgs>(Window_Tick);
             this.OnFocusGained = new EventHandler<FocusEventArgs>(Window_FocusGained);
             this.OnFocusLost = new EventHandler<FocusEventArgs>(Window_FocusLost);
+            this.OnTextInput = new EventHandler<TextInputEventArgs>(Window_TextInput);
 
             if (this.GetType() == typeof(Window)) { Initialize(); }
         }
@@ -76,22 +65,23 @@ namespace ODL
         {
             if (Graphics.Windows.Contains(this)) return;
             _StartTime = DateTime.Now;
-            _SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                this.Width, this.Height, SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI);
+            SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+            this.SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                this.Width, this.Height, flags);
             int WX;
             int WY;
             SDL_GetWindowPosition(this.SDL_Window, out WX, out WY);
-            _X = WX;
-            _Y = WY;
+            this.X = WX;
+            this.Y = WY;
             SDL_SetWindowResizable(this.SDL_Window, SDL_bool.SDL_TRUE);
-            if (_Icon != null)
+            if (this.Icon != null)
             {
-                SDL_SetWindowIcon(this.SDL_Window, _Icon.Surface);
+                SDL_SetWindowIcon(this.SDL_Window, this.Icon.Surface);
             }
-            _Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE));
+            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE));
 
-            _Viewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
-            _Viewport.Name = "Main Viewport";
+            this.Viewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
+            this.Viewport.Name = "Main Viewport";
 
             Viewport bgvp = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
             bgvp.Name = "Background Viewport";
@@ -122,8 +112,8 @@ namespace ODL
         }
         public void SetSize(int width, int height)
         {
-            _Width = width;
-            _Height = height;
+            this.Width = width;
+            this.Height = height;
             if (Initialized())
             {
                 SDL_SetWindowSize(this.SDL_Window, width, height);
@@ -132,7 +122,7 @@ namespace ODL
 
         public void SetText(string title)
         {
-            _Text = title;
+            this.Text = title;
             if (Initialized())
             {
                 SDL_SetWindowTitle(this.SDL_Window, title);
@@ -142,29 +132,29 @@ namespace ODL
         public void SetIcon(string filename)
         {
             Bitmap bmp = new Bitmap(filename);
-            _Icon = bmp;
+            this.Icon = bmp;
             if (Initialized()) SetIcon(bmp);
         }
         public void SetIcon(Bitmap bmp)
         {
-            if (_Icon != null) _Icon.Dispose();
-            _Icon = bmp;
-            if (Initialized()) SDL_SetWindowIcon(this.SDL_Window, _Icon.Surface);
+            if (this.Icon != null) this.Icon.Dispose();
+            this.Icon = bmp;
+            if (Initialized()) SDL_SetWindowIcon(this.SDL_Window, this.Icon.Surface);
         }
 
         public void SetPosition(int X, int Y)
         {
-            _X = X + Graphics.Screens[this.Screen].X;
-            _Y = Y + Graphics.Screens[this.Screen].Y;
+            this.X = X + Graphics.Screens[this.Screen].X;
+            this.Y = Y + Graphics.Screens[this.Screen].Y;
             if (Initialized())
             {
                 int oldscreen = this.Screen;
-                SDL_SetWindowPosition(this.SDL_Window, _X, _Y);
-                _Screen = SDL_GetWindowDisplayIndex(this.SDL_Window);
-                if (_Screen != oldscreen)
+                SDL_SetWindowPosition(this.SDL_Window, this.X, this.Y);
+                this.Screen = SDL_GetWindowDisplayIndex(this.SDL_Window);
+                if (this.Screen != oldscreen)
                 {
-                    _X -= Graphics.Screens[_Screen].X;
-                    _Y -= Graphics.Screens[_Screen].Y;
+                    this.X -= Graphics.Screens[this.Screen].X;
+                    this.Y -= Graphics.Screens[this.Screen].Y;
                 }
             }
         }
@@ -176,9 +166,9 @@ namespace ODL
             {
                 throw new Exception($"Cannot set window to screen {screen} as it exceeds the screen count.");
             }
-            _X = Graphics.Screens[screen].X + this.X;
-            _Y = Graphics.Screens[screen].Y + this.Y;
-            if (Initialized()) this.SetPosition(_X, _Y);
+            this.X = Graphics.Screens[screen].X + this.X;
+            this.Y = Graphics.Screens[screen].Y + this.Y;
+            if (Initialized()) this.SetPosition(this.X, this.Y);
         }
 
         public void Show()
@@ -196,7 +186,7 @@ namespace ODL
 
         public void Window_Closed(object sender, ClosedEventArgs e)
         {
-            _Closed = true;
+            this.Closed = true;
         }
         
         public void Window_Loaded(object sender, TimeEventArgs e) { }
@@ -205,9 +195,11 @@ namespace ODL
 
         public void Window_MouseDown(object sender, MouseEventArgs e) { }
 
+        public void Window_MousePress(object sender, MouseEventArgs e) { }
+
         public void Window_MouseUp(object sender, MouseEventArgs e) { }
 
-        public void Window_MousePress(object sender, MouseEventArgs e) { }
+        public void Window_MouseWheel(object sender, MouseEventArgs e) { }
 
         public void Window_Tick(object sender, EventArgs e)
         {
@@ -215,7 +207,10 @@ namespace ODL
         }
 
         private void Window_FocusGained(object sender, FocusEventArgs e) { }
+
         private void Window_FocusLost(object sender, FocusEventArgs e) { }
+
+        public void Window_TextInput(object sender, TextInputEventArgs e) { }
 
         public void Update()
         {
@@ -225,7 +220,7 @@ namespace ODL
         public void Dispose()
         {
             this.Renderer.Dispose();
-            _Disposed = true;
+            this.Disposed = true;
         }
 
         public void Close()
@@ -245,7 +240,7 @@ namespace ODL
         }
         public void SetBackgroundColor(Color c)
         {
-            _BackgroundColor = c;
+            this.BackgroundColor = c;
             if (Initialized())
             {
                 Sprite bg = this.Renderer.Viewports[1].Sprites[0];

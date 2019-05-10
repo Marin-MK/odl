@@ -4,7 +4,7 @@ namespace ODL
 {
     public class TimeEventArgs : EventArgs
     {
-        public TimeSpan Duration;
+        public TimeSpan Duration { get; }
 
         public TimeEventArgs(TimeSpan Duration)
         {
@@ -14,8 +14,8 @@ namespace ODL
 
     public class ClosingEventArgs : EventArgs
     {
-        public Exception Error = null;
-        public bool Cancel = false;
+        public Exception Error { get; } = null;
+        public bool Cancel { get; } = false;
         public bool CausedByException { get { return this.Error != null; } }
 
         public ClosingEventArgs() { }
@@ -28,7 +28,7 @@ namespace ODL
 
     public class ClosedEventArgs : EventArgs
     {
-        public Exception Error = null;
+        public Exception Error { get; } = null;
         public bool CausedByException { get { return this.Error != null; } }
 
         public ClosedEventArgs()
@@ -51,21 +51,23 @@ namespace ODL
 
     public class MouseEventArgs : EventArgs
     {
-        public int OldX;
-        public int OldY;
-        public int X;
-        public int Y;
-        public bool OldLeftButton;
-        public bool LeftButton;
-        public bool OldRightButton;
-        public bool RightButton;
-        public bool OldMiddleButton;
-        public bool MiddleButton;
+        public int OldX { get; }
+        public int OldY { get; }
+        public int X { get; }
+        public int Y { get; }
+        public bool OldLeftButton { get; }
+        public bool LeftButton { get; }
+        public bool OldRightButton { get; }
+        public bool RightButton { get; }
+        public bool OldMiddleButton { get; }
+        public bool MiddleButton { get; }
+        public int WheelY { get; }
 
         public MouseEventArgs(int OldX, int OldY, int X, int Y,
                 bool OldLeftButton, bool LeftButton,
                 bool OldRightButton, bool RightButton,
-                bool OldMiddleButton, bool MiddleButton)
+                bool OldMiddleButton, bool MiddleButton,
+                int WheelY = 0)
         {
             this.OldX = OldX;
             this.OldY = OldY;
@@ -77,6 +79,7 @@ namespace ODL
             this.RightButton = RightButton;
             this.OldMiddleButton = OldMiddleButton;
             this.MiddleButton = MiddleButton;
+            this.WheelY = WheelY;
         }
 
         public bool Over(Sprite s)
@@ -118,11 +121,23 @@ namespace ODL
 
     public class FocusEventArgs : EventArgs
     {
-        public bool Focus;
+        public bool Focus { get; }
 
         public FocusEventArgs(bool Focus)
         {
             this.Focus = Focus;
+        }
+    }
+
+    public class TextInputEventArgs : EventArgs
+    {
+        public string Text { get; }
+        public bool Backspace { get; }
+
+        public TextInputEventArgs(string Text, bool Backspace = false)
+        {
+            this.Text = Text;
+            this.Backspace = Backspace;
         }
     }
 }

@@ -5,12 +5,12 @@ namespace ODL
 {
     public class Rect
     {
-        public int X { get { return SDL_Rect.x; } }
-        public int Y { get { return SDL_Rect.y; } }
-        public int Width { get { return SDL_Rect.w; } }
-        public int Height { get { return SDL_Rect.h; } }
-        private SDL_Rect _rect;
-        public SDL_Rect SDL_Rect { get { return _rect; } }
+        public int X { get { return SDL_Rect.x; } set { this._SDL_Rect.x = value; } }
+        public int Y { get { return SDL_Rect.y; } set { this._SDL_Rect.y = value; } }
+        public int Width { get { return SDL_Rect.w; } set { this._SDL_Rect.w = value; } }
+        public int Height { get { return SDL_Rect.h; } set { this._SDL_Rect.h = value; } }
+        private SDL_Rect _SDL_Rect;
+        public SDL_Rect SDL_Rect { get { return _SDL_Rect; } }
 
         public Rect(Point p, Size s)
             : this(p.X, p.Y, s.Width, s.Height) { }
@@ -29,21 +29,22 @@ namespace ODL
 
         public Rect(SDL_Rect r)
         {
-            _rect = r;
+            this._SDL_Rect= r;
         }
 
         public Rect(int X, int Y, int Width, int Height)
         {
-            _rect = new SDL_Rect();
-            _rect.x = X;
-            _rect.y = Y;
-            _rect.w = Width;
-            _rect.h = Height;
+            SDL_Rect r = new SDL_Rect();
+            r.x = X;
+            r.y = Y;
+            r.w = Width;
+            r.h = Height;
+            this._SDL_Rect = r;
         }
 
         public bool Contains(int X, int Y)
         {
-            return X >= this.X && X < this.Width && Y >= this.Y && Y < this.Height;
+            return X >= this.X && X < this.X + this.Width && Y >= this.Y && Y < this.Y + this.Height;
         }
 
         public override string ToString()

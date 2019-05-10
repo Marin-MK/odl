@@ -4,8 +4,8 @@ namespace ODL
 {
     public class Size
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public int Width;
+        public int Height;
 
         public Size(int Width, int Height)
         {

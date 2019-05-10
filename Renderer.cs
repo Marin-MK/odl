@@ -6,9 +6,9 @@ namespace ODL
 {
     public class Renderer
     {
-        public List<Viewport> Viewports { get; set; } = new List<Viewport>();
-        public IntPtr SDL_Renderer { get; set; }
-        public bool Disposed { get; set; } = false;
+        public List<Viewport> Viewports = new List<Viewport>();
+        public IntPtr SDL_Renderer;
+        public bool Disposed = false;
 
         private bool ForcedUpdate = false;
 
@@ -56,24 +56,28 @@ namespace ODL
                                 SDL_SetTextureAlphaMod(Texture, s.Color.Alpha);
 
                                 SDL_Rect Src = s.SrcRect.SDL_Rect;
+
+                                // Make sure the Dest size is never bigger than the Bitmap size (otherwise it'll stretch the bitmap)
+                                if (Src.w > s.Bitmap.Width * s.ZoomX) Src.w = s.Bitmap.Width;
+                                if (Src.h > s.Bitmap.Height * s.ZoomY) Src.h = s.Bitmap.Height;
+
                                 SDL_Rect Dest = new SDL_Rect();
                                 Dest.x = s.X - s.OX;
                                 Dest.y = s.Y - s.OY;
+
                                 // Additional checks, since ZoomX/ZoomY are 1 99% of the time, this way it skips the extra calculation.
-                                if (s.ZoomX == 1) Dest.w = s.SrcRect.Width;
-                                else Dest.w = (int) Math.Round(s.SrcRect.Width * s.ZoomX);
-                                if (s.ZoomY == 1) Dest.h = s.SrcRect.Height;
-                                else Dest.h = (int) Math.Round(s.SrcRect.Height * s.ZoomY);
+                                if (s.ZoomX == 1) Dest.w = Src.w;
+                                else Dest.w = (int) Math.Round(Src.w * s.ZoomX);
+                                if (s.ZoomY == 1) Dest.h = Src.h;
+                                else Dest.h = (int) Math.Round(Src.h * s.ZoomY);
 
                                 SDL_Point Center = new SDL_Point();
                                 Center.x = s.OX;
                                 Center.y = s.OY;
 
-                                SDL_RendererFlip MirrorState;
-                                if (s.MirrorX && !s.MirrorY) { MirrorState = SDL_RendererFlip.SDL_FLIP_HORIZONTAL; }
-                                else if (s.MirrorY && !s.MirrorX) { MirrorState = SDL_RendererFlip.SDL_FLIP_VERTICAL; }
-                                else if (s.MirrorX && s.MirrorY) { MirrorState = SDL_RendererFlip.SDL_FLIP_HORIZONTAL | SDL_RendererFlip.SDL_FLIP_VERTICAL; }
-                                else { MirrorState = SDL_RendererFlip.SDL_FLIP_NONE; }
+                                SDL_RendererFlip MirrorState = SDL_RendererFlip.SDL_FLIP_NONE;
+                                if (s.MirrorX) MirrorState |= SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+                                if (s.MirrorY) MirrorState |= SDL_RendererFlip.SDL_FLIP_VERTICAL;
                                 
                                 SDL_RenderCopyEx(this.SDL_Renderer, Texture, ref Src, ref Dest, s.Angle, ref Center, MirrorState);
                                 SDL_DestroyTexture(Texture);

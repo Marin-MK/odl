@@ -5,8 +5,8 @@ namespace ODL
     public class Sprite
     {
         // Sprites have a Name property to keep track of which Sprite is which -- totally optional, of course
-        public string Name { get; set; }
-        public Viewport Viewport { get; set; }
+        public string Name;
+        public Viewport Viewport;
         public string Filename { get; }
         private Rect _SrcRect;
         public Rect SrcRect { get { return _SrcRect; } set { this._SrcRect = value; this.Viewport.ForceUpdate(); } }
@@ -30,7 +30,7 @@ namespace ODL
         public double ZoomX { get { return _ZoomX; } set { this._ZoomX = value; this.Viewport.ForceUpdate(); } }
         private double _ZoomY = 1;
         public double ZoomY { get { return _ZoomY; } set { this._ZoomY = value; this.Viewport.ForceUpdate(); } }
-        public bool Disposed { get; set; } = false;
+        public bool Disposed { get; protected set; } = false;
         private bool _Visible = true;
         public bool Visible { get { return _Visible; } set { this._Visible = value; this.Viewport.ForceUpdate(); } }
         private int _Angle = 0;
