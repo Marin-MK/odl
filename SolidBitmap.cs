@@ -1,61 +1,81 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using static SDL2.SDL;
-using static SDL2.SDL_ttf;
 
 namespace ODL
 {
-    public class Bitmap : IBitmap
+    public class SolidBitmap : IBitmap
     {
         public IntPtr Surface { get; protected set; }
         public SDL_Surface SurfaceObject { get; protected set; }
-        public IntPtr Texture { get; protected set; } 
-        public int Width { get { return this.SurfaceObject.w; } }
-        public int Height { get { return this.SurfaceObject.h; } }
+        public IntPtr Texture { get; protected set; }
+        public int Width { get; protected set; }
+        public int Height { get; protected set; }
         public bool Disposed { get; protected set; }
+        public Color Color { get; protected set; }
         public Renderer Renderer { get; set; }
         public Font Font { get; set; }
         public bool Locked { get; protected set; }
 
-        public Bitmap(string Filename)
+        public SolidBitmap(Size s, byte r, byte g, byte b, byte a = 255)
+            : this(s.Width, s.Height, new Color(r, g, b, a)) { }
+        public SolidBitmap(Size s, Color c)
+            : this(s.Width, s.Height, c) { }
+        public SolidBitmap(int Width, int Height, byte r, byte g, byte b, byte a = 255)
+            : this(Width, Height, new Color(r, g, b, a)) { }
+        public SolidBitmap(int Width, int Height)
+            : this(Width, Height, Color.ALPHA) { }
+        public SolidBitmap(Size s)
+            : this(s.Width, s.Height, Color.ALPHA) { }
+        public SolidBitmap(int Width, int Height, Color c)
         {
-            this.Surface = SDL2.SDL_image.IMG_Load(Filename);
+            this.Surface = SDL_CreateRGBSurface(0, 1, 1, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Width = Width;
+            this.Height = Height;
+            this.SetColor(c);
             this.Lock();
         }
 
-        public Bitmap(Size Size)
-            : this(Size.Width, Size.Height) { }
-        public Bitmap(int Width, int Height)
+        public void SetColor(byte r, byte g, byte b, byte a = 255)
         {
-            this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-            this.Lock();
+            this.SetColor(new Color(r, g, b, a));
+        }
+        public void SetColor(Color c)
+        {
+            if (Locked) throw new BitmapLockedException();
+            this.Color = c;
+            bool e = BitConverter.IsLittleEndian;
+            Marshal.WriteByte(SurfaceObject.pixels, 0, e ? c.Red : c.Blue);
+            Marshal.WriteByte(SurfaceObject.pixels, 1, c.Green);
+            Marshal.WriteByte(SurfaceObject.pixels, 2, e ? c.Blue : c.Red);
+            Marshal.WriteByte(SurfaceObject.pixels, 3, c.Alpha);
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
-        public Bitmap(IntPtr Surface)
+        public void SetSize(Size size)
         {
-            this.Surface = Surface;
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-            this.Lock();
+            this.SetSize(size.Width, size.Height);
+        }
+        public void SetSize(int Width, int Height)
+        {
+            if (Locked) throw new BitmapLockedException();
+            this.Width = Width;
+            this.Height = Height;
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         public void Dispose()
         {
-            if (this.Surface != IntPtr.Zero && this.Surface != null)
-            {
-                SDL_FreeSurface(this.Surface);
-                SDL_DestroyTexture(this.Texture);
-            }
+            SDL_FreeSurface(this.Surface);
+            SDL_DestroyTexture(this.Texture);
             this.Disposed = true;
             if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         public override string ToString()
         {
-            return $"(Bitmap: {this.Width},{this.Height})";
+            return $"(SolidBitmap: {this.Width},{this.Height})";
         }
 
         public void Clear()
@@ -67,7 +87,7 @@ namespace ODL
                 SDL_DestroyTexture(this.Texture);
                 this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
                 this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-                this.RecreateTexture();
+                this.Color = Color.ALPHA;
                 if (this.Renderer != null) this.Renderer.ForceUpdate();
             }
         }
@@ -88,14 +108,7 @@ namespace ODL
         #endregion
         public void SetPixel(int X, int Y, byte r, byte g, byte b, byte a = 255, bool subcall = false)
         {
-            if (Locked) throw new BitmapLockedException();
-            int Offset = this.Width * 4 * Y + 4 * X;
-            bool e = BitConverter.IsLittleEndian;
-            Marshal.WriteByte(SurfaceObject.pixels, Offset, e ? r : b);
-            Marshal.WriteByte(SurfaceObject.pixels, Offset + 1, g);
-            Marshal.WriteByte(SurfaceObject.pixels, Offset + 2, e ? b : r);
-            Marshal.WriteByte(SurfaceObject.pixels, Offset + 3, a);
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            throw new MethodNotSupportedException(this);
         }
 
         #region GetPixel Overloads
@@ -106,14 +119,7 @@ namespace ODL
         #endregion
         public Color GetPixel(int X, int Y)
         {
-            int Offset = this.Width * 4 * Y + 4 * X;
-            byte[] color = new byte[4];
-            color[0] = Marshal.ReadByte(SurfaceObject.pixels, Offset);
-            color[1] = Marshal.ReadByte(SurfaceObject.pixels, Offset + 1);
-            color[2] = Marshal.ReadByte(SurfaceObject.pixels, Offset + 2);
-            color[3] = Marshal.ReadByte(SurfaceObject.pixels, Offset + 3);
-            if (BitConverter.IsLittleEndian) return new Color(color[0], color[1], color[2], color[3]);
-            return new Color(color[2], color[1], color[0], color[3]);
+            throw new MethodNotSupportedException(this);
         }
 
         #region DrawLine Overloads
@@ -148,21 +154,7 @@ namespace ODL
         #endregion
         public void DrawLine(int x1, int y1, int x2, int y2, byte r, byte g, byte b, byte a = 255)
         {
-            if (Locked) throw new BitmapLockedException();
-            for (int x = x1 > x2 ? x2 : x1; (x1 > x2) ? (x <= x1) : (x <= x2); x++)
-            {
-                double fact = ((double)x - x1) / (x2 - x1);
-                int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
-                if (y >= 0) SetPixel(x, y, r, g, b, a, true);
-            }
-            int sy = y1 > y2 ? y2 : y1;
-            for (int y = y1 > y2 ? y2 : y1; (y1 > y2) ? (y <= y1) : (y <= y2); y++)
-            {
-                double fact = ((double) y - y1) / (y2 - y1);
-                int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
-                if (x >= 0) SetPixel(x, y, r, g, b, a, true);
-            }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            throw new MethodNotSupportedException(this);
         }
 
         #region DrawLines Overloads
@@ -177,11 +169,7 @@ namespace ODL
         #endregion
         public void DrawLines(byte r, byte g, byte b, byte a, params Point[] points)
         {
-            if (Locked) throw new BitmapLockedException();
-            for (int i = 0; i < points.Length - 1; i++)
-            {
-                this.DrawLine(points[i], points[i + 1], r, g, b, a);
-            }
+            throw new MethodNotSupportedException(this);
         }
 
         #region DrawCircle
@@ -200,36 +188,7 @@ namespace ODL
         #endregion
         public void DrawCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
         {
-            if (Locked) throw new BitmapLockedException();
-            int x = Radius - 1;
-            int y = 0;
-            int dx = 1;
-            int dy = 1;
-            int err = dx - (Radius << 1);
-            while (x >= y)
-            {
-                SetPixel(ox - x, oy - y, r, g, b, a, true);
-                SetPixel(ox - x, oy + y, r, g, b, a, true);
-                SetPixel(ox + x, oy - y, r, g, b, a, true);
-                SetPixel(ox + x, oy + y, r, g, b, a, true);
-                SetPixel(ox - y, oy - x, r, g, b, a, true);
-                SetPixel(ox - y, oy + x, r, g, b, a, true);
-                SetPixel(ox + y, oy - x, r, g, b, a, true);
-                SetPixel(ox + y, oy + x, r, g, b, a, true);
-                if (err <= 0)
-                {
-                    y++;
-                    err += dy;
-                    dy += 2;
-                }
-                if (err > 0)
-                {
-                    x--;
-                    dx += 2;
-                    err += dx - (Radius << 1);
-                }
-            }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            throw new MethodNotSupportedException(this);
         }
 
         #region FillCircle
@@ -248,36 +207,7 @@ namespace ODL
         #endregion
         public void FillCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
         {
-            if (Locked) throw new BitmapLockedException();
-            int x = Radius - 1;
-            int y = 0;
-            int dx = 1;
-            int dy = 1;
-            int err = dx - (Radius << 1);
-            while (x >= y)
-            {
-                for (int i = ox - x; i <= ox + x; i++)
-                {
-                    SetPixel(i, oy + y, r, g, b, a, true);
-                    SetPixel(i, oy - y, r, g, b, a, true);
-                }
-                for (int i = oy - y; i <= ox + y; i++)
-                {
-                    SetPixel(i, oy + x, r, g, b, a, true);
-                    SetPixel(i, oy - x, r, g, b, a, true);
-                }
-
-                y++;
-                err += dy;
-                dy += 2;
-                if (err > 0)
-                {
-                    x--;
-                    dx += 2;
-                    err += dx - (Radius << 1);
-                }
-            }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            throw new MethodNotSupportedException(this);
         }
 
         #region DrawRect Overloads
@@ -336,12 +266,7 @@ namespace ODL
         #endregion
         public void DrawRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
-            if (Locked) throw new BitmapLockedException();
-            DrawLine(X, Y, X + Width - 1, Y, r, g, b, a);
-            DrawLine(X, Y, X, Y + Height - 1, r, g, b, a);
-            DrawLine(X, Y + Height - 1, X + Width - 1, Y + Height - 1, r, g, b, a);
-            DrawLine(X + Width - 1, Y, X + Width - 1, Y + Height - 1, r, g, b, a);
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            throw new MethodNotSupportedException(this);
         }
 
         #region FillRect Overloads
@@ -400,10 +325,7 @@ namespace ODL
         #endregion
         public void FillRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
-            if (Locked) throw new BitmapLockedException();
-            SDL_Rect Rect = new Rect(X, Y, Width, Height).SDL_Rect;
-            SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            throw new MethodNotSupportedException(this);
         }
 
         #region Build Overloads
@@ -478,23 +400,12 @@ namespace ODL
         #endregion
         public void Build(Rect DestRect, Bitmap SrcBitmap, Rect SrcRect)
         {
-            if (Locked) throw new BitmapLockedException();
-            SDL_Rect Src = SrcRect.SDL_Rect;
-            SDL_Rect Dest = DestRect.SDL_Rect;
-            SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+            throw new MethodNotSupportedException(this);
         }
 
-        public Size TextSize(char Char, DrawOptions DrawOptions = 0)
-        {
-            return this.TextSize(Char.ToString(), DrawOptions);
-        }
         public Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
-            IntPtr SDL_Font = this.Font.SDL_Font;
-            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
-            int w, h;
-            TTF_SizeText(SDL_Font, Text, out w, out h);
-            return new Size(w, h);
+            throw new MethodNotSupportedException(this);
         }
 
         #region DrawText Overloads
@@ -521,30 +432,7 @@ namespace ODL
         #endregion
         public void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
-            if (Locked) throw new BitmapLockedException();
-            if (this.Font == null)
-            {
-                throw new Exception("No Font specified for this Bitmap.");
-            }
-            if (Text == "") return;
-            IntPtr SDL_Font = this.Font.SDL_Font;
-            bool solid = (DrawOptions & DrawOptions.Solid) == DrawOptions.Solid;
-            bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
-            bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
-            bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
-            if (leftalign && centeralign || leftalign && rightalign || centeralign && rightalign)
-            {
-                throw new Exception("Multiple alignments specified in DrawText DrawOptions - can only contain one alignment setting");
-            }
-            if (!leftalign && !centeralign && !rightalign) leftalign = true;
-            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
-            Bitmap TextBitmap;
-            if (solid) TextBitmap = new Bitmap(TTF_RenderText_Solid(  SDL_Font, Text, c.SDL_Color));
-            else       TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
-            if (centeralign) X -= TextBitmap.Width / 2;
-            if (rightalign)  X -= TextBitmap.Width;
-            this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
-            TextBitmap.Dispose();
+            throw new MethodNotSupportedException(this);
         }
 
         #region DrawGlyph Overloads
@@ -571,30 +459,7 @@ namespace ODL
         #endregion
         public void DrawGlyph(char c, int X, int Y, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
-            if (Locked) throw new BitmapLockedException();
-            if (this.Font == null)
-            {
-                throw new Exception("No Font specified for this Bitmap.");
-            }
-            if (c == '\x00') return;
-            IntPtr SDL_Font = this.Font.SDL_Font;
-            bool solid = (DrawOptions & DrawOptions.Solid) == DrawOptions.Solid;
-            bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
-            bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
-            bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
-            if (leftalign && centeralign || leftalign && rightalign || centeralign && rightalign)
-            {
-                throw new Exception("Multiple alignments specified in DrawGlyph DrawOptions - can only contain one alignment setting");
-            }
-            if (!leftalign && !centeralign && !rightalign) leftalign = true;
-            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
-            Bitmap TextBitmap;
-            if (solid) TextBitmap = new Bitmap(TTF_RenderGlyph_Solid(SDL_Font, c, color.SDL_Color));
-            else       TextBitmap = new Bitmap(TTF_RenderGlyph_Blended(SDL_Font, c, color.SDL_Color));
-            if (centeralign) X -= TextBitmap.Width / 2;
-            if (rightalign)  X -= TextBitmap.Width;
-            this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
-            TextBitmap.Dispose();
+            throw new MethodNotSupportedException(this);
         }
 
         /// <summary>
@@ -621,26 +486,6 @@ namespace ODL
             if (this.Renderer == null) return;
             if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
             this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
-        }
-    }
-
-    public enum DrawOptions
-    {
-        Bold          = 1,
-        Italic        = 2,
-        Underlined    = 4,
-        Strikethrough = 8,
-        Solid         = 16,
-        LeftAlign     = 32,
-        CenterAlign   = 64,
-        RightAlign    = 128
-    }
-
-    public class BitmapLockedException : Exception
-    {
-        public BitmapLockedException() : base("The bitmap was locked for writing, making it unchangeable.")
-        {
-
         }
     }
 }

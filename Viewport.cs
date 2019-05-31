@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ODL
 {
@@ -13,8 +14,10 @@ namespace ODL
         public int Z = 0;
         public int Width = -1;
         public int Height = -1;
+        public Rect Rect { get { return new Rect(X, Y, Width, Height); } }
         public bool Disposed { get; protected set; } = false;
         public bool Visible = true;
+        public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
 
         #region Constructor Overloads
         public Viewport(Renderer Renderer, Point p, Size s)
@@ -54,6 +57,16 @@ namespace ODL
         public void ForceUpdate()
         {
             this.Renderer.ForceUpdate();
+        }
+
+        public bool Contains(int X, int Y)
+        {
+            return X >= this.X && X < this.X + this.Width && Y >= this.Y && Y < this.Y + this.Height;
+        }
+
+        public override string ToString()
+        {
+            return $"(Viewport: {this.X},{this.Y},{this.Width},{this.Height})";
         }
     }
 }

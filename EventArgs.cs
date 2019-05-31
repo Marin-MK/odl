@@ -15,7 +15,7 @@ namespace ODL
     public class ClosingEventArgs : EventArgs
     {
         public Exception Error { get; } = null;
-        public bool Cancel { get; } = false;
+        public bool Cancel = false;
         public bool CausedByException { get { return this.Error != null; } }
 
         public ClosingEventArgs() { }
@@ -138,6 +138,44 @@ namespace ODL
         {
             this.Text = Text;
             this.Backspace = Backspace;
+        }
+    }
+
+    public class WindowEventArgs : EventArgs
+    {
+        public int Width { get; }
+        public int Height { get; }
+
+        public WindowEventArgs(int Width, int Height)
+        {
+            this.Width = Width;
+            this.Height = Height;
+        }
+    }
+
+    public class SizeEventArgs : EventArgs
+    {
+        public int Width { get; }
+        public int Height { get; }
+        public int OldWidth { get; }
+        public int OldHeight { get; }
+
+        public SizeEventArgs(Size size)
+            : this(size, size) { }
+        public SizeEventArgs(int Width, int Height)
+            : this(Width, Width, Height, Height) { }
+        public SizeEventArgs(Size newsize, Size oldsize)
+            : this(newsize.Width, oldsize.Width, newsize.Height, oldsize.Height) { }
+        public SizeEventArgs(Size newsize, int OldWidth, int OldHeight)
+            : this(newsize.Width, OldWidth, newsize.Height, OldHeight) { }
+        public SizeEventArgs(int NewWidth, int NewHeight, Size oldsize)
+            : this(NewWidth, oldsize.Width, NewHeight, oldsize.Height) { }
+        public SizeEventArgs(int NewWidth, int OldWidth, int NewHeight, int OldHeight)
+        {
+            this.Width = NewWidth;
+            this.OldWidth = OldWidth;
+            this.Height = NewHeight;
+            this.OldHeight = OldHeight;
         }
     }
 }

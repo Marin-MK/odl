@@ -60,6 +60,11 @@
     <Compile Include="Color.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Font.cs" />
+    <Compile Include="IBitmap.cs" />
+    <Compile Include="ISprite.cs" />
+    <Compile Include="MultiSprite.cs" />
+    <Compile Include="RectSprite.cs" />
+    <Compile Include="SolidBitmap.cs" />
     <Compile Include="Window.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Point.cs" />

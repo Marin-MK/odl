@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using static SDL2.SDL;
 
 namespace ODL
@@ -24,7 +25,8 @@ namespace ODL
         public int Screen { get; protected set; } = 0;
 
         public Color BackgroundColor { get; protected set; } = new Color(0, 0, 0);
-        protected Sprite _BackgroundSprite;
+        protected Sprite BackgroundSprite;
+        protected Viewport BackgroundViewport;
 
         public EventHandler<TimeEventArgs> OnLoaded;
         public EventHandler<ClosingEventArgs> OnClosing;
@@ -38,6 +40,8 @@ namespace ODL
         public EventHandler<FocusEventArgs> OnFocusGained;
         public EventHandler<FocusEventArgs> OnFocusLost;
         public EventHandler<TextInputEventArgs> OnTextInput;
+        public EventHandler<WindowEventArgs> OnWindowResized;
+        public EventHandler<WindowEventArgs> OnWindowSizeChanged;
 
         private DateTime _StartTime;
         private bool Init = false;
@@ -57,6 +61,8 @@ namespace ODL
             this.OnFocusGained = new EventHandler<FocusEventArgs>(Window_FocusGained);
             this.OnFocusLost = new EventHandler<FocusEventArgs>(Window_FocusLost);
             this.OnTextInput = new EventHandler<TextInputEventArgs>(Window_TextInput);
+            this.OnWindowResized = new EventHandler<WindowEventArgs>(Window_Resized);
+            this.OnWindowSizeChanged = new EventHandler<WindowEventArgs>(Window_SizeChanged);
 
             if (this.GetType() == typeof(Window)) { Initialize(); }
         }
@@ -83,13 +89,13 @@ namespace ODL
             this.Viewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
             this.Viewport.Name = "Main Viewport";
 
-            Viewport bgvp = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
-            bgvp.Name = "Background Viewport";
-            bgvp.Z = -999999999;
-            _BackgroundSprite = new Sprite(bgvp, this.Width, this.Height);
-            _BackgroundSprite.Name = "Background";
-            _BackgroundSprite.Z = -999999999;
-            _BackgroundSprite.Bitmap.FillRect(0, 0, this.Width, this.Height, this.BackgroundColor);
+            BackgroundViewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
+            BackgroundViewport.Name = "Background Viewport";
+            BackgroundViewport.Z = -999999999;
+            BackgroundSprite = new Sprite(BackgroundViewport);
+            BackgroundSprite.Name = "Background";
+            BackgroundSprite.Z = -999999999;
+            BackgroundSprite.Bitmap = new SolidBitmap(this.Width, this.Height, this.BackgroundColor);
 
             Graphics.AddWindow(this);
             Init = true;
@@ -118,6 +124,13 @@ namespace ODL
             {
                 SDL_SetWindowSize(this.SDL_Window, width, height);
             }
+        }
+        public void UpdateSize()
+        {
+            int w, h;
+            SDL_GetWindowSize(this.SDL_Window, out w, out h);
+            this.Width = w;
+            this.Height = h;
         }
 
         public void SetText(string title)
@@ -212,6 +225,20 @@ namespace ODL
 
         public void Window_TextInput(object sender, TextInputEventArgs e) { }
 
+        private void Window_SizeChanged(object sender, WindowEventArgs e)
+        {
+            this.Viewport.Width = e.Width;
+            this.Viewport.Height = e.Height;
+            this.BackgroundViewport.Width = e.Width;
+            this.BackgroundViewport.Height = e.Height;
+            BackgroundSprite.Bitmap.Unlock();
+            (BackgroundSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
+            BackgroundSprite.Bitmap.Lock();
+            UpdateSize();
+        }
+
+        private void Window_Resized(object sender, WindowEventArgs e) { }
+
         public void Update()
         {
             this.Renderer.Update();
@@ -243,9 +270,16 @@ namespace ODL
             this.BackgroundColor = c;
             if (Initialized())
             {
-                Sprite bg = this.Renderer.Viewports[1].Sprites[0];
-                bg.Bitmap.FillRect(0, 0, bg.Bitmap.Width, bg.Bitmap.Height, c);
+                BackgroundSprite.Bitmap.Unlock();
+                (BackgroundSprite.Bitmap as SolidBitmap).SetColor(c);
+                BackgroundSprite.Bitmap.Lock();
             }
         }
+    }
+
+    public class MethodNotSupportedException : Exception
+    {
+        public MethodNotSupportedException(object o)
+            : base($"This method is not supported in an object of type {o.GetType()}.") { }
     }
 }

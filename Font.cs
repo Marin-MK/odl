@@ -1,33 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using static SDL2.SDL_ttf;
 
 namespace ODL
 {
-    public class Font : IDisposable
+    public class Font
     {
-        private string _Name;
-        public string Name { get { return _Name; } set { _Name = value; UpdateFont(); } }
-        private int _Size;
-        public int Size { get { return _Size; } set { _Size = value; UpdateFont(); } }
+        public static List<Font> Cache = new List<Font>();
+
+        public string Name { get; protected set; }
+        public int Size { get; protected set; }
         public IntPtr SDL_Font { get; private set; }
 
         public Font(string Name, int Size = 12)
         {
-            _Name = Name;
-            _Size = Size;
-            UpdateFont();
-        }
-
-        private void UpdateFont()
-        {
-            if (this.SDL_Font != null) TTF_CloseFont(this.SDL_Font);
+            this.Name = Name;
+            this.Size = Size;
             this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
             if (this.SDL_Font == IntPtr.Zero)
             {
                 throw new Exception("Invalid font: '" + this.Name + "'");
             }
+            Cache.Add(this);
         }
 
+        public Size TextSize(char Char, DrawOptions DrawOptions = 0)
+        {
+            return this.TextSize(Char.ToString(), DrawOptions);
+        }
         public Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
             IntPtr SDL_Font = this.SDL_Font;
@@ -42,9 +42,14 @@ namespace ODL
             return new Font(this.Name, this.Size);
         }
 
-        public void Dispose()
+        public static Font Get(string Name, int Size)
         {
-            TTF_CloseFont(this.SDL_Font);
+            for (int i = 0; i < Cache.Count; i++)
+            {
+                Font f = Cache[i];
+                if (f.Name == Name && f.Size == Size) return f;
+            }
+            return new Font(Name, Size);
         }
     }
 }

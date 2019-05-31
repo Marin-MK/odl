@@ -1,22 +1,24 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace ODL
 {
-    public class Sprite
+    public class Sprite : ISprite
     {
         // Sprites have a Name property to keep track of which Sprite is which -- totally optional, of course
-        public string Name;
-        public Viewport Viewport;
+        public string Name { get; set; }
+        public Viewport Viewport { get; protected set; }
         public string Filename { get; }
         private Rect _SrcRect;
         public Rect SrcRect { get { return _SrcRect; } set { this._SrcRect = value; this.Viewport.ForceUpdate(); } }
-        private Bitmap _Bitmap;
-        public Bitmap Bitmap
+        private IBitmap _Bitmap;
+        public IBitmap Bitmap
         {
             get { return _Bitmap; }
             set {
                 this._Bitmap = value;
                 value.Renderer = this.Viewport.Renderer;
+                value.RecreateTexture();
                 this.SrcRect = new Rect(value.Width, value.Height);
             }
         }
@@ -44,7 +46,8 @@ namespace ODL
         private int _OY = 0;
         public int OY { get { return _OY; } set { this._OY = value; this.Viewport.ForceUpdate(); } }
         private Color _Color = new Color(255, 255, 255, 255);
-        public Color Color { get { return _Color; } set { this._Color = value;  this.Viewport.ForceUpdate(); } }
+        public Color Color { get { return _Color; } set { this._Color = value; this.Viewport.ForceUpdate(); } }
+        public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
 
         public Sprite(Viewport Viewport, string Filename)
             : this(Viewport)
@@ -62,7 +65,7 @@ namespace ODL
             this.SrcRect = new Rect(this.Bitmap.Width, this.Bitmap.Height);
         }
 
-        public Sprite(Viewport Viewport, Bitmap bmp)
+        public Sprite(Viewport Viewport, IBitmap bmp)
             : this(Viewport)
         {
             this.Bitmap = bmp;
