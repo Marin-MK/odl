@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -118,170 +119,161 @@ namespace ODL
             // Update button key states
             Input.IterationEnd();
 
-            // Get events
-            SDL_Event e;
-
-            bool quit = false;
-
-            while (!quit)
-            {
-                if (SDL_PollEvent(out e) > 0)
-                {
-                    if (e.type == SDL_EventType.SDL_FIRSTEVENT) { quit = true; continue; }
-                    if (e.window.windowID == 0) continue;
-                    IntPtr sdlwindow = SDL_GetWindowFromID(e.window.windowID);
-                    Window w = Windows.Find(win => win != null && win.SDL_Window == sdlwindow);
-                    if (w == null) continue;
-                    int idx = Windows.IndexOf(w);
-                    // After closing a window, there are still a few more events like losing focus;
-                    // We can skip these as the window was already destroyed.
-                    if (w == null) continue;
-                    if (OldMouseX == -1) OldMouseX = e.motion.x;
-                    if (OldMouseY == -1) OldMouseY = e.motion.y;
-                    if (e.type == SDL_EventType.SDL_WINDOWEVENT)
-                    {
-                        switch (e.window.windowEvent)
-                        {
-                            case SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
-                                ClosingEventArgs ClosingArgs = new ClosingEventArgs();
-                                w.OnClosing.Invoke(w, ClosingArgs);
-                                if (!ClosingArgs.Cancel)
-                                {
-                                    SDL_DestroyWindow(w.SDL_Window);
-                                    w.OnClosed.Invoke(w, new ClosedEventArgs());
-                                    w.Dispose();
-                                    Windows[idx] = null;
-                                }
-                                break;
-                            case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
-                                break;
-                            case SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
-                                int width1;
-                                int height1;
-                                SDL_GetWindowSize(w.SDL_Window, out width1, out height1);
-                                w.OnWindowSizeChanged.Invoke(w, new WindowEventArgs(width1, height1));
-                                w.OnWindowResized.Invoke(w, new WindowEventArgs(width1, height1));
-                                break;
-                            case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
-                                int width2;
-                                int height2;
-                                SDL_GetWindowSize(w.SDL_Window, out width2, out height2);
-                                w.OnWindowSizeChanged.Invoke(w, new WindowEventArgs(width2, height2));
-                                break;
-                            case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
-                                w.Focus = true;
-                                w.OnFocusGained(w, new FocusEventArgs(true));
-                                break;
-                            case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
-                                w.Focus = false;
-                                w.OnFocusLost(w, new FocusEventArgs(false));
-                                break;
-                        }
-                    }
-                    if (Windows[idx] == null) continue; // Just disposed this window
-                    if (w.Focus)
-                    {
-                        switch (e.type)
-                        {
-                            case SDL_EventType.SDL_MOUSEMOTION:
-                                if (e.motion.x != OldMouseX || e.motion.y != OldMouseY)
-                                {
-                                    LeftDown = (e.button.button & Convert.ToInt32(MouseButtons.Left)) == Convert.ToInt32(MouseButtons.Left);
-                                    RightDown = (e.button.button & Convert.ToInt32(MouseButtons.Right)) == Convert.ToInt32(MouseButtons.Right);
-                                    MiddleDown = (e.button.button & Convert.ToInt32(MouseButtons.Middle)) == Convert.ToInt32(MouseButtons.Middle);
-                                    w.OnMouseMoving.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                            e.motion.x, e.motion.y,
-                                            oldleftdown, LeftDown,
-                                            oldrightdown, RightDown,
-                                            oldmiddledown, MiddleDown));
-                                }
-                                OldMouseX = e.motion.x;
-                                OldMouseY = e.motion.y;
-                                break;
-                            case SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                                if (e.button.button == 1 && !LeftDown ||
-                                    e.button.button == 2 && !MiddleDown ||
-                                    e.button.button == 3 && !RightDown)
-                                {
-                                    if (e.button.button == 1) LeftDown = true;
-                                    if (e.button.button == 2) MiddleDown = true;
-                                    if (e.button.button == 3) RightDown = true;
-                                    w.OnMouseDown.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                            e.motion.x, e.motion.y,
-                                            oldleftdown, LeftDown,
-                                            oldrightdown, RightDown,
-                                            oldmiddledown, MiddleDown));
-                                }
-                                break;
-                            case SDL_EventType.SDL_MOUSEBUTTONUP:
-                                if (e.button.button == 1 && LeftDown ||
-                                    e.button.button == 2 && MiddleDown ||
-                                    e.button.button == 3 && RightDown)
-                                {
-                                    if (e.button.button == 1 && LeftDown) LeftDown = false;
-                                    if (e.button.button == 2 && MiddleDown) MiddleDown = false;
-                                    if (e.button.button == 3 && RightDown) RightDown = false;
-                                    w.OnMouseUp.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                            e.motion.x, e.motion.y,
-                                            oldleftdown, LeftDown,
-                                            oldrightdown, RightDown,
-                                            oldmiddledown, MiddleDown));
-                                }
-                                break;
-                            case SDL_EventType.SDL_MOUSEWHEEL:
-                                w.OnMouseWheel.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                        OldMouseX, OldMouseY,
-                                        oldleftdown, LeftDown,
-                                        oldrightdown, RightDown,
-                                        oldmiddledown, MiddleDown,
-                                        e.wheel.y));
-                                break;
-                            case SDL_EventType.SDL_KEYDOWN:
-                                SDL_Keycode sym1 = e.key.keysym.sym;
-                                Input.Register(sym1, true);
-                                string txt = "";
-                                bool backspace = false;
-                                if (sym1 == SDL_Keycode.SDLK_RETURN) txt = "\n";
-                                if (sym1 == SDL_Keycode.SDLK_BACKSPACE) backspace = true;
-                                if (txt.Length > 0 || backspace)
-                                {
-                                    w.OnTextInput.Invoke(w, new TextInputEventArgs(txt, backspace));
-                                }
-                                break;
-                            case SDL_EventType.SDL_KEYUP:
-                                SDL_Keycode sym2 = e.key.keysym.sym;
-                                Input.Register(sym2, false);
-                                break;
-                            case SDL_EventType.SDL_TEXTINPUT:
-                                byte[] bytes = new byte[32];
-                                unsafe
-                                {
-                                    byte* ptr = e.text.text;
-                                    byte* data = ptr;
-                                    int i = 0;
-                                    while (*data != 0)
-                                    {
-                                        bytes[i] = *data;
-                                        data++;
-                                        i++;
-                                    }
-                                }
-                                string text = "";
-                                foreach (char c in Encoding.UTF8.GetChars(bytes)) text += c;
-                                w.OnTextInput.Invoke(w, new TextInputEventArgs(text.TrimEnd('\x00')));
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    quit = true;
-                }
-            }
-
+            // Updates the renderers
             for (int i = 0; i < Renderers.Count; i++)
             {
                 Renderers[i].UpdateGraphics();
+            }
+
+            // Get events
+            SDL_Event e;
+
+            if (SDL_WaitEvent(out e) > 0)
+            {
+                if (e.window.windowID == 0) return;
+                IntPtr sdlwindow = SDL_GetWindowFromID(e.window.windowID);
+                Window w = Windows.Find(win => win != null && win.SDL_Window == sdlwindow);
+                if (w == null) return;
+                int idx = Windows.IndexOf(w);
+                // After closing a window, there are still a few more events like losing focus;
+                // We can skip these as the window was already destroyed.
+                if (w == null) return;
+                if (OldMouseX == -1) OldMouseX = e.motion.x;
+                if (OldMouseY == -1) OldMouseY = e.motion.y;
+                if (e.type == SDL_EventType.SDL_WINDOWEVENT)
+                {
+                    switch (e.window.windowEvent)
+                    {
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
+                            ClosingEventArgs ClosingArgs = new ClosingEventArgs();
+                            w.OnClosing.Invoke(w, ClosingArgs);
+                            if (!ClosingArgs.Cancel)
+                            {
+                                SDL_DestroyWindow(w.SDL_Window);
+                                w.OnClosed.Invoke(w, new ClosedEventArgs());
+                                w.Dispose();
+                                Windows[idx] = null;
+                            }
+                            break;
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
+                            break;
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
+                            int width1;
+                            int height1;
+                            SDL_GetWindowSize(w.SDL_Window, out width1, out height1);
+                            w.OnWindowSizeChanged.Invoke(w, new WindowEventArgs(width1, height1));
+                            w.OnWindowResized.Invoke(w, new WindowEventArgs(width1, height1));
+                            break;
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
+                            int width2;
+                            int height2;
+                            SDL_GetWindowSize(w.SDL_Window, out width2, out height2);
+                            w.OnWindowSizeChanged.Invoke(w, new WindowEventArgs(width2, height2));
+                            break;
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
+                            w.Focus = true;
+                            w.OnFocusGained(w, new FocusEventArgs(true));
+                            break;
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
+                            w.Focus = false;
+                            w.OnFocusLost(w, new FocusEventArgs(false));
+                            break;
+                    }
+                }
+                if (Windows[idx] == null) return; // Just disposed this window
+                if (w.Focus)
+                {
+                    switch (e.type)
+                    {
+                        case SDL_EventType.SDL_MOUSEMOTION:
+                            if (e.motion.x != OldMouseX || e.motion.y != OldMouseY)
+                            {
+                                LeftDown = (e.button.button & Convert.ToInt32(MouseButtons.Left)) == Convert.ToInt32(MouseButtons.Left);
+                                RightDown = (e.button.button & Convert.ToInt32(MouseButtons.Right)) == Convert.ToInt32(MouseButtons.Right);
+                                MiddleDown = (e.button.button & Convert.ToInt32(MouseButtons.Middle)) == Convert.ToInt32(MouseButtons.Middle);
+                                w.OnMouseMoving.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                        e.motion.x, e.motion.y,
+                                        oldleftdown, LeftDown,
+                                        oldrightdown, RightDown,
+                                        oldmiddledown, MiddleDown));
+                            }
+                            OldMouseX = e.motion.x;
+                            OldMouseY = e.motion.y;
+                            break;
+                        case SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                            if (e.button.button == 1 && !LeftDown ||
+                                e.button.button == 2 && !MiddleDown ||
+                                e.button.button == 3 && !RightDown)
+                            {
+                                if (e.button.button == 1) LeftDown = true;
+                                if (e.button.button == 2) MiddleDown = true;
+                                if (e.button.button == 3) RightDown = true;
+                                w.OnMouseDown.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                        e.motion.x, e.motion.y,
+                                        oldleftdown, LeftDown,
+                                        oldrightdown, RightDown,
+                                        oldmiddledown, MiddleDown));
+                            }
+                            break;
+                        case SDL_EventType.SDL_MOUSEBUTTONUP:
+                            if (e.button.button == 1 && LeftDown ||
+                                e.button.button == 2 && MiddleDown ||
+                                e.button.button == 3 && RightDown)
+                            {
+                                if (e.button.button == 1 && LeftDown) LeftDown = false;
+                                if (e.button.button == 2 && MiddleDown) MiddleDown = false;
+                                if (e.button.button == 3 && RightDown) RightDown = false;
+                                w.OnMouseUp.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                        e.motion.x, e.motion.y,
+                                        oldleftdown, LeftDown,
+                                        oldrightdown, RightDown,
+                                        oldmiddledown, MiddleDown));
+                            }
+                            break;
+                        case SDL_EventType.SDL_MOUSEWHEEL:
+                            w.OnMouseWheel.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                    OldMouseX, OldMouseY,
+                                    oldleftdown, LeftDown,
+                                    oldrightdown, RightDown,
+                                    oldmiddledown, MiddleDown,
+                                    e.wheel.y));
+                            break;
+                        case SDL_EventType.SDL_KEYDOWN:
+                            SDL_Keycode sym1 = e.key.keysym.sym;
+                            Input.Register(sym1, true);
+                            string txt = "";
+                            bool backspace = false;
+                            if (sym1 == SDL_Keycode.SDLK_RETURN) txt = "\n";
+                            if (sym1 == SDL_Keycode.SDLK_BACKSPACE) backspace = true;
+                            if (txt.Length > 0 || backspace)
+                            {
+                                w.OnTextInput.Invoke(w, new TextInputEventArgs(txt, backspace));
+                            }
+                            break;
+                        case SDL_EventType.SDL_KEYUP:
+                            SDL_Keycode sym2 = e.key.keysym.sym;
+                            Input.Register(sym2, false);
+                            break;
+                        case SDL_EventType.SDL_TEXTINPUT:
+                            byte[] bytes = new byte[32];
+                            unsafe
+                            {
+                                byte* ptr = e.text.text;
+                                byte* data = ptr;
+                                int i = 0;
+                                while (*data != 0)
+                                {
+                                    bytes[i] = *data;
+                                    data++;
+                                    i++;
+                                }
+                            }
+                            string text = "";
+                            foreach (char c in Encoding.UTF8.GetChars(bytes)) text += c;
+                            w.OnTextInput.Invoke(w, new TextInputEventArgs(text.TrimEnd('\x00')));
+                            break;
+                    }
+                }
             }
         }
 
