@@ -17,7 +17,8 @@ namespace ODL
         public double ZoomX { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public double ZoomY { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public bool Disposed { get { throw new MethodNotSupportedException(this); } }
-        public bool Visible { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
+        private bool _Visible = true;
+        public bool Visible { get { return _Visible; } set { _Visible = value; this.Update(); } }
         public int Angle { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public bool MirrorX { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public bool MirrorY { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
@@ -40,6 +41,7 @@ namespace ODL
             s.Y = Y + this.Y;
             s.OX = this.OX;
             s.OY = this.OY;
+            s.Visible = this.Visible;
             this.SpriteList.Add(Name, s);
             this.Viewport.Sprites.Add(s);
             this.Viewport.ForceUpdate();
@@ -59,6 +61,7 @@ namespace ODL
             {
                 s.OX = this.OX;
                 s.OY = this.OY;
+                s.Visible = this.Visible;
             }
         }
 

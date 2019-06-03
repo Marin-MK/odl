@@ -128,7 +128,7 @@ namespace ODL
             // Get events
             SDL_Event e;
 
-            if (SDL_WaitEvent(out e) > 0)
+            if (SDL_WaitEventTimeout(out e, 5) > 0)
             {
                 if (e.window.windowID == 0) return;
                 IntPtr sdlwindow = SDL_GetWindowFromID(e.window.windowID);

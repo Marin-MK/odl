@@ -88,6 +88,7 @@ namespace ODL
         {
             if (this.Bitmap != null) this.Bitmap.Dispose();
             this.Disposed = true;
+            this.Viewport.Sprites.Remove(this);
             this.Viewport.ForceUpdate();
         }
     }
