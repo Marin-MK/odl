@@ -49,8 +49,9 @@ namespace ODL
             for (int i = 0; i < Sprites.Count; i++)
             {
                 Sprites[i].Dispose();
-                Sprites.RemoveAt(i);
             }
+            this.Renderer.Viewports.Remove(this);
+            this.Renderer.ForceUpdate();
             this.Disposed = true;
         }
 

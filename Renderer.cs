@@ -41,7 +41,7 @@ namespace ODL
                     {
                         this.Viewports.RemoveAt(i);
                     }
-                    else if (vp.Visible && vp.Sprites.Count > 0)
+                    else if (vp.Visible && vp.Width > 0 && vp.Height > 0 && vp.Sprites.Count > 0)
                     {
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
@@ -139,7 +139,6 @@ namespace ODL
             for (int i = 0; i < Viewports.Count; i++)
             {
                 Viewports[i].Dispose();
-                Viewports.RemoveAt(i);
             }
             SDL_DestroyRenderer(this.SDL_Renderer);
             this.Disposed = true;
