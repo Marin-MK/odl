@@ -26,7 +26,11 @@ namespace ODL
 
         public Size TextSize(char Char, DrawOptions DrawOptions = 0)
         {
-            return this.TextSize(Char.ToString(), DrawOptions);
+            IntPtr SDL_Font = this.SDL_Font;
+            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
+            int minx, maxx, miny, maxy, adv;
+            TTF_GlyphMetrics(SDL_Font, Char, out minx, out maxx, out miny, out maxy, out adv);
+            return new Size(maxx - minx, TTF_FontHeight(SDL_Font));
         }
         public Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
