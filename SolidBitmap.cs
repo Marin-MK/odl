@@ -67,8 +67,12 @@ namespace ODL
 
         public void Dispose()
         {
-            SDL_FreeSurface(this.Surface);
-            SDL_DestroyTexture(this.Texture);
+            if (Disposed) return;
+            if (this.Surface != IntPtr.Zero && this.Surface != null)
+            {
+                SDL_FreeSurface(this.Surface);
+                SDL_DestroyTexture(this.Texture);
+            }
             this.Disposed = true;
             if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
@@ -81,7 +85,7 @@ namespace ODL
         public void Clear()
         {
             if (Locked) throw new BitmapLockedException();
-            if (this.Surface != null)
+            if (this.Surface != IntPtr.Zero && this.Surface != null)
             {
                 SDL_FreeSurface(this.Surface);
                 SDL_DestroyTexture(this.Texture);

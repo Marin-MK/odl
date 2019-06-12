@@ -13,6 +13,10 @@ namespace ODL
         public bool FillInside { get; protected set; }
         public Color InnerColor { get; protected set; }
         public int Thickness { get; protected set; }
+        private int _X = 0;
+        public int X { get { return _X; } set { _X = value; UpdateSprites(); } }
+        private int _Y = 0;
+        public int Y { get { return _Y; } set { _Y = value; UpdateSprites(); } }
         private SolidBitmap TopBmp;
         private SolidBitmap LeftBmp;
         private SolidBitmap RightBmp;
@@ -68,29 +72,39 @@ namespace ODL
             this.Size = size;
             TopBmp.Unlock();
             TopBmp.SetSize(this.Size.Width, Thickness);
-            SpriteList["top"].X = this.X;
-            SpriteList["top"].Y = this.Y;
             TopBmp.Lock();
+
             LeftBmp.Unlock();
-            LeftBmp.SetSize(Thickness, this.Size.Height - 2 * Thickness);
-            SpriteList["left"].X = this.X;
-            SpriteList["left"].Y = this.Y + Thickness;
+            LeftBmp.SetSize(Thickness, this.Size.Height - 2 * Thickness + 1);
             LeftBmp.Lock();
+
             RightBmp.Unlock();
-            RightBmp.SetSize(Thickness, this.Size.Height - 2 * Thickness);
-            SpriteList["right"].X = this.X + this.Size.Width - Thickness;
-            SpriteList["right"].Y = this.Y + Thickness;
+            RightBmp.SetSize(Thickness, this.Size.Height - 2 * Thickness + 1);
             RightBmp.Lock();
+
             BottomBmp.Unlock();
             BottomBmp.SetSize(this.Size.Width, Thickness);
-            SpriteList["bottom"].X = this.X;
-            SpriteList["bottom"].Y = this.Y + this.Size.Height - Thickness;
             BottomBmp.Lock();
+
             CenterBmp.Unlock();
             CenterBmp.SetSize(this.Size.Width - 2 * Thickness, this.Size.Height - 2 * Thickness);
+            CenterBmp.Lock();
+
+            this.UpdateSprites();
+        }
+
+        public void UpdateSprites()
+        {
+            SpriteList["top"].X = this.X;
+            SpriteList["top"].Y = this.Y;
+            SpriteList["left"].X = this.X;
+            SpriteList["left"].Y = this.Y + Thickness;
+            SpriteList["right"].X = this.X + this.Size.Width - Thickness - 1;
+            SpriteList["right"].Y = this.Y + Thickness;
+            SpriteList["bottom"].X = this.X;
+            SpriteList["bottom"].Y = this.Y + this.Size.Height - Thickness - 1;
             SpriteList["center"].X = this.X + Thickness;
             SpriteList["center"].Y = this.Y + Thickness;
-            CenterBmp.Lock();
         }
 
         public void SetOuterColor(byte R, byte G, byte B, byte A = 255)
