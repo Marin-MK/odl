@@ -622,6 +622,7 @@ namespace ODL
             if (this.Renderer == null) return;
             if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
             this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
+            this.Renderer.Update();
         }
     }
 
