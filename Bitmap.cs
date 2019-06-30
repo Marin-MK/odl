@@ -21,6 +21,10 @@ namespace ODL
 
         public Bitmap(string Filename)
         {
+            if (!System.IO.File.Exists(Filename))
+            {
+                throw new System.IO.FileNotFoundException($"File could not be found -- {Filename}");
+            }
             this.Surface = SDL2.SDL_image.IMG_Load(Filename);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
@@ -30,6 +34,14 @@ namespace ODL
             : this(Size.Width, Size.Height) { }
         public Bitmap(int Width, int Height)
         {
+            if (Width < 1 || Height < 1)
+            {
+                throw new Exception($"Invalid Bitmap size ({Width},{Height}) -- must be at least (1,1)");
+            }
+            if (Width > Graphics.MaxTextureSize.Width || Height > Graphics.MaxTextureSize.Height)
+            {
+                throw new Exception($"Invalid Bitmap size ({Width},{Height}) -- maximum size is ({Graphics.MaxTextureSize.Width},{Graphics.MaxTextureSize.Height})");
+            }
             this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
@@ -90,6 +102,14 @@ namespace ODL
         public void SetPixel(int X, int Y, byte r, byte g, byte b, byte a = 255, bool subcall = false)
         {
             if (Locked) throw new BitmapLockedException();
+            if (X < 0 || Y < 0)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+            }
+            if (X >= this.Width || Y >= this.Height)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            }
             int Offset = this.Width * 4 * Y + 4 * X;
             bool e = BitConverter.IsLittleEndian;
             Marshal.WriteByte(SurfaceObject.pixels, Offset, e ? r : b);
@@ -107,6 +127,14 @@ namespace ODL
         #endregion
         public Color GetPixel(int X, int Y)
         {
+            if (X < 0 || Y < 0)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+            }
+            if (X >= this.Width || Y >= this.Height)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            }
             int Offset = this.Width * 4 * Y + 4 * X;
             byte[] color = new byte[4];
             color[0] = Marshal.ReadByte(SurfaceObject.pixels, Offset);
@@ -338,6 +366,14 @@ namespace ODL
         public void DrawRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
+            if (X < 0 || Y < 0)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+            }
+            if (X + Width >= this.Width || Y + Height >= this.Height)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            }
             DrawLine(X, Y, X + Width - 1, Y, r, g, b, a);
             DrawLine(X, Y, X, Y + Height - 1, r, g, b, a);
             DrawLine(X, Y + Height - 1, X + Width - 1, Y + Height - 1, r, g, b, a);
@@ -402,6 +438,14 @@ namespace ODL
         public void FillRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
+            if (X < 0 || Y < 0)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+            }
+            if (X + Width - 1 >= this.Width || Y + Height - 1 >= this.Height)
+            {
+                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            }
             SDL_Rect Rect = new Rect(X, Y, Width, Height).SDL_Rect;
             SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
             if (this.Renderer != null) this.Renderer.ForceUpdate();
@@ -529,7 +573,7 @@ namespace ODL
             }
             if (Text == "") return;
             IntPtr SDL_Font = this.Font.SDL_Font;
-            bool solid = (DrawOptions & DrawOptions.Solid) == DrawOptions.Solid;
+            bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
             bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
             bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
             bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
@@ -540,8 +584,8 @@ namespace ODL
             if (!leftalign && !centeralign && !rightalign) leftalign = true;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             Bitmap TextBitmap;
-            if (solid) TextBitmap = new Bitmap(TTF_RenderText_Solid(  SDL_Font, Text, c.SDL_Color));
-            else       TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
+            if (aliased) TextBitmap = new Bitmap(TTF_RenderText_Solid(  SDL_Font, Text, c.SDL_Color));
+            else         TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
             if (centeralign) X -= TextBitmap.Width / 2;
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
@@ -579,7 +623,7 @@ namespace ODL
             }
             if (c == '\x00') return;
             IntPtr SDL_Font = this.Font.SDL_Font;
-            bool solid = (DrawOptions & DrawOptions.Solid) == DrawOptions.Solid;
+            bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
             bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
             bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
             bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
@@ -590,8 +634,8 @@ namespace ODL
             if (!leftalign && !centeralign && !rightalign) leftalign = true;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             Bitmap TextBitmap;
-            if (solid) TextBitmap = new Bitmap(TTF_RenderGlyph_Solid(SDL_Font, c, color.SDL_Color));
-            else       TextBitmap = new Bitmap(TTF_RenderGlyph_Blended(SDL_Font, c, color.SDL_Color));
+            if (aliased) TextBitmap = new Bitmap(TTF_RenderGlyph_Solid(SDL_Font, c, color.SDL_Color));
+            else         TextBitmap = new Bitmap(TTF_RenderGlyph_Blended(SDL_Font, c, color.SDL_Color));
             if (centeralign) X -= TextBitmap.Width / 2;
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
@@ -632,7 +676,7 @@ namespace ODL
         Italic        = 2,
         Underlined    = 4,
         Strikethrough = 8,
-        Solid         = 16,
+        Aliased       = 16,
         LeftAlign     = 32,
         CenterAlign   = 64,
         RightAlign    = 128

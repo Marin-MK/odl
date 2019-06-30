@@ -28,8 +28,7 @@ namespace ODL
         public RectSprite(Viewport viewport, Size s, Color OuterColor, Color InnerColor, int Thickness = 1)
             : this(viewport, s, OuterColor, Thickness)
         {
-            this.FillInside = true;
-            this.InnerColor = InnerColor;
+            this.SetInnerColor(InnerColor);
         }
 
         #region Overloads
@@ -41,16 +40,11 @@ namespace ODL
             : this(viewport, new Size(Width, Height), new Color(R, G, B, A), Thickness) { }
         #endregion
         public RectSprite(Viewport viewport, Size s, Color OuterColor, int Thickness = 1)
-            : base(viewport)
+            : this(viewport)
         {
-            this.Size = s;
-            this.OuterColor = OuterColor;
+            this.SetOuterColor(OuterColor);
             this.FillInside = false;
-            this.AddBitmap("top", TopBmp = new SolidBitmap(this.Size.Width, Thickness, OuterColor));
-            this.AddBitmap("left", LeftBmp = new SolidBitmap(Thickness, this.Size.Height - 2 * Thickness, OuterColor), 0, Thickness);
-            this.AddBitmap("right", RightBmp = new SolidBitmap(Thickness, this.Size.Height - 2 * Thickness, OuterColor), this.Size.Width - Thickness, Thickness);
-            this.AddBitmap("bottom", BottomBmp = new SolidBitmap(this.Size.Width, Thickness), 0, this.Size.Height - Thickness);
-            this.AddBitmap("center", CenterBmp = new SolidBitmap(this.Size.Width - 2 * Thickness, this.Size.Height - 2 * Thickness), Thickness, Thickness);
+            this.SetSize(s, Thickness);
         }
 
         public RectSprite(Viewport viewport)
@@ -70,6 +64,8 @@ namespace ODL
         public void SetSize(Size size, int Thickness = 1)
         {
             this.Size = size;
+            this.Thickness = Thickness;
+
             TopBmp.Unlock();
             TopBmp.SetSize(this.Size.Width, Thickness);
             TopBmp.Lock();
@@ -99,10 +95,10 @@ namespace ODL
             SpriteList["top"].Y = this.Y;
             SpriteList["left"].X = this.X;
             SpriteList["left"].Y = this.Y + Thickness;
-            SpriteList["right"].X = this.X + this.Size.Width - Thickness - 1;
+            SpriteList["right"].X = this.X + this.Size.Width - Thickness;
             SpriteList["right"].Y = this.Y + Thickness;
             SpriteList["bottom"].X = this.X;
-            SpriteList["bottom"].Y = this.Y + this.Size.Height - Thickness - 1;
+            SpriteList["bottom"].Y = this.Y + this.Size.Height - Thickness;
             SpriteList["center"].X = this.X + Thickness;
             SpriteList["center"].Y = this.Y + Thickness;
         }

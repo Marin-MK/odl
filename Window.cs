@@ -86,6 +86,13 @@ namespace ODL
             }
             this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE));
 
+            if (Graphics.MaxTextureSize == null)
+            {
+                SDL_RendererInfo info;
+                SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
+                Graphics.MaxTextureSize = new Size(info.max_texture_width, info.max_texture_height);
+            }
+
             this.Viewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
             this.Viewport.Name = "Main Viewport";
 

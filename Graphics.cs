@@ -16,6 +16,7 @@ namespace ODL
         public static List<Window> Windows = new List<Window>();
         public static List<Rect> Screens = new List<Rect>();
         public static List<Renderer> Renderers = new List<Renderer>();
+        public static Size MaxTextureSize;
 
         public static void Start()
         {
