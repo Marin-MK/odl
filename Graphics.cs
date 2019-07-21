@@ -17,6 +17,7 @@ namespace ODL
         public static List<Rect> Screens = new List<Rect>();
         public static List<Renderer> Renderers = new List<Renderer>();
         public static Size MaxTextureSize;
+        public static bool DebugLog = false;
 
         public static void Start()
         {
@@ -39,6 +40,11 @@ namespace ODL
             SDL_StopTextInput();
             // Scale linearly instead of nearest neighbour
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+        }
+
+        public static void Log(string Msg)
+        {
+            if (DebugLog) Console.WriteLine("ODL:DEBUG: " + Msg);
         }
 
         static void Render()

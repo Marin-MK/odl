@@ -28,21 +28,27 @@ namespace ODL
         {
             if (this.ForcedUpdate)
             {
+                Graphics.Log("=====================");
+                Graphics.Log("START Rendering");
                 long l1 = Stopwatch.GetTimestamp();
                 SDL_RenderClear(this.SDL_Renderer);
+                Graphics.Log("Viewports count " + this.Viewports.Count.ToString());
                 this.Viewports.Sort(delegate (Viewport vp1, Viewport vp2) {
                     if (vp1.Z != vp2.Z) return vp1.Z.CompareTo(vp2.Z);
                     return vp1.TimeCreated.CompareTo(vp2.TimeCreated);
                 });
+                Graphics.Log("Viewports sorted");
                 for (int i = 0; i < Viewports.Count; i++)
                 {
                     Viewport vp = Viewports[i];
                     if (vp.Disposed)
                     {
                         this.Viewports.RemoveAt(i);
+                        Graphics.Log("Viewport " + i.ToString() + " removed as it was disposed");
                     }
                     else if (vp.Visible && vp.Width > 0 && vp.Height > 0 && vp.Sprites.Count > 0)
                     {
+                        Graphics.Log("Drawing Viewport " + i.ToString());
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
                         ViewportRect.x = vp.X;
@@ -52,17 +58,21 @@ namespace ODL
                         ViewportRect.w = vp.Width;
                         ViewportRect.h = vp.Height;
                         SDL_RenderSetViewport(this.SDL_Renderer, ref ViewportRect);
+                        Graphics.Log($"Viewport rect set to ({ViewportRect.x},{ViewportRect.y},{ViewportRect.w},{ViewportRect.h})");
+                        Graphics.Log("Sprite count " + vp.Sprites.Count.ToString());
                         vp.Sprites.Sort(delegate (Sprite s1, Sprite s2) 
                         {
                             if (s1.Z != s2.Z) return s1.Z.CompareTo(s2.Z);
                             return s1.TimeCreated.CompareTo(s2.TimeCreated);
                         });
+                        Graphics.Log("Sprites sorted");
                         for (int j = 0; j < vp.Sprites.Count; j++)
                         {
                             Sprite s = vp.Sprites[j];
                             if (s.Disposed)
                             {
                                 vp.Sprites.RemoveAt(j);
+                                Graphics.Log("Sprite " + j.ToString() + " removed as it was disposed");
                             }
                             else if (s.Visible)
                             {
@@ -71,21 +81,33 @@ namespace ODL
                         }
                     }
                 }
+                Graphics.Log("Presenting renderer");
                 SDL_RenderPresent(this.SDL_Renderer);
                 this.ForcedUpdate = false;
+                Graphics.Log("FINISHED rendering");
             }
         }
 
         public void RenderSprite(Sprite s)
         {
+            Graphics.Log("Rendering sprite");
             IntPtr Texture = s.Bitmap.Texture;
             SDL_SetTextureColorMod(Texture, s.Color.Red, s.Color.Green, s.Color.Blue);
             SDL_SetTextureAlphaMod(Texture, s.Color.Alpha);
 
+            List<Point> Points;
+            if (s.MultiplePositions.Count == 0) // Normal X,Y positions
+            {
+                Points = new List<Point>() { new Point(s.X, s.Y) };
+            }
+            else // Multiple positions
+            {
+                Graphics.Log("Has multiple positions");
+                Points = s.MultiplePositions;
+            }
+
             SDL_Rect Src = new SDL_Rect();
             SDL_Rect Dest = new SDL_Rect();
-            Dest.x = s.X - s.OX;
-            Dest.y = s.Y - s.OY;
             if (s.Bitmap is Bitmap)
             {
                 Src = s.SrcRect.SDL_Rect;
@@ -99,6 +121,7 @@ namespace ODL
                 else Dest.w = (int) Math.Round(Src.w * s.ZoomX);
                 if (s.ZoomY == 1) Dest.h = Src.h;
                 else Dest.h = (int) Math.Round(Src.h * s.ZoomY);
+                Graphics.Log("Bitmap");
             }
             else if (s.Bitmap is SolidBitmap)
             {
@@ -108,30 +131,40 @@ namespace ODL
                 Src.h = 1;
                 Dest.w = s.Bitmap.Width;
                 Dest.h = s.Bitmap.Height;
+                Graphics.Log("SolidBitmap");
             }
 
             if (!s.Bitmap.Locked)
             {
+                Graphics.Log("ERR: Bitmap is locked");
                 throw new Exception("Bitmap not locked for writing - can't render it");
             }
 
-            if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
+            foreach (Point p in Points)
             {
-                SDL_RenderCopy(this.SDL_Renderer, Texture, ref Src, ref Dest);
-            }
-            else
-            {
-                SDL_Point Center = new SDL_Point();
-                Center.x = s.OX;
-                Center.y = s.OY;
+                Dest.x = p.X - s.OX;
+                Dest.y = p.Y - s.OY;
 
-                SDL_RendererFlip MirrorState = SDL_RendererFlip.SDL_FLIP_NONE;
-                if (s.MirrorX) MirrorState |= SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-                if (s.MirrorY) MirrorState |= SDL_RendererFlip.SDL_FLIP_VERTICAL;
+                if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
+                {
+                    SDL_RenderCopy(this.SDL_Renderer, Texture, ref Src, ref Dest);
+                    Graphics.Log("Rendered successfully");
+                }
+                else
+                {
+                    SDL_Point Center = new SDL_Point();
+                    Center.x = s.OX;
+                    Center.y = s.OY;
 
-                SDL_RenderCopyEx(this.SDL_Renderer, Texture, ref Src, ref Dest, s.Angle % 360, ref Center, MirrorState);
+                    SDL_RendererFlip MirrorState = SDL_RendererFlip.SDL_FLIP_NONE;
+                    if (s.MirrorX) MirrorState |= SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+                    if (s.MirrorY) MirrorState |= SDL_RendererFlip.SDL_FLIP_VERTICAL;
+
+                    SDL_RenderCopyEx(this.SDL_Renderer, Texture, ref Src, ref Dest, s.Angle % 360, ref Center, MirrorState);
+                    Graphics.Log("Rendered special successfully");
+                }
+                // Don't destroy the texture as it can be reused next render
             }
-            // Don't destroy the texture as it can be reused next render
         }
 
         public void ForceUpdate()

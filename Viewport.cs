@@ -16,7 +16,8 @@ namespace ODL
         public int Height = -1;
         public Rect Rect { get { return new Rect(X, Y, Width, Height); } }
         public bool Disposed { get; protected set; } = false;
-        public bool Visible = true;
+        private bool _Visible = true;
+        public bool Visible { get { return _Visible; } set { _Visible = value; ForceUpdate(); } }
         public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
 
         #region Constructor Overloads

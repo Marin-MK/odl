@@ -27,6 +27,7 @@ namespace ODL
         private int _OY = 0;
         public int OY { get { return _OY; } set { _OY = value; this.Update(); } }
         public Color Color { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
+        public List<Point> MultiplePositions { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
 
         public MultiSprite(Viewport viewport)
         {

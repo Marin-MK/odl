@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace ODL
@@ -48,6 +49,8 @@ namespace ODL
         private Color _Color = new Color(255, 255, 255, 255);
         public Color Color { get { return _Color; } set { this._Color = value; this.Viewport.ForceUpdate(); } }
         public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
+        private List<Point> _MultiplePositions = new List<Point>();
+        public List<Point> MultiplePositions { get { return _MultiplePositions; } set { this._MultiplePositions = value; this.Viewport.ForceUpdate(); } }
 
         public Sprite(Viewport Viewport, string Filename)
             : this(Viewport)
