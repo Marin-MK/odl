@@ -37,6 +37,8 @@ namespace ODL
                 Screens.Add(new Rect(r));
             }
             SDL_StopTextInput();
+            // Scale linearly instead of nearest neighbour
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
         }
 
         static void Render()

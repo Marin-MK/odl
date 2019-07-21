@@ -61,6 +61,20 @@ namespace ODL
         #endregion
         void FillCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255);
 
+        #region DrawQuadrant Overloads
+        void DrawQuadrant(Point c, int Radius, Quadrant q, Color color);
+        void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, Color c);
+        void DrawQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255);
+        #endregion
+        void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255);
+
+        #region FillQuadrant Overloads
+        void FillQuadrant(Point c, int Radius, Quadrant q, Color color);
+        void FillQuadrant(int ox, int oy, int Radius, Quadrant q, Color c);
+        void FillQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255);
+        #endregion
+        void FillQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255);
+
         #region DrawRect Overloads
         void DrawRect(Rect r, Color c);
         void DrawRect(Rect rect, byte r, byte g, byte b, byte a = 255);

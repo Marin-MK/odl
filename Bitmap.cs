@@ -309,6 +309,150 @@ namespace ODL
             if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
+        #region DrawQuadrant Overloads
+        public void DrawQuadrant(Point c, int Radius, Quadrant q, Color color)
+        {
+            DrawQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+        }
+        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        {
+            DrawQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+        }
+        public void DrawQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            DrawQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+        }
+        #endregion
+        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            if (Locked) throw new BitmapLockedException();
+            int x = Radius - 1;
+            int y = 0;
+            int dx = 1;
+            int dy = 1;
+            int err = dx - (Radius << 1);
+            while (x >= y)
+            {
+                if (q == Quadrant.TopRight) // 0 - 90
+                {
+                    SetPixel(ox + y, oy - x, r, g, b, a, true);
+                    SetPixel(ox + x, oy - y, r, g, b, a, true);
+                }
+                else if (q == Quadrant.TopLeft) // 90 - 180
+                {
+                    SetPixel(ox - x, oy - y, r, g, b, a, true);
+                    SetPixel(ox - y, oy - x, r, g, b, a, true);
+                }
+                else if (q == Quadrant.BottomLeft) // 180 - 270
+                {
+                    SetPixel(ox - x, oy + y, r, g, b, a, true);
+                    SetPixel(ox - y, oy + x, r, g, b, a, true);
+                }
+                else if (q == Quadrant.BottomRight) // 270 - 360
+                {
+                    SetPixel(ox + x, oy + y, r, g, b, a, true);
+                    SetPixel(ox + y, oy + x, r, g, b, a, true);
+                }
+                if (err <= 0)
+                {
+                    y++;
+                    err += dy;
+                    dy += 2;
+                }
+                if (err > 0)
+                {
+                    x--;
+                    dx += 2;
+                    err += dx - (Radius << 1);
+                }
+            }
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
+        }
+
+        #region FillQuadrant Overloads
+        public void FillQuadrant(Point c, int Radius, Quadrant q, Color color)
+        {
+            FillQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+        }
+        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        {
+            FillQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+        }
+        public void FillQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            FillQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+        }
+        #endregion
+        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            if (Locked) throw new BitmapLockedException();
+            int x = Radius - 1;
+            int y = 0;
+            int dx = 1;
+            int dy = 1;
+            int err = dx - (Radius << 1);
+            while (x >= y)
+            {
+                if (q == Quadrant.TopRight) // 0 - 90
+                {
+                    for (int i = ox + y; i <= ox + x; i++)
+                    {
+                        SetPixel(i, oy - y, r, g, b, a, true);
+                    }
+                    for (int i = oy - x; i <= oy - y; i++)
+                    {
+                        SetPixel(ox + y, i, r, g, b, a, true);
+                    }
+                }
+                else if (q == Quadrant.TopLeft) // 90 - 180
+                {
+                    for (int i = ox - x; i <= ox - y; i++)
+                    {
+                        SetPixel(i, oy - y, r, g, b, a, true);
+                    }
+                    for (int i = oy - x; i <= oy - y; i++)
+                    {
+                        SetPixel(ox - y, i, r, g, b, a, true);
+                    }
+                }
+                else if (q == Quadrant.BottomLeft) // 180 - 270
+                {
+                    for (int i = ox - x; i <= ox - y; i++)
+                    {
+                        SetPixel(i, oy + y, r, g, b, a, true);
+                    }
+                    for (int i = oy + y; i <= oy + x; i++)
+                    {
+                        SetPixel(ox - y, i, r, g, b, a, true);
+                    }
+                }
+                else if (q == Quadrant.BottomRight) // 270 - 360
+                {
+                    for (int i = ox + y; i <= ox + x; i++)
+                    {
+                        SetPixel(i, oy + y, r, g, b, a, true);
+                    }
+                    for (int i = oy + y; i <= oy + x; i++)
+                    {
+                        SetPixel(ox + y, i, r, g, b, a, true);
+                    }
+                }
+                if (err <= 0)
+                {
+                    y++;
+                    err += dy;
+                    dy += 2;
+                }
+                if (err > 0)
+                {
+                    x--;
+                    dx += 2;
+                    err += dx - (Radius << 1);
+                }
+            }
+            if (this.Renderer != null) this.Renderer.ForceUpdate();
+        }
+
         #region DrawRect Overloads
         public void DrawRect(Rect r, Color c)
         {
@@ -680,6 +824,14 @@ namespace ODL
         LeftAlign     = 32,
         CenterAlign   = 64,
         RightAlign    = 128
+    }
+
+    public enum Quadrant
+    {
+        TopRight,
+        TopLeft,
+        BottomRight,
+        BottomLeft
     }
 
     public class BitmapLockedException : Exception

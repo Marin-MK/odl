@@ -110,6 +110,11 @@ namespace ODL
                 Dest.h = s.Bitmap.Height;
             }
 
+            if (!s.Bitmap.Locked)
+            {
+                throw new Exception("Bitmap not locked for writing - can't render it");
+            }
+
             if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
             {
                 SDL_RenderCopy(this.SDL_Renderer, Texture, ref Src, ref Dest);

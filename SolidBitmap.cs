@@ -214,6 +214,44 @@ namespace ODL
             throw new MethodNotSupportedException(this);
         }
 
+        #region DrawQuadrant Overloads
+        public void DrawQuadrant(Point c, int Radius, Quadrant q, Color color)
+        {
+            DrawQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+        }
+        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        {
+            DrawQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+        }
+        public void DrawQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            DrawQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+        }
+        #endregion
+        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            throw new MethodNotSupportedException(this);
+        }
+
+        #region FillQuadrant Overloads
+        public void FillQuadrant(Point c, int Radius, Quadrant q, Color color)
+        {
+            FillQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+        }
+        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        {
+            FillQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+        }
+        public void FillQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            FillQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+        }
+        #endregion
+        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        {
+            throw new MethodNotSupportedException(this);
+        }
+
         #region DrawRect Overloads
         public void DrawRect(Rect r, Color c)
         {

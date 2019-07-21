@@ -178,4 +178,14 @@ namespace ODL
             this.OldHeight = OldHeight;
         }
     }
+
+    public class ConditionEventArgs : EventArgs
+    {
+        public bool ConditionValue;
+
+        public ConditionEventArgs(bool DefaultValue = true)
+        {
+            this.ConditionValue = DefaultValue;
+        }
+    }
 }
