@@ -7,7 +7,7 @@ using static SDL2.SDL_ttf;
 
 namespace ODL
 {
-    public class Bitmap : IBitmap
+    public class Bitmap : IBitmap, IDisposable
     {
         public IntPtr Surface { get; protected set; }
         public SDL_Surface SurfaceObject { get; protected set; }
@@ -310,20 +310,20 @@ namespace ODL
         }
 
         #region DrawQuadrant Overloads
-        public void DrawQuadrant(Point c, int Radius, Quadrant q, Color color)
+        public void DrawQuadrant(Point c, int Radius, Location l, Color color)
         {
-            DrawQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+            DrawQuadrant(c.X, c.Y, Radius, l, color.Red, color.Green, color.Blue, color.Alpha);
         }
-        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        public void DrawQuadrant(int ox, int oy, int Radius, Location l, Color c)
         {
-            DrawQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+            DrawQuadrant(ox, oy, Radius, l, c.Red, c.Green, c.Blue, c.Alpha);
         }
-        public void DrawQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void DrawQuadrant(Point c, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
-            DrawQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+            DrawQuadrant(c.X, c.Y, Radius, l, r, g, b, a);
         }
         #endregion
-        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void DrawQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             int x = Radius - 1;
@@ -333,22 +333,22 @@ namespace ODL
             int err = dx - (Radius << 1);
             while (x >= y)
             {
-                if (q == Quadrant.TopRight) // 0 - 90
+                if (l == Location.TopRight) // 0 - 90
                 {
                     SetPixel(ox + y, oy - x, r, g, b, a, true);
                     SetPixel(ox + x, oy - y, r, g, b, a, true);
                 }
-                else if (q == Quadrant.TopLeft) // 90 - 180
+                else if (l == Location.TopLeft) // 90 - 180
                 {
                     SetPixel(ox - x, oy - y, r, g, b, a, true);
                     SetPixel(ox - y, oy - x, r, g, b, a, true);
                 }
-                else if (q == Quadrant.BottomLeft) // 180 - 270
+                else if (l == Location.BottomLeft) // 180 - 270
                 {
                     SetPixel(ox - x, oy + y, r, g, b, a, true);
                     SetPixel(ox - y, oy + x, r, g, b, a, true);
                 }
-                else if (q == Quadrant.BottomRight) // 270 - 360
+                else if (l == Location.BottomRight) // 270 - 360
                 {
                     SetPixel(ox + x, oy + y, r, g, b, a, true);
                     SetPixel(ox + y, oy + x, r, g, b, a, true);
@@ -370,20 +370,20 @@ namespace ODL
         }
 
         #region FillQuadrant Overloads
-        public void FillQuadrant(Point c, int Radius, Quadrant q, Color color)
+        public void FillQuadrant(Point c, int Radius, Location l, Color color)
         {
-            FillQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+            FillQuadrant(c.X, c.Y, Radius, l, color.Red, color.Green, color.Blue, color.Alpha);
         }
-        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        public void FillQuadrant(int ox, int oy, int Radius, Location l, Color c)
         {
-            FillQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+            FillQuadrant(ox, oy, Radius, l, c.Red, c.Green, c.Blue, c.Alpha);
         }
-        public void FillQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void FillQuadrant(Point c, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
-            FillQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+            FillQuadrant(c.X, c.Y, Radius, l, r, g, b, a);
         }
         #endregion
-        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void FillQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             int x = Radius - 1;
@@ -393,7 +393,7 @@ namespace ODL
             int err = dx - (Radius << 1);
             while (x >= y)
             {
-                if (q == Quadrant.TopRight) // 0 - 90
+                if (l == Location.TopRight) // 0 - 90
                 {
                     for (int i = ox + y; i <= ox + x; i++)
                     {
@@ -404,7 +404,7 @@ namespace ODL
                         SetPixel(ox + y, i, r, g, b, a, true);
                     }
                 }
-                else if (q == Quadrant.TopLeft) // 90 - 180
+                else if (l == Location.TopLeft) // 90 - 180
                 {
                     for (int i = ox - x; i <= ox - y; i++)
                     {
@@ -415,7 +415,7 @@ namespace ODL
                         SetPixel(ox - y, i, r, g, b, a, true);
                     }
                 }
-                else if (q == Quadrant.BottomLeft) // 180 - 270
+                else if (l == Location.BottomLeft) // 180 - 270
                 {
                     for (int i = ox - x; i <= ox - y; i++)
                     {
@@ -426,7 +426,7 @@ namespace ODL
                         SetPixel(ox - y, i, r, g, b, a, true);
                     }
                 }
-                else if (q == Quadrant.BottomRight) // 270 - 360
+                else if (l == Location.BottomRight) // 270 - 360
                 {
                     for (int i = ox + y; i <= ox + x; i++)
                     {
@@ -826,7 +826,7 @@ namespace ODL
         RightAlign    = 128
     }
 
-    public enum Quadrant
+    public enum Location
     {
         TopRight,
         TopLeft,

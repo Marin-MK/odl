@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ODL
 {
-    public class Sprite : ISprite
+    public class Sprite : ISprite, IDisposable
     {
         // Sprites have a Name property to keep track of which Sprite is which -- totally optional, of course
         public string Name { get; set; }

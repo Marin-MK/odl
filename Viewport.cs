@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ODL
 {
-    public class Viewport
+    public class Viewport : IDisposable
     {
         public string Name;
         public Renderer Renderer;
@@ -51,6 +51,8 @@ namespace ODL
             {
                 Sprites[i].Dispose();
             }
+            Sprites.Clear();
+            Sprites = null;
             this.Renderer.Viewports.Remove(this);
             this.Renderer.ForceUpdate();
             this.Disposed = true;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ODL
 {
-    public class MultiSprite : ISprite
+    public class MultiSprite : ISprite, IDisposable
     {
         public Dictionary<string, Sprite> SpriteList = new Dictionary<string, Sprite>();
         public Viewport Viewport { get; protected set; }

@@ -215,39 +215,39 @@ namespace ODL
         }
 
         #region DrawQuadrant Overloads
-        public void DrawQuadrant(Point c, int Radius, Quadrant q, Color color)
+        public void DrawQuadrant(Point c, int Radius, Location l, Color color)
         {
-            DrawQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+            DrawQuadrant(c.X, c.Y, Radius, l, color.Red, color.Green, color.Blue, color.Alpha);
         }
-        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        public void DrawQuadrant(int ox, int oy, int Radius, Location l, Color c)
         {
-            DrawQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+            DrawQuadrant(ox, oy, Radius, l, c.Red, c.Green, c.Blue, c.Alpha);
         }
-        public void DrawQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void DrawQuadrant(Point c, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
-            DrawQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+            DrawQuadrant(c.X, c.Y, Radius, l, r, g, b, a);
         }
         #endregion
-        public void DrawQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void DrawQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             throw new MethodNotSupportedException(this);
         }
 
         #region FillQuadrant Overloads
-        public void FillQuadrant(Point c, int Radius, Quadrant q, Color color)
+        public void FillQuadrant(Point c, int Radius, Location l, Color color)
         {
-            FillQuadrant(c.X, c.Y, Radius, q, color.Red, color.Green, color.Blue, color.Alpha);
+            FillQuadrant(c.X, c.Y, Radius, l, color.Red, color.Green, color.Blue, color.Alpha);
         }
-        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, Color c)
+        public void FillQuadrant(int ox, int oy, int Radius, Location l, Color c)
         {
-            FillQuadrant(ox, oy, Radius, q, c.Red, c.Green, c.Blue, c.Alpha);
+            FillQuadrant(ox, oy, Radius, l, c.Red, c.Green, c.Blue, c.Alpha);
         }
-        public void FillQuadrant(Point c, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void FillQuadrant(Point c, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
-            FillQuadrant(c.X, c.Y, Radius, q, r, g, b, a);
+            FillQuadrant(c.X, c.Y, Radius, l, r, g, b, a);
         }
         #endregion
-        public void FillQuadrant(int ox, int oy, int Radius, Quadrant q, byte r, byte g, byte b, byte a = 255)
+        public void FillQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             throw new MethodNotSupportedException(this);
         }

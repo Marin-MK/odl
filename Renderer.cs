@@ -5,7 +5,7 @@ using static SDL2.SDL;
 
 namespace ODL
 {
-    public class Renderer
+    public class Renderer : IDisposable
     {
         public List<Viewport> Viewports = new List<Viewport>();
         public IntPtr SDL_Renderer;

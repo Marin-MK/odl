@@ -5,7 +5,7 @@ using static SDL2.SDL;
 
 namespace ODL
 {
-    public class Window
+    public class Window : IDisposable
     {
         public Viewport Viewport { get; protected set; }
         public IntPtr SDL_Window { get; protected set; }
