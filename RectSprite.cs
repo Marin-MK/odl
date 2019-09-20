@@ -66,25 +66,11 @@ namespace ODL
             this.Size = size;
             this.Thickness = Thickness;
 
-            TopBmp.Unlock();
             TopBmp.SetSize(this.Size.Width, Thickness);
-            TopBmp.Lock();
-
-            LeftBmp.Unlock();
             LeftBmp.SetSize(Thickness, this.Size.Height - 2 * Thickness + 1);
-            LeftBmp.Lock();
-
-            RightBmp.Unlock();
             RightBmp.SetSize(Thickness, this.Size.Height - 2 * Thickness + 1);
-            RightBmp.Lock();
-
-            BottomBmp.Unlock();
             BottomBmp.SetSize(this.Size.Width, Thickness);
-            BottomBmp.Lock();
-
-            CenterBmp.Unlock();
             CenterBmp.SetSize(this.Size.Width - 2 * Thickness, this.Size.Height - 2 * Thickness);
-            CenterBmp.Lock();
 
             this.UpdateSprites();
         }
@@ -110,18 +96,10 @@ namespace ODL
         public void SetOuterColor(Color c)
         {
             this.OuterColor = c;
-            TopBmp.Unlock();
             TopBmp.SetColor(c);
-            TopBmp.Lock();
-            LeftBmp.Unlock();
             LeftBmp.SetColor(c);
-            LeftBmp.Lock();
-            RightBmp.Unlock();
             RightBmp.SetColor(c);
-            RightBmp.Lock();
-            BottomBmp.Unlock();
             BottomBmp.SetColor(c);
-            BottomBmp.Lock();
         }
 
         public void SetInnerColor(byte R, byte G, byte B, byte A = 255)
@@ -132,9 +110,7 @@ namespace ODL
         {
             this.FillInside = true;
             this.InnerColor = c;
-            CenterBmp.Unlock();
             CenterBmp.SetColor(c);
-            CenterBmp.Lock();
         }
 
         public void SetColor(Color Outer, byte IR, byte IG, byte IB, byte IA = 255)

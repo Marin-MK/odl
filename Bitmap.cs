@@ -7,18 +7,49 @@ using static SDL2.SDL_ttf;
 
 namespace ODL
 {
-    public class Bitmap : IBitmap, IDisposable
+    public class Bitmap : IDisposable
     {
+        /// <summary>
+        /// The pointer to the SDL_Surface.
+        /// </summary>
         public IntPtr Surface { get; protected set; }
+        /// <summary>
+        /// The SDL_Surface object.
+        /// </summary>
         public SDL_Surface SurfaceObject { get; protected set; }
+        /// <summary>
+        /// The pointer to the SDL_Texture.
+        /// </summary>
         public IntPtr Texture { get; protected set; } 
-        public int Width { get { return this.SurfaceObject.w; } }
-        public int Height { get { return this.SurfaceObject.h; } }
+        /// <summary>
+        /// The width of the bitmap.
+        /// </summary>
+        public virtual int Width { get { return this.SurfaceObject.w; } protected set { } }
+        /// <summary>
+        /// The height of the bitmap.
+        /// </summary>
+        public virtual int Height { get { return this.SurfaceObject.h; } protected set { } }
+        /// <summary>
+        /// Whether or not the bitmap has been disposed.
+        /// </summary>
         public bool Disposed { get; protected set; }
+        /// <summary>
+        /// The Renderer object associated with the bitmap.
+        /// </summary>
         public Renderer Renderer { get; set; }
+        /// <summary>
+        /// The Font object associated with the bitmap.
+        /// </summary>
         public Font Font { get; set; }
+        /// <summary>
+        /// Whether the bitmap can be written on.
+        /// </summary>
         public bool Locked { get; protected set; }
 
+        /// <summary>
+        /// Loads the specified file into a bitmap.
+        /// </summary>
+        /// <param name="Filename">The file to load into a bitmap.</param>
         public Bitmap(string Filename)
         {
             if (!System.IO.File.Exists(Filename))
@@ -30,8 +61,17 @@ namespace ODL
             this.Lock();
         }
 
+        /// <summary>
+        /// Creates a new bitmap with the given size.
+        /// </summary>
+        /// <param name="Size">The size of the new bitmap.</param>
         public Bitmap(Size Size)
             : this(Size.Width, Size.Height) { }
+        /// <summary>
+        /// Creates a new bitmap with the given size.
+        /// </summary>
+        /// <param name="Width">The width of the new bitmap.</param>
+        /// <param name="Height">The height of the new bitmap.</param>
         public Bitmap(int Width, int Height)
         {
             if (Width < 1 || Height < 1)
@@ -44,7 +84,7 @@ namespace ODL
             }
             this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-            this.Lock();
+            if (!(this is SolidBitmap)) this.Lock();
         }
 
         public Bitmap(IntPtr Surface)
@@ -54,7 +94,10 @@ namespace ODL
             this.Lock();
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Disposes and destroys the bitmap.
+        /// </summary>
+        public virtual void Dispose()
         {
             if (Disposed) return;
             if (this.Surface != IntPtr.Zero && this.Surface != null)
@@ -71,7 +114,10 @@ namespace ODL
             return $"(Bitmap: {this.Width},{this.Height})";
         }
 
-        public void Clear()
+        /// <summary>
+        /// Clears the bitmap content.
+        /// </summary>
+        public virtual void Clear()
         {
             if (Locked) throw new BitmapLockedException();
             if (this.Surface != IntPtr.Zero && this.Surface != null)
@@ -86,20 +132,48 @@ namespace ODL
         }
 
         #region SetPixel Overloads
+        /// <summary>
+        /// Sets a pixel in the bitmap to the specified color.
+        /// </summary>
+        /// <param name="p">The position in the bitmap.</param>
+        /// <param name="c">The color to set the pixel to.</param>
         public void SetPixel(Point p, Color c)
         {
             SetPixel(p.X, p.Y, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Sets a pixel in the bitmap to the specified color.
+        /// </summary>
+        /// <param name="X">The X position in the bitmap.</param>
+        /// <param name="Y">The Y position in the bitmap.</param>
+        /// <param name="c">The color to set the pixel to.</param>
         public void SetPixel(int X, int Y, Color c)
         {
             SetPixel(X, Y, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Sets a pixel in the bitmap to the specified color.
+        /// </summary>
+        /// <param name="p">The position in the bitmap.</param>
+        /// <param name="r">The Red component of the color to set the pixel to.</param>
+        /// <param name="g">The Green component of the color to set the pixel to.</param>
+        /// <param name="b">The Blue component of the color to set the pixel to.</param>
+        /// <param name="a">The Alpha component of the color to set the pixel to.</param>
         public void SetPixel(Point p, byte r, byte g, byte b, byte a = 255)
         {
             SetPixel(p.X, p.Y, r, g, b, a);
         }
         #endregion
-        public void SetPixel(int X, int Y, byte r, byte g, byte b, byte a = 255, bool subcall = false)
+        /// <summary>
+        /// Sets a pixel in the bitmap to the specified color.
+        /// </summary>
+        /// <param name="X">The X position in the bitmap.</param>
+        /// <param name="Y">The Y position in the bitmap.</param>
+        /// <param name="r">The Red component of the color to set the pixel to.</param>
+        /// <param name="g">The Green component of the color to set the pixel to.</param>
+        /// <param name="b">The Blue component of the color to set the pixel to.</param>
+        /// <param name="a">The Alpha component of the color to set the pixel to.</param>
+        public virtual void SetPixel(int X, int Y, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             if (X < 0 || Y < 0)
@@ -120,12 +194,21 @@ namespace ODL
         }
 
         #region GetPixel Overloads
+        /// <summary>
+        /// Returns the color at the given position.
+        /// </summary>
+        /// <param name="p">The position in the bitmap.</param>
         public Color GetPixel(Point p)
         {
             return GetPixel(p.X, p.Y);
         }
         #endregion
-        public Color GetPixel(int X, int Y)
+        /// <summary>
+        /// Returns the color at the given position.
+        /// </summary>
+        /// <param name="X">The X position in the bitmap.</param>
+        /// <param name="Y">The Y position in the bitmap.</param>
+        public virtual Color GetPixel(int X, int Y)
         {
             if (X < 0 || Y < 0)
             {
@@ -146,65 +229,153 @@ namespace ODL
         }
 
         #region DrawLine Overloads
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="p1">The position of the first point.</param>
+        /// <param name="p2">The position of the second point.</param>
+        /// <param name="c">The color to draw the line with.</param>
         public void DrawLine(Point p1, Point p2, Color c)
         {
             DrawLine(p1.X, p1.Y, p2.X, p2.Y, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="p1">The position of the first point.</param>
+        /// <param name="p2">The position of the second point.</param>
+        /// <param name="r">The Red component of the color to draw the line with.</param>
+        /// <param name="g">The Green component of the color to draw the line with.</param>
+        /// <param name="b">The Blue component of the color to draw the line with.</param>
+        /// <param name="a">The Alpha component of the color to draw the line with.</param>
         public void DrawLine(Point p1, Point p2, byte r, byte g, byte b, byte a = 255)
         {
             DrawLine(p1.X, p1.Y, p2.X, p2.Y, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="p1">The position of the first point.</param>
+        /// <param name="x2">The X position of the second point.</param>
+        /// <param name="y2">The Y position of the second point.</param>
+        /// <param name="c">The color to draw the line with.</param>
         public void DrawLine(Point p1, int x2, int y2, Color c)
         {
             DrawLine(p1.X, p1.Y, x2, y2, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="p1">The position of the first point.</param>
+        /// <param name="x2">The X position of the second point.</param>
+        /// <param name="y2">The Y position of the second point.</param>
+        /// <param name="r">The Red component of the color to draw the line with.</param>
+        /// <param name="g">The Green component of the color to draw the line with.</param>
+        /// <param name="b">The Blue component of the color to draw the line with.</param>
+        /// <param name="a">The Alpha component of the color to draw the line with.</param>
         public void DrawLine(Point p1, int x2, int y2, byte r, byte g, byte b, byte a = 255)
         {
             DrawLine(p1.X, p1.Y, x2, y2, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="x1">The X position of the first point.</param>
+        /// <param name="y1">The Y position of the first point.</param>
+        /// <param name="p2">The position of the second point.</param>
+        /// <param name="c">The color to draw the line with.</param>
         public void DrawLine(int x1, int y1, Point p2, Color c)
         {
             DrawLine(x1, y1, p2.X, p2.Y, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="x1">The X position of the first point.</param>
+        /// <param name="y1">The Y position of the first point.</param>
+        /// <param name="p2">The position of the second point.</param>
+        /// <param name="r">The Red component of the color to draw the line with.</param>
+        /// <param name="g">The Green component of the color to draw the line with.</param>
+        /// <param name="b">The Blue component of the color to draw the line with.</param>
+        /// <param name="a">The Alpha component of the color to draw the line with.</param>
         public void DrawLine(int x1, int y1, Point p2, byte r, byte g, byte b, byte a = 255)
         {
             DrawLine(x1, y1, p2.X, p2.Y, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="x1">The X position of the first point.</param>
+        /// <param name="y1">The Y position of the first point.</param>
+        /// <param name="x2">The X position of the second point.</param>
+        /// <param name="y2">The Y position of the second point.</param>
+        /// <param name="c">The color to draw the line with.</param>
         public void DrawLine(int x1, int y1, int x2, int y2, Color c)
         {
             DrawLine(x1, y1, x2, y2, c.Red, c.Green, c.Blue, c.Alpha);
         }
         #endregion
-        public void DrawLine(int x1, int y1, int x2, int y2, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="x1">The X position of the first point.</param>
+        /// <param name="y1">The Y position of the first point.</param>
+        /// <param name="x2">The X position of the second point.</param>
+        /// <param name="y2">The Y position of the second point.</param>
+        /// <param name="r">The Red component of the color to draw the line with.</param>
+        /// <param name="g">The Green component of the color to draw the line with.</param>
+        /// <param name="b">The Blue component of the color to draw the line with.</param>
+        /// <param name="a">The Alpha component of the color to draw the line with.</param>
+        public virtual void DrawLine(int x1, int y1, int x2, int y2, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             for (int x = x1 > x2 ? x2 : x1; (x1 > x2) ? (x <= x1) : (x <= x2); x++)
             {
                 double fact = ((double)x - x1) / (x2 - x1);
                 int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
-                if (y >= 0) SetPixel(x, y, r, g, b, a, true);
+                if (y >= 0) SetPixel(x, y, r, g, b, a);
             }
             int sy = y1 > y2 ? y2 : y1;
             for (int y = y1 > y2 ? y2 : y1; (y1 > y2) ? (y <= y1) : (y <= y2); y++)
             {
                 double fact = ((double) y - y1) / (y2 - y1);
                 int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
-                if (x >= 0) SetPixel(x, y, r, g, b, a, true);
+                if (x >= 0) SetPixel(x, y, r, g, b, a);
             }
             if (this.Renderer != null) this.Renderer.ForceUpdate();
         }
 
         #region DrawLines Overloads
+        /// <summary>
+        /// Draws lines between the given points.
+        /// </summary>
+        /// <param name="c">The color to draw the lines with.</param>
+        /// <param name="points">The list of points to draw the lines between.</param>
         public void DrawLines(Color c, params Point[] points)
         {
             this.DrawLines(c.Red, c.Green, c.Blue, c.Alpha, points);
         }
+        /// <summary>
+        /// Draws lines between the given points.
+        /// </summary>
+        /// <param name="r">The Red component of the color to draw the lines with.</param>
+        /// <param name="g">The Green component of the color to draw the lines with.</param>
+        /// <param name="b">The Blue component of the color to draw the lines with.</param>
+        /// <param name="points">The list of points to draw the lines between.</param>
         public void DrawLines(byte r, byte g, byte b, params Point[] points)
         {
             this.DrawLines(r, g, b, 255, points);
         }
         #endregion
-        public void DrawLines(byte r, byte g, byte b, byte a, params Point[] points)
+        /// <summary>
+        /// Draws lines between the given points.
+        /// </summary>
+        /// <param name="r">The Red component of the color to draw the lines with.</param>
+        /// <param name="g">The Green component of the color to draw the lines with.</param>
+        /// <param name="b">The Blue component of the color to draw the lines with.</param>
+        /// <param name="a">The Alpha component of the color to draw the lines with.</param>
+        /// <param name="points">The list of points to draw the lines between.</param>
+        public virtual void DrawLines(byte r, byte g, byte b, byte a, params Point[] points)
         {
             if (Locked) throw new BitmapLockedException();
             for (int i = 0; i < points.Length - 1; i++)
@@ -214,20 +385,52 @@ namespace ODL
         }
 
         #region DrawCircle
+        /// <summary>
+        /// Draws a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="color">The color to draw the circle with.</param>
         public void DrawCircle(Point c, int Radius, Color color)
         {
             DrawCircle(c.X, c.Y, Radius, color.Red, color.Green, color.Blue, color.Alpha);
         }
+        /// <summary>
+        /// Draws a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="c">The color to draw the circle with.</param>
         public void DrawCircle(int ox, int oy, int Radius, Color c)
         {
             DrawCircle(ox, oy, Radius, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="r">The Red component of the color to draw the circle with.</param>
+        /// <param name="g">The Green component of the color to draw the circle with.</param>
+        /// <param name="b">The Blue component of the color to draw the circle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the circle with.</param>
         public void DrawCircle(Point c, int Radius, byte r, byte g, byte b, byte a = 255)
         {
             DrawCircle(c.X, c.Y, Radius, r, g, b, a);
         }
         #endregion
-        public void DrawCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Draws a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="r">The Red component of the color to draw the circle with.</param>
+        /// <param name="g">The Green component of the color to draw the circle with.</param>
+        /// <param name="b">The Blue component of the color to draw the circle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the circle with.</param>
+        public virtual void DrawCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             int x = Radius - 1;
@@ -237,14 +440,14 @@ namespace ODL
             int err = dx - (Radius << 1);
             while (x >= y)
             {
-                SetPixel(ox - x, oy - y, r, g, b, a, true);
-                SetPixel(ox - x, oy + y, r, g, b, a, true);
-                SetPixel(ox + x, oy - y, r, g, b, a, true);
-                SetPixel(ox + x, oy + y, r, g, b, a, true);
-                SetPixel(ox - y, oy - x, r, g, b, a, true);
-                SetPixel(ox - y, oy + x, r, g, b, a, true);
-                SetPixel(ox + y, oy - x, r, g, b, a, true);
-                SetPixel(ox + y, oy + x, r, g, b, a, true);
+                SetPixel(ox - x, oy - y, r, g, b, a);
+                SetPixel(ox - x, oy + y, r, g, b, a);
+                SetPixel(ox + x, oy - y, r, g, b, a);
+                SetPixel(ox + x, oy + y, r, g, b, a);
+                SetPixel(ox - y, oy - x, r, g, b, a);
+                SetPixel(ox - y, oy + x, r, g, b, a);
+                SetPixel(ox + y, oy - x, r, g, b, a);
+                SetPixel(ox + y, oy + x, r, g, b, a);
                 if (err <= 0)
                 {
                     y++;
@@ -262,20 +465,52 @@ namespace ODL
         }
 
         #region FillCircle
+        /// <summary>
+        /// Fills a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="color">The color to fill the circle with.</param>
         public void FillCircle(Point c, int Radius, Color color)
         {
             FillCircle(c.X, c.Y, Radius, color.Red, color.Green, color.Blue, color.Alpha);
         }
+        /// <summary>
+        /// Fills a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="c">The color to fill the circle with.</param>
         public void FillCircle(int ox, int oy, int Radius, Color c)
         {
             FillCircle(ox, oy, Radius, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Fills a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="r">The Red component of the color to fill the circle with.</param>
+        /// <param name="g">The Green component of the color to fill the circle with.</param>
+        /// <param name="b">The Blue component of the color to fill the circle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the circle with.</param>
         public void FillCircle(Point c, int Radius, byte r, byte g, byte b, byte a = 255)
         {
             FillCircle(c.X, c.Y, Radius, r, g, b, a);
         }
         #endregion
-        public void FillCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Fills a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="r">The Red component of the color to fill the circle with.</param>
+        /// <param name="g">The Green component of the color to fill the circle with.</param>
+        /// <param name="b">The Blue component of the color to fill the circle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the circle with.</param>
+        public virtual void FillCircle(int ox, int oy, int Radius, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             int x = Radius - 1;
@@ -287,13 +522,13 @@ namespace ODL
             {
                 for (int i = ox - x; i <= ox + x; i++)
                 {
-                    SetPixel(i, oy + y, r, g, b, a, true);
-                    SetPixel(i, oy - y, r, g, b, a, true);
+                    SetPixel(i, oy + y, r, g, b, a);
+                    SetPixel(i, oy - y, r, g, b, a);
                 }
                 for (int i = oy - y; i <= ox + y; i++)
                 {
-                    SetPixel(i, oy + x, r, g, b, a, true);
-                    SetPixel(i, oy - x, r, g, b, a, true);
+                    SetPixel(i, oy + x, r, g, b, a);
+                    SetPixel(i, oy - x, r, g, b, a);
                 }
 
                 y++;
@@ -310,20 +545,56 @@ namespace ODL
         }
 
         #region DrawQuadrant Overloads
+        /// <summary>
+        /// Draws a quarter of a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="color">The color to draw the quadrant with.</param>
         public void DrawQuadrant(Point c, int Radius, Location l, Color color)
         {
             DrawQuadrant(c.X, c.Y, Radius, l, color.Red, color.Green, color.Blue, color.Alpha);
         }
+        /// <summary>
+        /// Draws a quarter of a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="c">The color to draw the quadrant with.</param>
         public void DrawQuadrant(int ox, int oy, int Radius, Location l, Color c)
         {
             DrawQuadrant(ox, oy, Radius, l, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a quarter of a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="r">The Red component of the color to draw the quadrant with.</param>
+        /// <param name="g">The Green component of the color to draw the quadrant with.</param>
+        /// <param name="b">The Blue component of the color to draw the quadrant with.</param>
+        /// <param name="a">The Alpha component of the color to draw the quadrant with.</param>
         public void DrawQuadrant(Point c, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             DrawQuadrant(c.X, c.Y, Radius, l, r, g, b, a);
         }
         #endregion
-        public void DrawQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Draws a quarter of a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="r">The Red component of the color to draw the quadrant with.</param>
+        /// <param name="g">The Green component of the color to draw the quadrant with.</param>
+        /// <param name="b">The Blue component of the color to draw the quadrant with.</param>
+        /// <param name="a">The Alpha component of the color to draw the quadrant with.</param>
+        public virtual void DrawQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             int x = Radius - 1;
@@ -335,23 +606,23 @@ namespace ODL
             {
                 if (l == Location.TopRight) // 0 - 90
                 {
-                    SetPixel(ox + y, oy - x, r, g, b, a, true);
-                    SetPixel(ox + x, oy - y, r, g, b, a, true);
+                    SetPixel(ox + y, oy - x, r, g, b, a);
+                    SetPixel(ox + x, oy - y, r, g, b, a);
                 }
                 else if (l == Location.TopLeft) // 90 - 180
                 {
-                    SetPixel(ox - x, oy - y, r, g, b, a, true);
-                    SetPixel(ox - y, oy - x, r, g, b, a, true);
+                    SetPixel(ox - x, oy - y, r, g, b, a);
+                    SetPixel(ox - y, oy - x, r, g, b, a);
                 }
                 else if (l == Location.BottomLeft) // 180 - 270
                 {
-                    SetPixel(ox - x, oy + y, r, g, b, a, true);
-                    SetPixel(ox - y, oy + x, r, g, b, a, true);
+                    SetPixel(ox - x, oy + y, r, g, b, a);
+                    SetPixel(ox - y, oy + x, r, g, b, a);
                 }
                 else if (l == Location.BottomRight) // 270 - 360
                 {
-                    SetPixel(ox + x, oy + y, r, g, b, a, true);
-                    SetPixel(ox + y, oy + x, r, g, b, a, true);
+                    SetPixel(ox + x, oy + y, r, g, b, a);
+                    SetPixel(ox + y, oy + x, r, g, b, a);
                 }
                 if (err <= 0)
                 {
@@ -370,20 +641,56 @@ namespace ODL
         }
 
         #region FillQuadrant Overloads
+        /// <summary>
+        /// Fills a quarter of a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="color">The color to fill the quadrant with.</param>
         public void FillQuadrant(Point c, int Radius, Location l, Color color)
         {
             FillQuadrant(c.X, c.Y, Radius, l, color.Red, color.Green, color.Blue, color.Alpha);
         }
+        /// <summary>
+        /// Fills a quarter of a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="c">The color to fill the quadrant with.</param>
         public void FillQuadrant(int ox, int oy, int Radius, Location l, Color c)
         {
             FillQuadrant(ox, oy, Radius, l, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Fills a quarter of a circle.
+        /// </summary>
+        /// <param name="c">The origin position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="r">The Red component of the color to fill the quadrant with.</param>
+        /// <param name="g">The Green component of the color to fill the quadrant with.</param>
+        /// <param name="b">The Blue component of the color to fill the quadrant with.</param>
+        /// <param name="a">The Alpha component of the color to fill the quadrant with.</param>
         public void FillQuadrant(Point c, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             FillQuadrant(c.X, c.Y, Radius, l, r, g, b, a);
         }
         #endregion
-        public void FillQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Fills a quarter of a circle.
+        /// </summary>
+        /// <param name="ox">The origin X position of the circle.</param>
+        /// <param name="oy">The origin Y position of the circle.</param>
+        /// <param name="Radius">The radius of the circle.</param>
+        /// <param name="l">The part of the circle to draw.</param>
+        /// <param name="r">The Red component of the color to fill the quadrant with.</param>
+        /// <param name="g">The Green component of the color to fill the quadrant with.</param>
+        /// <param name="b">The Blue component of the color to fill the quadrant with.</param>
+        /// <param name="a">The Alpha component of the color to fill the quadrant with.</param>
+        public virtual void FillQuadrant(int ox, int oy, int Radius, Location l, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             int x = Radius - 1;
@@ -397,44 +704,44 @@ namespace ODL
                 {
                     for (int i = ox + y; i <= ox + x; i++)
                     {
-                        SetPixel(i, oy - y, r, g, b, a, true);
+                        SetPixel(i, oy - y, r, g, b, a);
                     }
                     for (int i = oy - x; i <= oy - y; i++)
                     {
-                        SetPixel(ox + y, i, r, g, b, a, true);
+                        SetPixel(ox + y, i, r, g, b, a);
                     }
                 }
                 else if (l == Location.TopLeft) // 90 - 180
                 {
                     for (int i = ox - x; i <= ox - y; i++)
                     {
-                        SetPixel(i, oy - y, r, g, b, a, true);
+                        SetPixel(i, oy - y, r, g, b, a);
                     }
                     for (int i = oy - x; i <= oy - y; i++)
                     {
-                        SetPixel(ox - y, i, r, g, b, a, true);
+                        SetPixel(ox - y, i, r, g, b, a);
                     }
                 }
                 else if (l == Location.BottomLeft) // 180 - 270
                 {
                     for (int i = ox - x; i <= ox - y; i++)
                     {
-                        SetPixel(i, oy + y, r, g, b, a, true);
+                        SetPixel(i, oy + y, r, g, b, a);
                     }
                     for (int i = oy + y; i <= oy + x; i++)
                     {
-                        SetPixel(ox - y, i, r, g, b, a, true);
+                        SetPixel(ox - y, i, r, g, b, a);
                     }
                 }
                 else if (l == Location.BottomRight) // 270 - 360
                 {
                     for (int i = ox + y; i <= ox + x; i++)
                     {
-                        SetPixel(i, oy + y, r, g, b, a, true);
+                        SetPixel(i, oy + y, r, g, b, a);
                     }
                     for (int i = oy + y; i <= oy + x; i++)
                     {
-                        SetPixel(ox + y, i, r, g, b, a, true);
+                        SetPixel(ox + y, i, r, g, b, a);
                     }
                 }
                 if (err <= 0)
@@ -454,60 +761,169 @@ namespace ODL
         }
 
         #region DrawRect Overloads
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="r">The rectangle to draw.</param>
+        /// <param name="c">The color to draw the rectangle with.</param>
         public void DrawRect(Rect r, Color c)
         {
             DrawRect(r.X, r.Y, r.Width, r.Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="rect">The rectangle to draw.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
         public void DrawRect(Rect rect, byte r, byte g, byte b, byte a = 255)
         {
             DrawRect(rect.X, rect.Y, rect.Width, rect.Height, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="c">The color to draw the rectangle with.</param>
         public void DrawRect(Point Point, Size Size, Color c)
         {
             DrawRect(Point.X, Point.Y, Size.Width, Size.Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
         public void DrawRect(Point Point, Size Size, byte r, byte g, byte b, byte a = 255)
         {
             DrawRect(Point.X, Point.Y, Size.Width, Size.Height, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="c">The color to draw the rectangle with.</param>
         public void DrawRect(Point Point, int Width, int Height, Color c)
         {
             DrawRect(Point.X, Point.Y, Width, Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
         public void DrawRect(Point Point, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             DrawRect(Point.X, Point.Y, Width, Height, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="size">The size of the rectangle.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
         public void DrawRect(Size size, byte r, byte g, byte b, byte a = 255)
         {
             this.DrawRect(0, 0, size, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="size">The size of the rectangle.</param>
+        /// <param name="c">The color to draw the rectangle with.</param>
         public void DrawRect(Size size, Color c)
         {
             this.DrawRect(0, 0, size, c);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
         public void DrawRect(int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             this.DrawRect(0, 0, Width, Height, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="c">The color to draw the rectangle with.</param>
         public void DrawRect(int Width, int Height, Color c)
         {
             this.DrawRect(0, 0, Width, Height, c);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="c">The color of the rectangle to draw.</param>
         public void DrawRect(int X, int Y, Size Size, Color c)
         {
             DrawRect(X, Y, Size.Width, Size.Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
         public void DrawRect(int X, int Y, Size Size, byte r, byte g, byte b, byte a = 255)
         {
             DrawRect(X, Y, Size.Width, Size.Height, r, g, b, a);
         }
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="c">The color to draw the rectangle with.</param>
         public void DrawRect(int X, int Y, int Width, int Height, Color c)
         {
             DrawRect(X, Y, Width, Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
         #endregion
-        public void DrawRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Draws a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="r">The Red component of the color to draw the rectangle with.</param>
+        /// <param name="g">The Green component of the color to draw the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to draw the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to draw the rectangle with.</param>
+        public virtual void DrawRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             if (X < 0 || Y < 0)
@@ -526,60 +942,169 @@ namespace ODL
         }
 
         #region FillRect Overloads
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="r">The rectangle to fill.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(Rect r, Color c)
         {
             FillRect(r.X, r.Y, r.Width, r.Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="rect">The rectangle to fill.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
         public void FillRect(Rect rect, byte r, byte g, byte b, byte a = 255)
         {
             FillRect(rect.X, rect.Y, rect.Width, rect.Height, r, g, b, a);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(Point Point, Size Size, Color c)
         {
             FillRect(Point.X, Point.Y, Size.Width, Size.Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
         public void FillRect(Point Point, Size Size, byte r, byte g, byte b, byte a = 255)
         {
             FillRect(Point.X, Point.Y, Size.Width, Size.Height, r, g, b, a);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(Point Point, int Width, int Height, Color c)
         {
             FillRect(Point.X, Point.Y, Width, Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Point">The position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
         public void FillRect(Point Point, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             FillRect(Point.X, Point.Y, Width, Height, r, g, b, a);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="size">The size of the rectangle.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
         public void FillRect(Size size, byte r, byte g, byte b, byte a = 255)
         {
             this.FillRect(0, 0, size, r, g, b, a);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="size">The size of the rectangle.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(Size size, Color c)
         {
             this.FillRect(0, 0, size, c);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
         public void FillRect(int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             this.FillRect(0, 0, Width, Height, r, g, b, a);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(int Width, int Height, Color c)
         {
             this.FillRect(0, 0, Width, Height, c);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(int X, int Y, Size Size, Color c)
         {
             FillRect(X, Y, Size.Width, Size.Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Size">The size of the rectangle.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
         public void FillRect(int X, int Y, Size Size, byte r, byte g, byte b, byte a = 255)
         {
             FillRect(X, Y, Size.Width, Size.Height, r, g, b, a);
         }
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="c">The color to fill the rectangle with.</param>
         public void FillRect(int X, int Y, int Width, int Height, Color c)
         {
             FillRect(X, Y, Width, Height, c.Red, c.Green, c.Blue, c.Alpha);
         }
         #endregion
-        public void FillRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
+        /// <summary>
+        /// Fills a rectangle with a solid color.
+        /// </summary>
+        /// <param name="X">The X position of the rectangle.</param>
+        /// <param name="Y">The Y position of the rectangle.</param>
+        /// <param name="Width">The width of the rectangle.</param>
+        /// <param name="Height">The height of the rectangle.</param>
+        /// <param name="r">The Red component of the color to fill the rectangle with.</param>
+        /// <param name="g">The Green component of the color to fill the rectangle with.</param>
+        /// <param name="b">The Blue component of the color to fill the rectangle with.</param>
+        /// <param name="a">The Alpha component of the color to fill the rectangle with.</param>
+        public virtual void FillRect(int X, int Y, int Width, int Height, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
             if (X < 0 || Y < 0)
@@ -600,76 +1125,220 @@ namespace ODL
         }
 
         #region Build Overloads
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DestRect">The available rectangle in the destination bitmap to draw the source bitmap in.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(Rect DestRect, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(DestRect, SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DestRect">The available rectangle in the destination bitmap to draw the source bitmap in.</param>
+        /// <param name="SrcBitmap">The bitmap to be drawn.</param>
         public void Build(Rect DestRect, Bitmap SrcBitmap)
         {
             this.Build(DestRect, SrcBitmap, new Rect(0, 0, SrcBitmap.Width, SrcBitmap.Height));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DS">The size available for the source bitmap to be drawn.</param>
+        /// <param name="DestRect">The bitmap to be drawn on.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, Size DS, Bitmap SrcBitmap, Rect SrcRect)
         {
             this.Build(new Rect(DP, DS), SrcBitmap, SrcRect);
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DS">The size available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, Size DS, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(new Rect(DP, DS), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DWidth">The width available for the source bitmap to be drawn.</param>
+        /// <param name="DHeight">The height available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, int DWidth, int DHeight, Bitmap SrcBitmap, Rect SrcRect)
         {
             this.Build(new Rect(DP, DWidth, DHeight), SrcBitmap, SrcRect);
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DWidth">The width available for the source bitmap to be drawn.</param>
+        /// <param name="DHeight">The height available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, int DWidth, int DHeight, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(new Rect(DP, DWidth, DHeight), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DS">The size available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, Size DS, Bitmap SrcBitmap, Rect SrcRect)
         {
             this.Build(new Rect(DX, DY, DS), SrcBitmap, SrcRect);
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DS">The size available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, Size DS, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(new Rect(DX, DY, DS), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DWidth">The width available for the source bitmap to be drawn.</param>
+        /// <param name="DHeight">The height available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, int DWidth, int DHeight, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(new Rect(DX, DY, DWidth, DHeight), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DWidth">The width available for the source bitmap to be drawn.</param>
+        /// <param name="DHeight">The height available for the source bitmap to be drawn.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, int DWidth, int DHeight, Bitmap SrcBitmap, Rect SrcRect)
         {
             this.Build(new Rect(DX, DY, DWidth, DHeight), SrcBitmap, SrcRect);
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, Bitmap SrcBitmap, Rect SrcRect)
         {
             this.Build(new Rect(DP, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, SrcRect);
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(new Rect(DP, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, Bitmap SrcBitmap, Rect SrcRect)
         {
             this.Build(new Rect(DX, DY, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, SrcRect);
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SX">The X position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SY">The Y position of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SWidth">The width of the rectangle of the source bitmap to use for drawing.</param>
+        /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
             this.Build(new Rect(DX, DY, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DP">The position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
         public void Build(Point DP, Bitmap SrcBitmap)
         {
             this.Build(new Rect(DP, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(0, 0, SrcBitmap.Width, SrcBitmap.Height));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DX">The X position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="DY">The Y position in the destination bitmap to draw the source bitmap at.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
         public void Build(int DX, int DY, Bitmap SrcBitmap)
         {
             this.Build(new Rect(DX, DY, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(0, 0, SrcBitmap.Width, SrcBitmap.Height));
         }
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
         public void Build(Bitmap SrcBitmap)
         {
             this.Build(new Rect(0, 0, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(0, 0, SrcBitmap.Width, SrcBitmap.Height));
         }
         #endregion
-        public void Build(Rect DestRect, Bitmap SrcBitmap, Rect SrcRect)
+        /// <summary>
+        /// Blits the Source bitmap on top of the Destination bitmap.
+        /// </summary>
+        /// <param name="DestRect">The available rectangle in the destination bitmap to draw the source bitmap in.</param>
+        /// <param name="SrcBitmap">The bitmap to be overlayed.</param>
+        /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
+        public virtual void Build(Rect DestRect, Bitmap SrcBitmap, Rect SrcRect)
         {
             if (Locked) throw new BitmapLockedException();
             SDL_Rect Src = SrcRect.SDL_Rect;
@@ -677,11 +1346,23 @@ namespace ODL
             SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
         }
 
-        public Size TextSize(char Char, DrawOptions DrawOptions = 0)
+        /// <summary>
+        /// Returns the size the given character would take up when rendered.
+        /// </summary>
+        /// <param name="Char">The character to find the size of.</param>
+        /// <param name="DrawOptions">Additional options for drawing the character.</param>
+        /// <returns></returns>
+        public virtual Size TextSize(char Char, DrawOptions DrawOptions = 0)
         {
             return this.TextSize(Char.ToString(), DrawOptions);
         }
-        public Size TextSize(string Text, DrawOptions DrawOptions = 0)
+        /// <summary>
+        /// Returns the size the given text would take up when rendered.
+        /// </summary>
+        /// <param name="Text">The text to find the size of.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        /// <returns></returns>
+        public virtual Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
             IntPtr SDL_Font = this.Font.SDL_Font;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
@@ -691,28 +1372,79 @@ namespace ODL
         }
 
         #region DrawText Overloads
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="X">The X position to draw the text at.</param>
+        /// <param name="Y">The Y position to draw the text at.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public void DrawText(string Text, int X, int Y, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, X, Y, new Color(R, G, B, A), DrawOptions);
         }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="p">The position to draw the text at.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public void DrawText(string Text, Point p, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, p.X, p.Y, c, DrawOptions);
         }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="p">The position to draw the text at.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public void DrawText(string Text, Point p, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, p.X, p.Y, new Color(R, G, B, A), DrawOptions);
         }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public void DrawText(string Text, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, 0, 0, c, DrawOptions);
         }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public void DrawText(string Text, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             this.DrawText(Text, 0, 0, new Color(R, G, B, A), DrawOptions);
         }
         #endregion
-        public void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="X">The X position to draw the text at.</param>
+        /// <param name="Y">The Y position to draw the text at.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public virtual void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             if (Locked) throw new BitmapLockedException();
             if (this.Font == null)
@@ -763,7 +1495,7 @@ namespace ODL
             this.DrawGlyph(c, 0, 0, new Color(R, G, B, A), DrawOptions);
         }
         #endregion
-        public void DrawGlyph(char c, int X, int Y, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        public virtual void DrawGlyph(char c, int X, int Y, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
             if (Locked) throw new BitmapLockedException();
             if (this.Font == null)
@@ -791,116 +1523,10 @@ namespace ODL
             TextBitmap.Dispose();
         }
 
-        public void ApplyGlow(int Size, params Point[] _points)
-        {
-            List<Point> points = new List<Point>(_points);
-            Color glowcolor = null;
-            if (points.Count == 0) // Apply glow to whole bitmap
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        Color source = GetPixel(x, y);
-                        if (source.Alpha == 0) continue;
-                        if (glowcolor != null && (glowcolor.Red != source.Red || glowcolor.Green != source.Green || glowcolor.Blue != source.Blue))
-                        {
-                            throw new Exception("Can't glow image with different colors");
-                        }
-                        glowcolor = source;
-                        points.Add(new Point(x, y));
-                    }
-                }
-            }
-
-            List<object[]> pixels = new List<object[]>();
-
-            foreach (Point p in points)
-            {
-                for (int blury = p.Y - Size; blury < p.Y + Size; blury++)
-                {
-                    for (int blurx = p.X - Size; blurx < p.X + Size; blurx++)
-                    {
-                        double distance = Math.Sqrt(Math.Pow(p.X - blurx, 2) + Math.Pow(p.Y - blury, 2));
-                        if (distance > Size) continue;
-                        double factor = (Size - distance) / Size;
-                        pixels.Add(new object[] { blurx, blury, factor });
-                    }
-                }
-
-                /*for (int blurx = p.X - Size; blurx < p.X; blurx++)
-                {
-                    int xindex = blurx - (p.X - Size);
-                    if (blurx < 0 || blurx >= Width)
-                    {
-                        continue;
-                    }
-                    Color original = GetPixel(blurx, p.Y);
-                    double factor = (double) (xindex + 1) / (Size + 1);
-                    byte blur = Convert.ToByte(source.Alpha * factor);
-                    glowcolor = new Color(source.Red, source.Green, source.Blue, blur);
-
-                    pixels.Add(new object[] { blurx, p.Y, factor });
-                    pixels.Add(new object[] { p.X + Size - xindex, p.Y, factor });
-                    
-                    for (int i = 1; i < Size + 1; i++)
-                    {
-                        if (blurx + i <= p.X)
-                        {
-                            pixels.Add(new object[] { blurx + i, p.Y - i, factor });
-                            pixels.Add(new object[] { blurx + i, p.Y + i, factor });
-                            if (p.X + Size - xindex - i > p.X)
-                            {
-                                pixels.Add(new object[] { p.X + Size - xindex - i, p.Y - i, factor });
-                                pixels.Add(new object[] { p.X + Size - xindex - i, p.Y + i, factor });
-                            }
-                        }
-                    }
-                }*/
-            }
-
-            // Filter out duplicate points and copies the highest factor for a point to the final hash
-            Dictionary<Point, double> final = new Dictionary<Point, double>();
-            foreach (object[] o in pixels)
-            {
-                bool exists = false;
-                foreach (KeyValuePair<Point, double> kvp in final)
-                {
-                    if (kvp.Key.X == (int) o[0] && kvp.Key.Y == (int) o[1])
-                    {
-                        exists = true;
-                        if (kvp.Value < (double) o[2]) final[kvp.Key] = (double) o[2];
-                        break;
-                    }
-                }
-                if (!exists)
-                {
-                    final.Add(new Point((int) o[0], (int) o[1]), (double) o[2]);
-                }
-            }
-
-            // Draws the final coordinates
-            foreach (KeyValuePair<Point, double> kvp in final)
-            {
-                byte alpha = Convert.ToByte(Math.Round(255 * kvp.Value));
-                SetPixel(kvp.Key, new Color(glowcolor.Red, glowcolor.Green, glowcolor.Blue, alpha));
-            }
-        }
-
-        public static Color BlendColors(Color background, Color foreground)
-        {
-            byte r = Convert.ToByte(Math.Round(foreground.Red * foreground.AlphaFactor) + (background.Red * (1 - foreground.AlphaFactor)));
-            byte g = Convert.ToByte(Math.Round(foreground.Green * foreground.AlphaFactor) + (background.Green * (1 - foreground.AlphaFactor)));
-            byte b = Convert.ToByte(Math.Round(foreground.Blue * foreground.AlphaFactor) + (background.Blue * (1 - foreground.AlphaFactor)));
-            double afactor = foreground.AlphaFactor + (background.AlphaFactor * (1 - foreground.AlphaFactor));
-            byte a = Convert.ToByte(255 * afactor);
-            return new Color(r, g, b, a);
-        }
-
         /// <summary>
         /// Locks the bitmap and converts the surface to a texture. The bitmap can no longer be modified until unlocked.
         /// </summary>
-        public void Lock()
+        public virtual void Lock()
         {
             if (Locked) throw new BitmapLockedException();
             this.Locked = true;
@@ -910,7 +1536,7 @@ namespace ODL
         /// <summary>
         /// Unlocks the bitmap, allowing you to modify the bitmap until locked again.
         /// </summary>
-        public void Unlock()
+        public virtual void Unlock()
         {
             if (!Locked) throw new Exception("Bitmap was already unlocked and cannot be unlocked again.");
             this.Locked = false;

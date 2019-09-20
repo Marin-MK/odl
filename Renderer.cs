@@ -28,7 +28,7 @@ namespace ODL
         {
             if (this.ForcedUpdate)
             {
-                Graphics.Log("=====================");
+                Graphics.Log("\n=====================");
                 Graphics.Log("START Rendering");
                 long l1 = Stopwatch.GetTimestamp();
                 SDL_RenderClear(this.SDL_Renderer);
@@ -86,6 +86,7 @@ namespace ODL
                 SDL_RenderPresent(this.SDL_Renderer);
                 this.ForcedUpdate = false;
                 Graphics.Log("FINISHED rendering");
+                Graphics.Log("=====================\n");
             }
         }
 
@@ -101,7 +102,7 @@ namespace ODL
             {
                 Points = new List<Point>() { new Point(s.X, s.Y) };
             }
-            else // Multiple positions
+            else // Multiple positions; used to prevent the need for hundreds of identical sprites that only differ in position (e.g. in a background grid)
             {
                 Graphics.Log("Has multiple positions");
                 Points = s.MultiplePositions;
@@ -109,7 +110,7 @@ namespace ODL
 
             SDL_Rect Src = new SDL_Rect();
             SDL_Rect Dest = new SDL_Rect();
-            if (s.Bitmap is Bitmap)
+            if (!(s.Bitmap is SolidBitmap))
             {
                 Src = s.SrcRect.SDL_Rect;
 
@@ -124,18 +125,18 @@ namespace ODL
                 else Dest.h = (int) Math.Round(Src.h * s.ZoomY);
                 Graphics.Log("Bitmap");
             }
-            else if (s.Bitmap is SolidBitmap)
+            else // If s.Bitmap is SolidBitmap
             {
                 Src.x = 0;
                 Src.y = 0;
                 Src.w = 1;
                 Src.h = 1;
-                Dest.w = s.Bitmap.Width;
-                Dest.h = s.Bitmap.Height;
+                Dest.w = (s.Bitmap as SolidBitmap).BitmapWidth;
+                Dest.h = (s.Bitmap as SolidBitmap).BitmapHeight;
                 Graphics.Log("SolidBitmap");
             }
 
-            if (!s.Bitmap.Locked)
+            if (!s.Bitmap.Locked && !(s.Bitmap is SolidBitmap))
             {
                 Graphics.Log("ERR: Bitmap is locked");
                 throw new Exception("Bitmap not locked for writing - can't render it");

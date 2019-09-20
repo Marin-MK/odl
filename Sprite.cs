@@ -12,8 +12,8 @@ namespace ODL
         public string Filename { get; }
         private Rect _SrcRect;
         public Rect SrcRect { get { return _SrcRect; } set { this._SrcRect = value; this.Viewport.ForceUpdate(); } }
-        private IBitmap _Bitmap;
-        public IBitmap Bitmap
+        private Bitmap _Bitmap;
+        public Bitmap Bitmap
         {
             get { return _Bitmap; }
             set {
@@ -70,7 +70,7 @@ namespace ODL
             this.SrcRect = new Rect(this.Bitmap.Width, this.Bitmap.Height);
         }
 
-        public Sprite(Viewport Viewport, IBitmap bmp)
+        public Sprite(Viewport Viewport, Bitmap bmp)
             : this(Viewport)
         {
             this.Bitmap = bmp;

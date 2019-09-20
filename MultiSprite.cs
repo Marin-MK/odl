@@ -10,7 +10,7 @@ namespace ODL
         public string Name { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public string Filename { get { throw new MethodNotSupportedException(this); } }
         public Rect SrcRect { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
-        public IBitmap Bitmap { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
+        public Bitmap Bitmap { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public int X { get; set; }
         public int Y { get; set; }
         public int Z { get; set; }
@@ -35,7 +35,7 @@ namespace ODL
             this.Viewport = viewport;
         }
 
-        public void AddBitmap(string Name, IBitmap bmp, int X = 0, int Y = 0)
+        public void AddBitmap(string Name, Bitmap bmp, int X = 0, int Y = 0)
         {
             Sprite s = new Sprite(this.Viewport);
             s.Bitmap = bmp;

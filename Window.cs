@@ -12,7 +12,7 @@ namespace ODL
         /// </summary>
         public Viewport Viewport { get; protected set; }
         /// <summary>
-        /// The pointer to the SDL_Window struct.
+        /// The pointer to the SDL_Window object.
         /// </summary>
         public IntPtr SDL_Window { get; protected set; }
         /// <summary>
@@ -414,12 +414,8 @@ namespace ODL
             this.BackgroundViewport.Height = e.Height;
             this.TopViewport.Width = e.Width;
             this.TopViewport.Height = e.Height;
-            BackgroundSprite.Bitmap.Unlock();
             (BackgroundSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
-            BackgroundSprite.Bitmap.Lock();
-            TopSprite.Bitmap.Unlock();
             (TopSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
-            TopSprite.Bitmap.Lock();
             UpdateSize();
         }
 
@@ -472,9 +468,7 @@ namespace ODL
             this.BackgroundColor = c;
             if (Initialized())
             {
-                BackgroundSprite.Bitmap.Unlock();
                 (BackgroundSprite.Bitmap as SolidBitmap).SetColor(c);
-                BackgroundSprite.Bitmap.Lock();
             }
         }
     }

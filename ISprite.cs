@@ -12,7 +12,7 @@ namespace ODL
         Viewport Viewport { get; }
         string Filename { get; }
         Rect SrcRect { get; set; }
-        IBitmap Bitmap { get; set; }
+        Bitmap Bitmap { get; set; }
         int X { get; set; }
         int Y { get; set; }
         int Z { get; set; }
