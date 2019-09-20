@@ -18,6 +18,10 @@ namespace ODL
         public bool Disposed { get; protected set; } = false;
         private bool _Visible = true;
         public bool Visible { get { return _Visible; } set { _Visible = value; ForceUpdate(); } }
+        private double _ZoomX = 1;
+        public double ZoomX { get { return _ZoomX; } set { this._ZoomX = value; this.ForceUpdate(); } }
+        private double _ZoomY = 1;
+        public double ZoomY { get { return _ZoomY; } set { this._ZoomY = value; this.ForceUpdate(); } }
         public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
 
         #region Constructor Overloads

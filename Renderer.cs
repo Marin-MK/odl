@@ -48,7 +48,7 @@ namespace ODL
                     }
                     else if (vp.Visible && vp.Width > 0 && vp.Height > 0 && vp.Sprites.Count > 0)
                     {
-                        Graphics.Log("Drawing Viewport " + i.ToString());
+                        Graphics.Log("Drawing Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : ""));
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
                         ViewportRect.x = vp.X;
@@ -57,6 +57,7 @@ namespace ODL
                         if (vp.Height == -1) vp.Height = ViewportRect.h;
                         ViewportRect.w = vp.Width;
                         ViewportRect.h = vp.Height;
+                        SDL_RenderSetScale(SDL_Renderer, (float) vp.ZoomX, (float) vp.ZoomY);
                         SDL_RenderSetViewport(this.SDL_Renderer, ref ViewportRect);
                         Graphics.Log($"Viewport rect set to ({ViewportRect.x},{ViewportRect.y},{ViewportRect.w},{ViewportRect.h})");
                         Graphics.Log("Sprite count " + vp.Sprites.Count.ToString());
@@ -90,10 +91,10 @@ namespace ODL
 
         public void RenderSprite(Sprite s)
         {
-            Graphics.Log("Rendering sprite");
+            Graphics.Log("Rendering sprite" + (!string.IsNullOrEmpty(s.Name) ? ": " + s.Name : ""));
             IntPtr Texture = s.Bitmap.Texture;
             SDL_SetTextureColorMod(Texture, s.Color.Red, s.Color.Green, s.Color.Blue);
-            SDL_SetTextureAlphaMod(Texture, s.Color.Alpha);
+            SDL_SetTextureAlphaMod(Texture, Convert.ToByte(255d * ((s.Color.Alpha / 255d) * (s.Opacity / 255d))));
 
             List<Point> Points;
             if (s.MultiplePositions.Count == 0) // Normal X,Y positions
@@ -139,7 +140,6 @@ namespace ODL
                 Graphics.Log("ERR: Bitmap is locked");
                 throw new Exception("Bitmap not locked for writing - can't render it");
             }
-
             foreach (Point p in Points)
             {
                 Dest.x = p.X - s.OX;

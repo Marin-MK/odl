@@ -27,6 +27,7 @@ namespace ODL
         int OY { get; set; }
         Color Color { get; set; }
         List<Point> MultiplePositions { get; set; }
+        byte Opacity { get; set; }
 
         void Update();
 

@@ -40,7 +40,7 @@ namespace ODL
             }
             if (Width > Graphics.MaxTextureSize.Width || Height > Graphics.MaxTextureSize.Height)
             {
-                throw new Exception($"Invalid Bitmap size ({Width},{Height}) -- maximum size is ({Graphics.MaxTextureSize.Width},{Graphics.MaxTextureSize.Height})");
+                throw new Exception($"Bitmap ({Width},{Height}) exceeded maximum possible texture size ({Graphics.MaxTextureSize.Width},{Graphics.MaxTextureSize.Height})");
             }
             this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
@@ -514,7 +514,7 @@ namespace ODL
             {
                 throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
             }
-            if (X + Width >= this.Width || Y + Height >= this.Height)
+            if (X + Width > this.Width || Y + Height > this.Height)
             {
                 throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
             }
@@ -586,9 +586,13 @@ namespace ODL
             {
                 throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
             }
-            if (X + Width - 1 >= this.Width || Y + Height - 1 >= this.Height)
+            if (X >= this.Width || Y >= this.Height)
             {
                 throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            }
+            if (X + Width - 1 >= this.Width || Y + Height - 1 >= this.Height)
+            {
+                throw new Exception($"Invalid rectangle ({X},{Y},{Width},{Height}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
             }
             SDL_Rect Rect = new Rect(X, Y, Width, Height).SDL_Rect;
             SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
@@ -734,6 +738,7 @@ namespace ODL
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
+            SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
         }
 
         #region DrawGlyph Overloads
@@ -786,6 +791,112 @@ namespace ODL
             TextBitmap.Dispose();
         }
 
+        public void ApplyGlow(int Size, params Point[] _points)
+        {
+            List<Point> points = new List<Point>(_points);
+            Color glowcolor = null;
+            if (points.Count == 0) // Apply glow to whole bitmap
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int x = 0; x < Width; x++)
+                    {
+                        Color source = GetPixel(x, y);
+                        if (source.Alpha == 0) continue;
+                        if (glowcolor != null && (glowcolor.Red != source.Red || glowcolor.Green != source.Green || glowcolor.Blue != source.Blue))
+                        {
+                            throw new Exception("Can't glow image with different colors");
+                        }
+                        glowcolor = source;
+                        points.Add(new Point(x, y));
+                    }
+                }
+            }
+
+            List<object[]> pixels = new List<object[]>();
+
+            foreach (Point p in points)
+            {
+                for (int blury = p.Y - Size; blury < p.Y + Size; blury++)
+                {
+                    for (int blurx = p.X - Size; blurx < p.X + Size; blurx++)
+                    {
+                        double distance = Math.Sqrt(Math.Pow(p.X - blurx, 2) + Math.Pow(p.Y - blury, 2));
+                        if (distance > Size) continue;
+                        double factor = (Size - distance) / Size;
+                        pixels.Add(new object[] { blurx, blury, factor });
+                    }
+                }
+
+                /*for (int blurx = p.X - Size; blurx < p.X; blurx++)
+                {
+                    int xindex = blurx - (p.X - Size);
+                    if (blurx < 0 || blurx >= Width)
+                    {
+                        continue;
+                    }
+                    Color original = GetPixel(blurx, p.Y);
+                    double factor = (double) (xindex + 1) / (Size + 1);
+                    byte blur = Convert.ToByte(source.Alpha * factor);
+                    glowcolor = new Color(source.Red, source.Green, source.Blue, blur);
+
+                    pixels.Add(new object[] { blurx, p.Y, factor });
+                    pixels.Add(new object[] { p.X + Size - xindex, p.Y, factor });
+                    
+                    for (int i = 1; i < Size + 1; i++)
+                    {
+                        if (blurx + i <= p.X)
+                        {
+                            pixels.Add(new object[] { blurx + i, p.Y - i, factor });
+                            pixels.Add(new object[] { blurx + i, p.Y + i, factor });
+                            if (p.X + Size - xindex - i > p.X)
+                            {
+                                pixels.Add(new object[] { p.X + Size - xindex - i, p.Y - i, factor });
+                                pixels.Add(new object[] { p.X + Size - xindex - i, p.Y + i, factor });
+                            }
+                        }
+                    }
+                }*/
+            }
+
+            // Filter out duplicate points and copies the highest factor for a point to the final hash
+            Dictionary<Point, double> final = new Dictionary<Point, double>();
+            foreach (object[] o in pixels)
+            {
+                bool exists = false;
+                foreach (KeyValuePair<Point, double> kvp in final)
+                {
+                    if (kvp.Key.X == (int) o[0] && kvp.Key.Y == (int) o[1])
+                    {
+                        exists = true;
+                        if (kvp.Value < (double) o[2]) final[kvp.Key] = (double) o[2];
+                        break;
+                    }
+                }
+                if (!exists)
+                {
+                    final.Add(new Point((int) o[0], (int) o[1]), (double) o[2]);
+                }
+            }
+
+            // Draws the final coordinates
+            foreach (KeyValuePair<Point, double> kvp in final)
+            {
+                byte alpha = Convert.ToByte(Math.Round(255 * kvp.Value));
+                SetPixel(kvp.Key, new Color(glowcolor.Red, glowcolor.Green, glowcolor.Blue, alpha));
+            }
+        }
+
+        public static Color BlendColors(Color background, Color foreground)
+        {
+            byte r = Convert.ToByte(Math.Round(foreground.Red * foreground.AlphaFactor) + (background.Red * (1 - foreground.AlphaFactor)));
+            byte g = Convert.ToByte(Math.Round(foreground.Green * foreground.AlphaFactor) + (background.Green * (1 - foreground.AlphaFactor)));
+            byte b = Convert.ToByte(Math.Round(foreground.Blue * foreground.AlphaFactor) + (background.Blue * (1 - foreground.AlphaFactor)));
+            double afactor = foreground.AlphaFactor + (background.AlphaFactor * (1 - foreground.AlphaFactor));
+            byte a = Convert.ToByte(255 * afactor);
+            return new Color(r, g, b, a);
+        }
+
         /// <summary>
         /// Locks the bitmap and converts the surface to a texture. The bitmap can no longer be modified until unlocked.
         /// </summary>
@@ -808,8 +919,11 @@ namespace ODL
         public void RecreateTexture()
         {
             if (this.Renderer == null) return;
+            SDL_BlendMode blend;
+            SDL_GetTextureBlendMode(this.Texture, out blend);
             if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
             this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
+            if (blend != SDL_BlendMode.SDL_BLENDMODE_NONE) SDL_SetTextureBlendMode(this.Texture, blend);
             this.Renderer.Update();
         }
     }

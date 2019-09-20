@@ -38,8 +38,6 @@ namespace ODL
                 Screens.Add(new Rect(r));
             }
             SDL_StopTextInput();
-            // Scale linearly instead of nearest neighbour
-            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
         }
 
         public static void Log(string Msg)
@@ -86,6 +84,12 @@ namespace ODL
         public static int GetHeight(int screen = 0)
         {
             return Screens[screen].Height;
+        }
+
+        public static void SetCursor(Bitmap CursorBitmap, int OriginX = 0, int OriginY = 0)
+        {
+            IntPtr cursor = SDL_CreateColorCursor(CursorBitmap.Surface, OriginX, OriginY);
+            SDL_SetCursor(cursor);
         }
 
         private static int OldMouseX = -1;

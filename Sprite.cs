@@ -51,6 +51,8 @@ namespace ODL
         public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
         private List<Point> _MultiplePositions = new List<Point>();
         public List<Point> MultiplePositions { get { return _MultiplePositions; } set { this._MultiplePositions = value; this.Viewport.ForceUpdate(); } }
+        private byte _Opacity = 255;
+        public byte Opacity { get { return _Opacity; } set { this._Opacity = value; this.Viewport.ForceUpdate(); } }
 
         public Sprite(Viewport Viewport, string Filename)
             : this(Viewport)

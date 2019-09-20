@@ -28,6 +28,7 @@ namespace ODL
         public byte Green;
         public byte Blue;
         public byte Alpha = 255;
+        public double AlphaFactor { get { return (double)Alpha / 255d; } }
 
         public Color(byte Red, byte Green, byte Blue, byte Alpha = 255)
         {
