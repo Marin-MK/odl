@@ -62,6 +62,7 @@ namespace ODL
         public bool OldMiddleButton { get; }
         public bool MiddleButton { get; }
         public int WheelY { get; }
+        public bool Handled = false;
 
         public MouseEventArgs(int OldX, int OldY, int X, int Y,
                 bool OldLeftButton, bool LeftButton,
