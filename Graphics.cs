@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -18,6 +19,7 @@ namespace ODL
         public static List<Renderer> Renderers = new List<Renderer>();
         public static Size MaxTextureSize;
         public static bool DebugLog = false;
+        public static MouseEventArgs LastMouseEvent;
 
         public static void Start()
         {
@@ -42,7 +44,12 @@ namespace ODL
 
         public static void Log(string Msg)
         {
-            if (DebugLog) Console.WriteLine("ODL:DEBUG: " + Msg);
+            if (DebugLog)
+            {
+                DateTime n = DateTime.Now;
+                string str = $"{n.Minute}min {n.Second}s {n.Millisecond}ms ODL:DEBUG: " + Msg;
+                Console.WriteLine(str);
+            }
         }
 
         static void Render()
@@ -106,6 +113,11 @@ namespace ODL
         public static bool CanUpdate()
         {
             return Windows.Count(w => w != null) > 0;
+        }
+
+        public static void Sleep(long milliseconds)
+        {
+            SDL_Delay(Convert.ToUInt32(milliseconds));
         }
 
         public static void Update()

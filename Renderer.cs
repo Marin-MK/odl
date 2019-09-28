@@ -28,16 +28,15 @@ namespace ODL
         {
             if (this.ForcedUpdate)
             {
-                Graphics.Log("\n=====================");
-                Graphics.Log("START Rendering");
+                Graphics.Log("=====================");
+                Graphics.Log("START render cycle");
                 long l1 = Stopwatch.GetTimestamp();
                 SDL_RenderClear(this.SDL_Renderer);
-                Graphics.Log("Viewports count " + this.Viewports.Count.ToString());
+                Graphics.Log("Viewport count: " + this.Viewports.Count.ToString());
                 this.Viewports.Sort(delegate (Viewport vp1, Viewport vp2) {
                     if (vp1.Z != vp2.Z) return vp1.Z.CompareTo(vp2.Z);
                     return vp1.TimeCreated.CompareTo(vp2.TimeCreated);
                 });
-                Graphics.Log("Viewports sorted");
                 for (int i = 0; i < Viewports.Count; i++)
                 {
                     Viewport vp = Viewports[i];
@@ -48,7 +47,7 @@ namespace ODL
                     }
                     else if (vp.Visible && vp.Width > 0 && vp.Height > 0 && vp.Sprites.Count > 0)
                     {
-                        Graphics.Log("Drawing Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : ""));
+                        Graphics.Log("Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : "") + $" ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
                         ViewportRect.x = vp.X;
@@ -59,14 +58,11 @@ namespace ODL
                         ViewportRect.h = vp.Height;
                         SDL_RenderSetScale(SDL_Renderer, (float) vp.ZoomX, (float) vp.ZoomY);
                         SDL_RenderSetViewport(this.SDL_Renderer, ref ViewportRect);
-                        Graphics.Log($"Viewport rect set to ({ViewportRect.x},{ViewportRect.y},{ViewportRect.w},{ViewportRect.h})");
-                        Graphics.Log("Sprite count " + vp.Sprites.Count.ToString());
                         vp.Sprites.Sort(delegate (Sprite s1, Sprite s2) 
                         {
                             if (s1.Z != s2.Z) return s1.Z.CompareTo(s2.Z);
                             return s1.TimeCreated.CompareTo(s2.TimeCreated);
                         });
-                        Graphics.Log("Sprites sorted");
                         for (int j = 0; j < vp.Sprites.Count; j++)
                         {
                             Sprite s = vp.Sprites[j];
@@ -77,22 +73,23 @@ namespace ODL
                             }
                             else if (s.Visible)
                             {
-                                if (s.Bitmap != null) RenderSprite(s);
+                                if (s.Bitmap != null && !s.Bitmap.Disposed) RenderSprite(s);
                             }
                         }
+                        Graphics.Log("");
                     }
                 }
                 Graphics.Log("Presenting renderer");
                 SDL_RenderPresent(this.SDL_Renderer);
                 this.ForcedUpdate = false;
-                Graphics.Log("FINISHED rendering");
-                Graphics.Log("=====================\n");
+                Graphics.Log("FINISHED render cycle");
+                Graphics.Log("=====================\n\n");
             }
         }
 
         public void RenderSprite(Sprite s)
         {
-            Graphics.Log("Rendering sprite" + (!string.IsNullOrEmpty(s.Name) ? ": " + s.Name : ""));
+            Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? s.Name + " " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({s.Bitmap.Width},{s.Bitmap.Height}) ox: {s.OX} oy: {s.OY}");
             IntPtr Texture = s.Bitmap.Texture;
             SDL_SetTextureColorMod(Texture, s.Color.Red, s.Color.Green, s.Color.Blue);
             SDL_SetTextureAlphaMod(Texture, Convert.ToByte(255d * ((s.Color.Alpha / 255d) * (s.Opacity / 255d))));
@@ -104,7 +101,7 @@ namespace ODL
             }
             else // Multiple positions; used to prevent the need for hundreds of identical sprites that only differ in position (e.g. in a background grid)
             {
-                Graphics.Log("Has multiple positions");
+                Graphics.Log("Multiple positions!");
                 Points = s.MultiplePositions;
             }
 
@@ -123,7 +120,6 @@ namespace ODL
                 else Dest.w = (int) Math.Round(Src.w * s.ZoomX);
                 if (s.ZoomY == 1) Dest.h = Src.h;
                 else Dest.h = (int) Math.Round(Src.h * s.ZoomY);
-                Graphics.Log("Bitmap");
             }
             else // If s.Bitmap is SolidBitmap
             {
@@ -133,7 +129,6 @@ namespace ODL
                 Src.h = 1;
                 Dest.w = (s.Bitmap as SolidBitmap).BitmapWidth;
                 Dest.h = (s.Bitmap as SolidBitmap).BitmapHeight;
-                Graphics.Log("SolidBitmap");
             }
 
             if (!s.Bitmap.Locked && !(s.Bitmap is SolidBitmap))
@@ -149,7 +144,6 @@ namespace ODL
                 if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
                 {
                     SDL_RenderCopy(this.SDL_Renderer, Texture, ref Src, ref Dest);
-                    Graphics.Log("Rendered successfully");
                 }
                 else
                 {
@@ -162,7 +156,6 @@ namespace ODL
                     if (s.MirrorY) MirrorState |= SDL_RendererFlip.SDL_FLIP_VERTICAL;
 
                     SDL_RenderCopyEx(this.SDL_Renderer, Texture, ref Src, ref Dest, s.Angle % 360, ref Center, MirrorState);
-                    Graphics.Log("Rendered special successfully");
                 }
                 // Don't destroy the texture as it can be reused next render
             }

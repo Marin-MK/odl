@@ -1542,6 +1542,15 @@ namespace ODL
             this.Locked = false;
         }
 
+        /// <summary>
+        /// Saves the current bitmap to a file as a PNG.
+        /// </summary>
+        /// <param name="filename">The filename to save the bitmap as.</param>
+        public void SaveToPNG(string filename)
+        {
+            SDL2.SDL_image.IMG_SavePNG(Surface, filename);
+        }
+
         public void RecreateTexture()
         {
             if (this.Renderer == null) return;

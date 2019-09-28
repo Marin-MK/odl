@@ -81,6 +81,7 @@ namespace ODL
             this.OldMiddleButton = OldMiddleButton;
             this.MiddleButton = MiddleButton;
             this.WheelY = WheelY;
+            Graphics.LastMouseEvent = this;
         }
 
         public bool Over(Sprite s)
@@ -187,6 +188,18 @@ namespace ODL
         public ConditionEventArgs(bool DefaultValue = true)
         {
             this.ConditionValue = DefaultValue;
+        }
+    }
+
+    public class DirectionEventArgs : EventArgs
+    {
+        public bool Up;
+        public bool Down;
+
+        public DirectionEventArgs(bool Up, bool Down)
+        {
+            this.Up = Up;
+            this.Down = Down;
         }
     }
 }
