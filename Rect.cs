@@ -5,11 +5,26 @@ namespace ODL
 {
     public class Rect
     {
+        /// <summary>
+        /// The x position of the rectangle.
+        /// </summary>
         public int X { get { return SDL_Rect.x; } set { this._SDL_Rect.x = value; } }
+        /// <summary>
+        /// The y position of the rectangle.
+        /// </summary>
         public int Y { get { return SDL_Rect.y; } set { this._SDL_Rect.y = value; } }
+        /// <summary>
+        /// The width of the rectangle.
+        /// </summary>
         public int Width { get { return SDL_Rect.w; } set { this._SDL_Rect.w = value; } }
+        /// <summary>
+        /// The height of the rectangle.
+        /// </summary>
         public int Height { get { return SDL_Rect.h; } set { this._SDL_Rect.h = value; } }
         private SDL_Rect _SDL_Rect;
+        /// <summary>
+        /// The SDL_Rect object associated with the rectangle.
+        /// </summary>
         public SDL_Rect SDL_Rect { get { return _SDL_Rect; } }
 
         public Rect(Point p, Size s)
@@ -42,6 +57,21 @@ namespace ODL
             this._SDL_Rect = r;
         }
 
+        /// <summary>
+        /// Returns whether the given point is within the rectangle boundaries.
+        /// </summary>
+        /// <param name="p">The point to test.</param>
+        /// <returns></returns>
+        public bool Contains(Point p)
+        {
+            return Contains(p.X, p.Y);
+        }
+        /// <summary>
+        /// Returns whether the given point is within the rectangle boundaries.
+        /// </summary>
+        /// <param name="X">The x position to test.</param>
+        /// <param name="Y">The y position to test.</param>
+        /// <returns></returns>
         public bool Contains(int X, int Y)
         {
             return X >= this.X && X < this.X + this.Width && Y >= this.Y && Y < this.Y + this.Height;

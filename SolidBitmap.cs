@@ -30,10 +30,20 @@ namespace ODL
             this.BitmapHeight = Height;
         }
 
+        /// <summary>
+        /// Sets the color of the bitmap.
+        /// </summary>
+        /// <param name="r">The Red component of the bitmap color.</param>
+        /// <param name="g">The Blue component of the bitmap color.</param>
+        /// <param name="b">The Green component of the bitmap color.</param>
+        /// <param name="a">The Alpha component of the bitmap color.</param>
         public void SetColor(byte r, byte g, byte b, byte a = 255)
         {
             this.SetColor(new Color(r, g, b, a));
         }
+        /// <summary>
+        /// Sets the color of the bitmap.
+        /// </summary>
         public void SetColor(Color c)
         {
             this.Color = c;
@@ -44,18 +54,26 @@ namespace ODL
             Marshal.WriteByte(SurfaceObject.pixels, 3, c.Alpha);
             this.RecreateTexture();
             this.Locked = true;
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
+        /// <summary>
+        /// Sets the size of the bitmap.
+        /// </summary>
         public void SetSize(Size size)
         {
             this.SetSize(size.Width, size.Height);
         }
+        /// <summary>
+        /// Sets the size of the bitmap.
+        /// </summary>
+        /// <param name="Width">The width of the bitmap.</param>
+        /// <param name="Height">The height of the bitmap.</param>
         public void SetSize(int Width, int Height)
         {
             this.BitmapWidth = Width;
             this.BitmapHeight = Height;
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         public override string ToString()
@@ -73,7 +91,7 @@ namespace ODL
                 this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
                 this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
                 this.Color = Color.ALPHA;
-                if (this.Renderer != null) this.Renderer.ForceUpdate();
+                if (this.Renderer != null) this.Renderer.Update();
             }
         }
 

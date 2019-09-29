@@ -7,11 +7,23 @@ namespace ODL
 {
     public class Renderer : IDisposable
     {
+        /// <summary>
+        /// The list of viewports associated with the renderer.
+        /// </summary>
         public List<Viewport> Viewports = new List<Viewport>();
+        /// <summary>
+        /// The pointer to the SDL_Renderer object.
+        /// </summary>
         public IntPtr SDL_Renderer;
+        /// <summary>
+        /// Whether the renderer is disposed.
+        /// </summary>
         public bool Disposed = false;
 
-        private bool ForcedUpdate = false;
+        /// <summary>
+        /// Whether the renderer needs to re-render.
+        /// </summary>
+        bool NeedUpdate = false;
 
         public Renderer(IntPtr SDL_Renderer)
         {
@@ -19,14 +31,20 @@ namespace ODL
             Graphics.RegisterRenderer(this);
         }
 
-        public void Update(bool Force = true)
+        /// <summary>
+        /// Forces a re-render.
+        /// </summary>
+        public void Update()
         {
-            if (Force) this.ForcedUpdate = true;
+            NeedUpdate = true;
         }
 
+        /// <summary>
+        /// Re-renders the entire screen.
+        /// </summary>
         public void UpdateGraphics()
         {
-            if (this.ForcedUpdate)
+            if (NeedUpdate)
             {
                 Graphics.Log("=====================");
                 Graphics.Log("START render cycle");
@@ -81,12 +99,16 @@ namespace ODL
                 }
                 Graphics.Log("Presenting renderer");
                 SDL_RenderPresent(this.SDL_Renderer);
-                this.ForcedUpdate = false;
+                NeedUpdate = false;
                 Graphics.Log("FINISHED render cycle");
                 Graphics.Log("=====================\n\n");
             }
         }
 
+        /// <summary>
+        /// Renders an individual sprite.
+        /// </summary>
+        /// <param name="s">The sprite to render.</param>
         public void RenderSprite(Sprite s)
         {
             Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? s.Name + " " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({s.Bitmap.Width},{s.Bitmap.Height}) ox: {s.OX} oy: {s.OY}");
@@ -161,11 +183,9 @@ namespace ODL
             }
         }
 
-        public void ForceUpdate()
-        {
-            this.ForcedUpdate = true;
-        }
-
+        /// <summary>
+        /// Disposes the renderer and the associated viewports.
+        /// </summary>
         public void Dispose()
         {
             for (int i = 0; i < Viewports.Count; i++)

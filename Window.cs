@@ -397,7 +397,7 @@ namespace ODL
 
         public void Window_Tick(object sender, EventArgs e)
         {
-            this.Renderer.Update(false);
+            this.Renderer.Update();
         }
 
         private void Window_FocusGained(object sender, FocusEventArgs e) { }

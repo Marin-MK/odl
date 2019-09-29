@@ -46,7 +46,7 @@ namespace ODL
             s.Visible = this.Visible;
             this.SpriteList.Add(Name, s);
             this.Viewport.Sprites.Add(s);
-            this.Viewport.ForceUpdate();
+            this.Viewport.Update();
         }
 
         public void RemoveBitmap(string Name)
@@ -54,7 +54,7 @@ namespace ODL
             Sprite s = this.SpriteList[Name];
             this.SpriteList.Remove(Name);
             this.Viewport.Sprites.Remove(s);
-            this.Viewport.ForceUpdate();
+            this.Viewport.Update();
         }
 
         public void Update()

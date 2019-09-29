@@ -106,7 +106,7 @@ namespace ODL
                 SDL_DestroyTexture(this.Texture);
             }
             this.Disposed = true;
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         public override string ToString()
@@ -127,7 +127,7 @@ namespace ODL
                 this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
                 this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
                 this.RecreateTexture();
-                if (this.Renderer != null) this.Renderer.ForceUpdate();
+                if (this.Renderer != null) this.Renderer.Update();
             }
         }
 
@@ -190,7 +190,7 @@ namespace ODL
             Marshal.WriteByte(SurfaceObject.pixels, Offset + 1, g);
             Marshal.WriteByte(SurfaceObject.pixels, Offset + 2, e ? b : r);
             Marshal.WriteByte(SurfaceObject.pixels, Offset + 3, a);
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region GetPixel Overloads
@@ -342,7 +342,7 @@ namespace ODL
                 int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
                 if (x >= 0) SetPixel(x, y, r, g, b, a);
             }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region DrawLines Overloads
@@ -461,7 +461,7 @@ namespace ODL
                     err += dx - (Radius << 1);
                 }
             }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region FillCircle
@@ -541,7 +541,7 @@ namespace ODL
                     err += dx - (Radius << 1);
                 }
             }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region DrawQuadrant Overloads
@@ -637,7 +637,7 @@ namespace ODL
                     err += dx - (Radius << 1);
                 }
             }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region FillQuadrant Overloads
@@ -757,7 +757,7 @@ namespace ODL
                     err += dx - (Radius << 1);
                 }
             }
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region DrawRect Overloads
@@ -938,7 +938,7 @@ namespace ODL
             DrawLine(X, Y, X, Y + Height - 1, r, g, b, a);
             DrawLine(X, Y + Height - 1, X + Width - 1, Y + Height - 1, r, g, b, a);
             DrawLine(X + Width - 1, Y, X + Width - 1, Y + Height - 1, r, g, b, a);
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region FillRect Overloads
@@ -1121,7 +1121,7 @@ namespace ODL
             }
             SDL_Rect Rect = new Rect(X, Y, Width, Height).SDL_Rect;
             SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
-            if (this.Renderer != null) this.Renderer.ForceUpdate();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region Build Overloads
@@ -1351,17 +1351,15 @@ namespace ODL
         /// </summary>
         /// <param name="Char">The character to find the size of.</param>
         /// <param name="DrawOptions">Additional options for drawing the character.</param>
-        /// <returns></returns>
         public virtual Size TextSize(char Char, DrawOptions DrawOptions = 0)
         {
             return this.TextSize(Char.ToString(), DrawOptions);
         }
         /// <summary>
-        /// Returns the size the given text would take up when rendered.
+        /// Returns the size the given string would take up when rendered.
         /// </summary>
-        /// <param name="Text">The text to find the size of.</param>
-        /// <param name="DrawOptions">Additional options for drawing the text.</param>
-        /// <returns></returns>
+        /// <param name="Text">The string to find the size of.</param>
+        /// <param name="DrawOptions">Additional options for drawing the string.</param>
         public virtual Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
             IntPtr SDL_Font = this.Font.SDL_Font;
@@ -1551,6 +1549,9 @@ namespace ODL
             SDL2.SDL_image.IMG_SavePNG(Surface, filename);
         }
 
+        /// <summary>
+        /// Converts the SDL_Surface to an SDL_Texture used when rendering.
+        /// </summary>
         public void RecreateTexture()
         {
             if (this.Renderer == null) return;

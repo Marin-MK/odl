@@ -14,13 +14,34 @@ namespace ODL
 {
     public static class Graphics
     {
+        /// <summary>
+        /// The list of active windows.
+        /// </summary>
         public static List<Window> Windows = new List<Window>();
+        /// <summary>
+        /// The list of screen rectangles.
+        /// </summary>
         public static List<Rect> Screens = new List<Rect>();
+        /// <summary>
+        /// The list of active renderers.
+        /// </summary>
         public static List<Renderer> Renderers = new List<Renderer>();
+        /// <summary>
+        /// The maximum size of an SDL_Texture.
+        /// </summary>
         public static Size MaxTextureSize;
+        /// <summary>
+        /// Whether the debug log should be printed to the console.
+        /// </summary>
         public static bool DebugLog = false;
+        /// <summary>
+        /// The last used MouseEventArgs object.
+        /// </summary>
         public static MouseEventArgs LastMouseEvent;
 
+        /// <summary>
+        /// Initializes SDL and its components.
+        /// </summary>
         public static void Start()
         {
             if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
@@ -42,6 +63,9 @@ namespace ODL
             SDL_StopTextInput();
         }
 
+        /// <summary>
+        /// Logs a message to the debug log.
+        /// </summary>
         public static void Log(string Msg)
         {
             if (DebugLog)
@@ -52,7 +76,10 @@ namespace ODL
             }
         }
 
-        static void Render()
+        /// <summary>
+        /// Updates all renderers.
+        /// </summary>
+        private static void Render()
         {
             while (true)
             {
@@ -63,36 +90,66 @@ namespace ODL
             }
         }
 
+        /// <summary>
+        /// Registers a new Window object.
+        /// </summary>
+        /// <param name="w">The window to register.</param>
         public static void AddWindow(Window w)
         {
             Windows.Add(w);
         }
 
+        /// <summary>
+        /// Returns whether a screen exists at the given index.
+        /// </summary>
+        /// <param name="screen">The screen index to look for.</param>
         public static bool ScreenExists(int screen)
         {
             return screen < Screens.Count;
         }
 
+        /// <summary>
+        /// Returns the width of the screen the Window is on.
+        /// </summary>
+        /// <param name="w">The window to determine the screen of.</param>
         public static int GetWidth(Window w)
         {
             int screen = SDL_GetWindowDisplayIndex(w.SDL_Window);
             return GetWidth(screen);
         }
+        /// <summary>
+        /// Returns the width of the screen at the given index.
+        /// </summary>
+        /// <param name="screen">The screen index to find the width of.</param>
         public static int GetWidth(int screen = 0)
         {
             return Screens[screen].Width;
         }
 
+        /// <summary>
+        /// Returns the height of the screen the Window is on.
+        /// </summary>
+        /// <param name="w">The window to determine the height of.</param>
         public static int GetHeight(Window w)
         {
             int screen = SDL_GetWindowDisplayIndex(w.SDL_Window);
             return GetHeight(screen);
         }
+        /// <summary>
+        /// Returns the height of the screen at the given index.
+        /// </summary>
+        /// <param name="screen">The screen index to find the height of.</param>
         public static int GetHeight(int screen = 0)
         {
             return Screens[screen].Height;
         }
 
+        /// <summary>
+        /// Replaces the mouse cursor with a custom bitmap.
+        /// </summary>
+        /// <param name="CursorBitmap">The bitmap to use for the mouse cursor.</param>
+        /// <param name="OriginX">The origin x position of the bitmap.</param>
+        /// <param name="OriginY">The origin y position of the bitmap.</param>
         public static void SetCursor(Bitmap CursorBitmap, int OriginX = 0, int OriginY = 0)
         {
             IntPtr cursor = SDL_CreateColorCursor(CursorBitmap.Surface, OriginX, OriginY);
@@ -105,21 +162,35 @@ namespace ODL
         private static bool MiddleDown = false;
         private static bool RightDown = false;
 
+        /// <summary>
+        /// Registers a new Renderer object.
+        /// </summary>
+        /// <param name="Renderer">The renderer to register.</param>
         public static void RegisterRenderer(Renderer Renderer)
         {
             Renderers.Add(Renderer);
         }
 
+        /// <summary>
+        /// Returns whether there are windows to update.
+        /// </summary>
         public static bool CanUpdate()
         {
             return Windows.Count(w => w != null) > 0;
         }
 
+        /// <summary>
+        /// Delays the main thread for the given timespan.
+        /// </summary>
+        /// <param name="milliseconds">The number of milliseconds to delay the main thread for.</param>
         public static void Sleep(long milliseconds)
         {
             SDL_Delay(Convert.ToUInt32(milliseconds));
         }
 
+        /// <summary>
+        /// Updates all windows.
+        /// </summary>
         public static void Update()
         {
             // Old mouse states
@@ -302,6 +373,9 @@ namespace ODL
             }
         }
 
+        /// <summary>
+        /// Disposes SDL and all components.
+        /// </summary>
         public static void Stop()
         {
             for (int i = 0; i < Font.Cache.Count; i++)
