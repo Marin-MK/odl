@@ -18,7 +18,7 @@ namespace ODL
         /// <summary>
         /// The rectangle within the bitmap displayed when rendered.
         /// </summary>
-        public Rect SrcRect { get { return _SrcRect; } set { this._SrcRect = value; Viewport.Update(); } }
+        public Rect SrcRect { get { return _SrcRect; } set { if (value != _SrcRect) Viewport.Update(); _SrcRect = value; } }
         private Bitmap _Bitmap;
         /// <summary>
         /// The bitmap associated with the sprite.
@@ -37,27 +37,27 @@ namespace ODL
         /// <summary>
         /// The x position of the sprite.
         /// </summary>
-        public int X { get { return _X; } set { this._X = value; Viewport.Update(); } }
+        public int X { get { return _X; } set { if (value != _X) Viewport.Update(); _X = value; } }
         private int _Y = 0;
         /// <summary>
         /// The y position of the sprite.
         /// </summary>
-        public int Y { get { return _Y; } set { this._Y = value; Viewport.Update(); } }
+        public int Y { get { return _Y; } set { if (value != _Y) Viewport.Update(); _Y = value; } }
         private int _Z = 0;
         /// <summary>
         /// The z index of the sprite.
         /// </summary>
-        public int Z { get { return _Z; } set { this._Z = value; Viewport.Update(); } }
+        public int Z { get { return _Z; } set { if (value != _Z) Viewport.Update(); _Z = value; } }
         private double _ZoomX = 1;
         /// <summary>
         /// The horizontal zoom factor of the sprite.
         /// </summary>
-        public double ZoomX { get { return _ZoomX; } set { this._ZoomX = value; Viewport.Update(); } }
+        public double ZoomX { get { return _ZoomX; } set { if (value != _ZoomX) Viewport.Update(); _ZoomX = value; } }
         private double _ZoomY = 1;
         /// <summary>
         /// The vertical zoom factor of the sprite.
         /// </summary>
-        public double ZoomY { get { return _ZoomY; } set { this._ZoomY = value; Viewport.Update(); } }
+        public double ZoomY { get { return _ZoomY; } set { if (value != _ZoomY) Viewport.Update(); _ZoomY = value; } }
         /// <summary>
         /// Whether the sprite is disposed.
         /// </summary>
@@ -66,37 +66,37 @@ namespace ODL
         /// <summary>
         /// Whether the sprite is visible.
         /// </summary>
-        public bool Visible { get { return _Visible; } set { this._Visible = value; Viewport.Update(); } }
+        public bool Visible { get { return _Visible; } set { if (value != _Visible) Viewport.Update(); _Visible = value; } }
         private int _Angle = 0;
         /// <summary>
         /// The angle at which the sprite is rendered.
         /// </summary>
-        public int Angle { get { return _Angle; } set { this._Angle = value; Viewport.Update(); } }
+        public int Angle { get { return _Angle; } set { if (value != _Angle) Viewport.Update(); _Angle = value; } }
         private bool _MirrorX = false;
         /// <summary>
         /// Whether the sprite is mirrored horizontally.
         /// </summary>
-        public bool MirrorX { get { return _MirrorX; } set { this._MirrorX = value; Viewport.Update(); } }
+        public bool MirrorX { get { return _MirrorX; } set { if (value != _MirrorX) Viewport.Update(); _MirrorX = value; } }
         private bool _MirrorY = false;
         /// <summary>
         /// Whether the sprite is mirrored vertically.
         /// </summary>
-        public bool MirrorY { get { return _MirrorY; } set { this._MirrorY = value; Viewport.Update(); } }
+        public bool MirrorY { get { return _MirrorY; } set { if (value != _MirrorY) Viewport.Update(); _MirrorY = value; } }
         private int _OX = 0;
         /// <summary>
         /// The origin x position of the sprite.
         /// </summary>
-        public int OX { get { return _OX; } set { this._OX = value; Viewport.Update(); } }
+        public int OX { get { return _OX; } set { if (value != _OX) Viewport.Update(); _OX = value; } }
         private int _OY = 0;
         /// <summary>
         /// The origin y position of the sprite.
         /// </summary>
-        public int OY { get { return _OY; } set { this._OY = value; Viewport.Update(); } }
+        public int OY { get { return _OY; } set { if (value != _OY) Viewport.Update(); _OY = value; } }
         private Color _Color = new Color(255, 255, 255, 255);
         /// <summary>
         /// The color of the sprite.
         /// </summary>
-        public Color Color { get { return _Color; } set { this._Color = value; Viewport.Update(); } }
+        public Color Color { get { return _Color; } set { if (value != _Color) Viewport.Update(); _Color = value; } }
         /// <summary>
         /// The timestamp at which the sprite was created.
         /// </summary>
@@ -105,12 +105,12 @@ namespace ODL
         /// <summary>
         /// The list of additional positions to render the sprite at.
         /// </summary>
-        public List<Point> MultiplePositions { get { return _MultiplePositions; } set { this._MultiplePositions = value; Viewport.Update(); } }
+        public List<Point> MultiplePositions { get { return _MultiplePositions; } set { if (value != _MultiplePositions) Viewport.Update(); _MultiplePositions = value; } }
         private byte _Opacity = 255;
         /// <summary>
         /// The opacity at which the sprite is rendered.
         /// </summary>
-        public byte Opacity { get { return _Opacity; } set { this._Opacity = value; Viewport.Update(); } }
+        public byte Opacity { get { return _Opacity; } set { if (value != _Opacity) Viewport.Update(); _Opacity = value; } }
 
         public Sprite(Viewport Viewport, string Filename)
             : this(Viewport)

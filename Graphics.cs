@@ -63,6 +63,16 @@ namespace ODL
             SDL_StopTextInput();
         }
 
+        public static void StartLog()
+        {
+            DebugLog = true;
+        }
+
+        public static void StopLog()
+        {
+            DebugLog = false;
+        }
+
         /// <summary>
         /// Logs a message to the debug log.
         /// </summary>
@@ -85,7 +95,7 @@ namespace ODL
             {
                 for (int i = 0; i < Renderers.Count; i++)
                 {
-                    lock (Renderers[i]) { Renderers[i].UpdateGraphics(); }
+                    lock (Renderers[i]) { Renderers[i].UpdateImmediately(); }
                 }
             }
         }
@@ -218,7 +228,7 @@ namespace ODL
             // Updates the renderers
             for (int i = 0; i < Renderers.Count; i++)
             {
-                Renderers[i].UpdateGraphics();
+                Renderers[i].UpdateImmediately();
             }
 
             // Get events
@@ -241,7 +251,7 @@ namespace ODL
                     switch (e.window.windowEvent)
                     {
                         case SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
-                            ClosingEventArgs ClosingArgs = new ClosingEventArgs();
+                            CancelEventArgs ClosingArgs = new CancelEventArgs();
                             w.OnClosing.Invoke(w, ClosingArgs);
                             if (!ClosingArgs.Cancel)
                             {

@@ -12,17 +12,13 @@ namespace ODL
         }
     }
 
-    public class ClosingEventArgs : EventArgs
+    public class CancelEventArgs : EventArgs
     {
-        public Exception Error { get; } = null;
         public bool Cancel = false;
-        public bool CausedByException { get { return this.Error != null; } }
 
-        public ClosingEventArgs() { }
-
-        public ClosingEventArgs(Exception Error)
+        public CancelEventArgs(bool Cancel = false)
         {
-            this.Error = Error;
+            this.Cancel = Cancel;
         }
     }
 

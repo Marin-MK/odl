@@ -18,18 +18,21 @@ namespace ODL
         /// The sprites inside the viewport.
         /// </summary>
         public List<Sprite> Sprites = new List<Sprite>();
+        private int _X = 0;
         /// <summary>
         /// The x position of the viewport.
         /// </summary>
-        public int X = 0;
+        public int X { get { return _X; } set { if (value != _X) Update(); _X = value; } }
+        private int _Y = 0;
         /// <summary>
         /// The y position of the viewport.
         /// </summary>
-        public int Y = 0;
+        public int Y { get { return _Y; } set { if (value != _Y) Update(); _Y = value; } }
+        private int _Z = 0;
         /// <summary>
         /// The z index of the viewport.
         /// </summary>
-        public int Z = 0;
+        public int Z { get { return _Z; } set { if (value != _Z) Update(); _Z = value; } }
         /// <summary>
         /// The width of the viewport.
         /// </summary>
@@ -50,17 +53,17 @@ namespace ODL
         /// <summary>
         /// Whether the viewport is visible.
         /// </summary>
-        public bool Visible { get { return _Visible; } set { _Visible = value; Update(); } }
+        public bool Visible { get { return _Visible; } set { if (value != _Visible) Update(); _Visible = value; } }
         private double _ZoomX = 1;
         /// <summary>
         /// The horizontal zoom factor of the viewport.
         /// </summary>
-        public double ZoomX { get { return _ZoomX; } set { this._ZoomX = value; Update(); } }
+        public double ZoomX { get { return _ZoomX; } set { if (value != _ZoomX) Update(); _ZoomX = value; } }
         private double _ZoomY = 1;
         /// <summary>
         /// The vertical zoom factor of the viewport.
         /// </summary>
-        public double ZoomY { get { return _ZoomY; } set { this._ZoomY = value; Update(); } }
+        public double ZoomY { get { return _ZoomY; } set { if (value != _ZoomY) Update(); _ZoomY = value; } }
         /// <summary>
         /// The timestamp at which the viewport was created.
         /// </summary>

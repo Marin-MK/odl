@@ -42,10 +42,12 @@ namespace ODL
         /// <summary>
         /// Re-renders the entire screen.
         /// </summary>
-        public void UpdateGraphics()
+        public void UpdateImmediately()
         {
             if (NeedUpdate)
             {
+                Random r = new Random();
+                Console.WriteLine("Rendering (" + r.Next().ToString() + ")");
                 Graphics.Log("=====================");
                 Graphics.Log("START render cycle");
                 long l1 = Stopwatch.GetTimestamp();
@@ -65,7 +67,7 @@ namespace ODL
                     }
                     else if (vp.Visible && vp.Width > 0 && vp.Height > 0 && vp.Sprites.Count > 0)
                     {
-                        Graphics.Log("Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : "") + $" ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
+                        Graphics.Log("Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : "") + $" z={vp.Z} ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
                         ViewportRect.x = vp.X;

@@ -90,7 +90,7 @@ namespace ODL
         /// The event called whenever the window is about to close.
         /// This event can cancel the close event.
         /// </summary>
-        public EventHandler<ClosingEventArgs> OnClosing;
+        public EventHandler<CancelEventArgs> OnClosing;
         /// <summary>
         /// The event called when the window has been closed.
         /// </summary>
@@ -147,7 +147,7 @@ namespace ODL
         {
             this.Parent = Parent;
             this.OnLoaded = new EventHandler<TimeEventArgs>(Window_Loaded);
-            this.OnClosing = new EventHandler<ClosingEventArgs>(Window_Closing);
+            this.OnClosing = new EventHandler<CancelEventArgs>(Window_Closing);
             this.OnClosed = new EventHandler<ClosedEventArgs>(Window_Closed);
             this.OnMouseMoving = new EventHandler<MouseEventArgs>(Window_MouseMoving);
             this.OnMouseDown = new EventHandler<MouseEventArgs>(Window_MouseDown);
@@ -205,7 +205,7 @@ namespace ODL
             BackgroundSprite.Bitmap = new SolidBitmap(this.Width, this.Height, this.BackgroundColor);
 
             TopViewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
-            TopViewport.Z = 1000;
+            TopViewport.Z = -1;
             TopViewport.Name = "Top Viewport";
             TopSprite = new Sprite(TopViewport, new SolidBitmap(this.Width, this.Height, Color.BLACK));
             TopSprite.Z = 999999999;
@@ -376,7 +376,7 @@ namespace ODL
             SDL_RaiseWindow(this.SDL_Window);
         }
 
-        public void Window_Closing(object sender, ClosingEventArgs e) { }
+        public void Window_Closing(object sender, CancelEventArgs e) { }
 
         public void Window_Closed(object sender, ClosedEventArgs e)
         {
@@ -397,7 +397,7 @@ namespace ODL
 
         public void Window_Tick(object sender, EventArgs e)
         {
-            this.Renderer.Update();
+            
         }
 
         private void Window_FocusGained(object sender, FocusEventArgs e) { }
@@ -443,7 +443,7 @@ namespace ODL
         /// </summary>
         public void Close()
         {
-            ClosingEventArgs e = new ClosingEventArgs();
+            CancelEventArgs e = new CancelEventArgs();
             this.OnClosing.Invoke(this, e);
             if (!e.Cancel)
             {
