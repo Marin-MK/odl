@@ -46,8 +46,6 @@ namespace ODL
         {
             if (NeedUpdate)
             {
-                Random r = new Random();
-                Console.WriteLine("Rendering (" + r.Next().ToString() + ")");
                 Graphics.Log("=====================");
                 Graphics.Log("START render cycle");
                 long l1 = Stopwatch.GetTimestamp();

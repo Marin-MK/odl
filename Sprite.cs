@@ -28,9 +28,12 @@ namespace ODL
             get { return _Bitmap; }
             set {
                 this._Bitmap = value;
-                value.Renderer = this.Viewport.Renderer;
-                value.RecreateTexture();
-                this.SrcRect = new Rect(value.Width, value.Height);
+                if (value != null)
+                {
+                    value.Renderer = this.Viewport.Renderer;
+                    value.RecreateTexture();
+                    this.SrcRect = new Rect(value.Width, value.Height);
+                }
             }
         }
         private int _X = 0;

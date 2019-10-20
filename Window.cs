@@ -76,6 +76,17 @@ namespace ODL
         /// The inner background color of the window.
         /// </summary>
         public Color BackgroundColor { get; protected set; } = new Color(0, 0, 0);
+        /// <summary>
+        /// Whether or not the window is maximized.
+        /// </summary>
+        public bool Maximized
+        {
+            get
+            {
+                SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(SDL_Window);
+                return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) == SDL_WindowFlags.SDL_WINDOW_MAXIMIZED;
+            }
+        }
 
         protected Sprite BackgroundSprite;
         protected Viewport BackgroundViewport;
@@ -184,8 +195,8 @@ namespace ODL
             {
                 SDL_SetWindowIcon(this.SDL_Window, this.Icon.Surface);
             }
-            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE));
-
+            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE | SDL_RendererFlags.SDL_RENDERER_ACCELERATED));
+            
             if (Graphics.MaxTextureSize == null)
             {
                 SDL_RendererInfo info;
@@ -328,6 +339,7 @@ namespace ODL
         /// </summary>
         public void SetPosition(int X, int Y)
         {
+            if (Maximized) return;
             this.X = X + Graphics.Screens[this.Screen].X;
             this.Y = Y + Graphics.Screens[this.Screen].Y;
             if (Initialized())

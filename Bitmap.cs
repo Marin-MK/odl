@@ -1449,7 +1449,7 @@ namespace ODL
             {
                 throw new Exception("No Font specified for this Bitmap.");
             }
-            if (Text == "") return;
+            if (string.IsNullOrEmpty(Text)) return;
             IntPtr SDL_Font = this.Font.SDL_Font;
             bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
             bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
