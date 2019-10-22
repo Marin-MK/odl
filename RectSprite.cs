@@ -14,9 +14,9 @@ namespace ODL
         public Color InnerColor { get; protected set; }
         public int Thickness { get; protected set; }
         private int _X = 0;
-        public int X { get { return _X; } set { _X = value; UpdateSprites(); } }
+        public new int X { get { return _X; } set { _X = value; UpdateSprites(); } }
         private int _Y = 0;
-        public int Y { get { return _Y; } set { _Y = value; UpdateSprites(); } }
+        public new int Y { get { return _Y; } set { _Y = value; UpdateSprites(); } }
         private SolidBitmap TopBmp;
         private SolidBitmap LeftBmp;
         private SolidBitmap RightBmp;
