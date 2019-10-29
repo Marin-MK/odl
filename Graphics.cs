@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
 using static SDL2.SDL_ttf;
@@ -63,16 +59,6 @@ namespace ODL
             SDL_StopTextInput();
         }
 
-        public static void StartLog()
-        {
-            DebugLog = true;
-        }
-
-        public static void StopLog()
-        {
-            DebugLog = false;
-        }
-
         /// <summary>
         /// Logs a message to the debug log.
         /// </summary>
@@ -84,6 +70,20 @@ namespace ODL
                 string str = $"{n.Minute}min {n.Second}s {n.Millisecond}ms ODL:DEBUG: " + Msg;
                 Console.WriteLine(str);
             }
+        }
+
+        /// <summary>
+        /// Returns the current OS.
+        /// </summary>
+        public static Platform GetPlatform()
+        {
+            string p = SDL_GetPlatform();
+            if (p == "Windows") return Platform.Windows;
+            if (p == "Linux") return Platform.Linux;
+            if (p == "Mac OS X") return Platform.MacOS;
+            if (p == "iOS") return Platform.IOS;
+            if (p == "Android") return Platform.Android;
+            return Platform.Unknown;
         }
 
         /// <summary>
@@ -398,5 +398,15 @@ namespace ODL
             SDL_Quit();
             TTF_Quit();
         }
+    }
+
+    public enum Platform
+    {
+        Unknown,
+        Windows,
+        Linux,
+        MacOS,
+        IOS,
+        Android
     }
 }
