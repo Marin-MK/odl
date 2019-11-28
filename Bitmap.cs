@@ -54,7 +54,8 @@ namespace ODL
         {
             if (!System.IO.File.Exists(Filename))
             {
-                throw new System.IO.FileNotFoundException($"File could not be found -- {Filename}");
+                if (System.IO.File.Exists(Filename + ".png")) Filename += ".png";
+                else throw new System.IO.FileNotFoundException($"File could not be found -- {Filename}");
             }
             this.Surface = SDL2.SDL_image.IMG_Load(Filename);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
