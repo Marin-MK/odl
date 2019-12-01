@@ -349,11 +349,13 @@ namespace ODL
                             Input.Register(sym1, true);
                             string txt = "";
                             bool backspace = false;
+                            bool delete = false;
                             if (sym1 == SDL_Keycode.SDLK_RETURN) txt = "\n";
                             if (sym1 == SDL_Keycode.SDLK_BACKSPACE) backspace = true;
-                            if (txt.Length > 0 || backspace)
+                            if (sym1 == SDL_Keycode.SDLK_DELETE) delete = true;
+                            if (txt.Length > 0 || backspace || delete)
                             {
-                                w.OnTextInput.Invoke(w, new TextInputEventArgs(txt, backspace));
+                                w.OnTextInput.Invoke(w, new TextInputEventArgs(txt, backspace, delete));
                             }
                             break;
                         case SDL_EventType.SDL_KEYUP:

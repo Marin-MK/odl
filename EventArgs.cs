@@ -131,11 +131,13 @@ namespace ODL
     {
         public string Text { get; }
         public bool Backspace { get; }
+        public bool Delete { get; }
 
-        public TextInputEventArgs(string Text, bool Backspace = false)
+        public TextInputEventArgs(string Text, bool Backspace = false, bool Delete = false)
         {
             this.Text = Text;
             this.Backspace = Backspace;
+            this.Delete = Delete;
         }
     }
 
