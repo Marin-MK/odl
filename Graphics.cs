@@ -34,6 +34,10 @@ namespace ODL
         /// The last used MouseEventArgs object.
         /// </summary>
         public static MouseEventArgs LastMouseEvent;
+        /// <summary>
+        /// The last custom cursor that was set.
+        /// </summary>
+        public static IntPtr LastCustomCursor;
 
         /// <summary>
         /// Initializes SDL and its components.
@@ -152,18 +156,6 @@ namespace ODL
         public static int GetHeight(int screen = 0)
         {
             return Screens[screen].Height;
-        }
-
-        /// <summary>
-        /// Replaces the mouse cursor with a custom bitmap.
-        /// </summary>
-        /// <param name="CursorBitmap">The bitmap to use for the mouse cursor.</param>
-        /// <param name="OriginX">The origin x position of the bitmap.</param>
-        /// <param name="OriginY">The origin y position of the bitmap.</param>
-        public static void SetCursor(Bitmap CursorBitmap, int OriginX = 0, int OriginY = 0)
-        {
-            IntPtr cursor = SDL_CreateColorCursor(CursorBitmap.Surface, OriginX, OriginY);
-            SDL_SetCursor(cursor);
         }
 
         private static int OldMouseX = -1;

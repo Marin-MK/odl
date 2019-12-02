@@ -1354,7 +1354,7 @@ namespace ODL
         /// <param name="DrawOptions">Additional options for drawing the character.</param>
         public virtual Size TextSize(char Char, DrawOptions DrawOptions = 0)
         {
-            return this.TextSize(Char.ToString(), DrawOptions);
+            return Font.TextSize(Char, DrawOptions);
         }
         /// <summary>
         /// Returns the size the given string would take up when rendered.
@@ -1363,11 +1363,7 @@ namespace ODL
         /// <param name="DrawOptions">Additional options for drawing the string.</param>
         public virtual Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
-            IntPtr SDL_Font = this.Font.SDL_Font;
-            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
-            int w, h;
-            TTF_SizeText(SDL_Font, Text, out w, out h);
-            return new Size(w, h);
+            return Font.TextSize(Text, DrawOptions);
         }
 
         #region DrawText Overloads

@@ -49,8 +49,8 @@ namespace ODL
     {
         public int OldX { get; }
         public int OldY { get; }
-        public int X { get; }
-        public int Y { get; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public bool OldLeftButton { get; }
         public bool LeftButton { get; }
         public bool OldRightButton { get; }

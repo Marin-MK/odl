@@ -6,8 +6,8 @@ namespace ODL
 {
     public static class Input
     {
-        public static IntPtr CursorSurface = IntPtr.Zero;
-        public static SDL_SystemCursor SystemCursor;
+        public static IntPtr Cursor;
+        public static SDL_SystemCursor? SystemCursor;
 
         public static List<long> OldKeysDown = new List<long>();
         public static List<long> KeysDown = new List<long>();
@@ -61,14 +61,33 @@ namespace ODL
         {
             if (SystemCursor != Cursor)
             {
-                if (CursorSurface != IntPtr.Zero)
-                {
-                    SDL_FreeCursor(CursorSurface);
-                }
-                CursorSurface = SDL_CreateSystemCursor(Cursor);
+                IntPtr surface = SDL_CreateSystemCursor(Cursor);
                 SystemCursor = Cursor;
-                SDL_SetCursor(CursorSurface);
+                SDL_SetCursor(surface);
             }
+        }
+        /// <summary>
+        /// Replaces the mouse cursor with a custom bitmap.
+        /// </summary>
+        /// <param name="CursorBitmap">The bitmap to use for the mouse cursor.</param>
+        /// <param name="OriginX">The origin x position of the bitmap.</param>
+        /// <param name="OriginY">The origin y position of the bitmap.</param>
+        public static void SetCursor(Bitmap CursorBitmap, int OriginX = 0, int OriginY = 0)
+        {
+            IntPtr cursor = SDL_CreateColorCursor(CursorBitmap.Surface, OriginX, OriginY);
+            Graphics.LastCustomCursor = cursor;
+            SystemCursor = null;
+            SDL_SetCursor(cursor);
+        }
+        /// <summary>
+        /// Replaces the mouse cursor with a different cursor.
+        /// </summary>
+        /// <param name="Cursor">Pointer to the SDL_Cursor object.</param>
+        public static void SetCursor(IntPtr Cursor)
+        {
+            SystemCursor = null;
+            Graphics.LastCustomCursor = Cursor;
+            SDL_SetCursor(Cursor);
         }
     }
 }

@@ -43,6 +43,12 @@ namespace ODL
         /// <param name="DrawOptions">Additional options for drawing the character.</param>
         public Size TextSize(char Char, DrawOptions DrawOptions = 0)
         {
+            if (Char == ' ')
+            {
+                Size total = TextSize("a a", DrawOptions);
+                Size nospace = TextSize("aa", DrawOptions);
+                return new Size(total.Width - nospace.Width, total.Height - nospace.Height);
+            }
             IntPtr SDL_Font = this.SDL_Font;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             int minx, maxx, miny, maxy, adv;
@@ -56,6 +62,7 @@ namespace ODL
         /// <param name="DrawOptions">Additional options for drawing the string.</param>
         public Size TextSize(string Text, DrawOptions DrawOptions = 0)
         {
+            if (Text.Length == 1) return TextSize(Convert.ToChar(Text), DrawOptions);
             IntPtr SDL_Font = this.SDL_Font;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             int w, h;
