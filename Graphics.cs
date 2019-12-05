@@ -178,7 +178,7 @@ namespace ODL
         /// </summary>
         public static bool CanUpdate()
         {
-            return Windows.Count(w => w != null) > 0;
+            return Windows.Count(w => w != null && !w.Disposed) > 0;
         }
 
         /// <summary>
