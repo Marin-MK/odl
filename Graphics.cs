@@ -77,20 +77,6 @@ namespace ODL
         }
 
         /// <summary>
-        /// Returns the current OS.
-        /// </summary>
-        public static Platform GetPlatform()
-        {
-            string p = SDL_GetPlatform();
-            if (p == "Windows") return Platform.Windows;
-            if (p == "Linux") return Platform.Linux;
-            if (p == "Mac OS X") return Platform.MacOS;
-            if (p == "iOS") return Platform.IOS;
-            if (p == "Android") return Platform.Android;
-            return Platform.Unknown;
-        }
-
-        /// <summary>
         /// Updates all renderers.
         /// </summary>
         private static void Render()
@@ -392,15 +378,5 @@ namespace ODL
             SDL_Quit();
             TTF_Quit();
         }
-    }
-
-    public enum Platform
-    {
-        Unknown,
-        Windows,
-        Linux,
-        MacOS,
-        IOS,
-        Android
     }
 }

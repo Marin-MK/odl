@@ -200,4 +200,15 @@ namespace ODL
             this.Down = Down;
         }
     }
+
+    public class FetchEventArgs : EventArgs
+    {
+        public object Value;
+
+        public FetchEventArgs() { }
+        public FetchEventArgs(object Value)
+        {
+            this.Value = Value;
+        }
+    }
 }
