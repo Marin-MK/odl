@@ -20,7 +20,7 @@ namespace ODL
         /// <summary>
         /// A fully transparent color.
         /// </summary>
-        public static Color ALPHA = new Color(255, 255, 255, 0);
+        public static Color ALPHA = new Color(0, 0, 0, 0);
         /// <summary>
         /// A solid black color.
         /// </summary>

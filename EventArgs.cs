@@ -211,4 +211,41 @@ namespace ODL
             this.Value = Value;
         }
     }
+
+    public class PointEventArgs : EventArgs
+    {
+        public int X;
+        public int Y;
+        public bool LeftButton;
+        public bool RightButton;
+        public bool MiddleButton;
+
+        public PointEventArgs(int X, int Y, bool LeftButton = false, bool RightButton = false, bool MiddleButton = false)
+        {
+            this.X = X;
+            this.Y = Y;
+            this.LeftButton = LeftButton;
+            this.RightButton = RightButton;
+            this.MiddleButton = MiddleButton;
+        }
+
+        public PointEventArgs(Point p, bool LeftButton = false, bool RightButton = false, bool MiddleButton = false)
+        {
+            this.X = p.X;
+            this.Y = p.Y;
+            this.LeftButton = LeftButton;
+            this.RightButton = RightButton;
+            this.MiddleButton = MiddleButton;
+        }
+    }
+
+    public class ObjectEventArgs : EventArgs
+    {
+        public object Value;
+
+        public ObjectEventArgs(object Value)
+        {
+            this.Value = Value;
+        }
+    }
 }

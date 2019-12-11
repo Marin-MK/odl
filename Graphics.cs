@@ -179,7 +179,7 @@ namespace ODL
         /// <summary>
         /// Updates all windows.
         /// </summary>
-        public static void Update()
+        public static void Update(bool IgnoreErrors = false)
         {
             // Old mouse states
             bool oldleftdown = LeftDown;
@@ -189,14 +189,33 @@ namespace ODL
             // Update all the windows
             Windows.ForEach(w =>
             {
-                if (w != null) w.OnTick.Invoke(w, new EventArgs());
-                if (w.Focus && (LeftDown || MiddleDown || RightDown))
+                if (IgnoreErrors)
                 {
-                    w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                            OldMouseX, OldMouseY,
-                                            oldleftdown, LeftDown,
-                                            oldrightdown, RightDown,
-                                            oldmiddledown, MiddleDown));
+                    try
+                    {
+                        if (w != null) w.OnTick.Invoke(w, new EventArgs());
+                        if (w.Focus && (LeftDown || MiddleDown || RightDown))
+                        {
+                            w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                                    OldMouseX, OldMouseY,
+                                                    oldleftdown, LeftDown,
+                                                    oldrightdown, RightDown,
+                                                    oldmiddledown, MiddleDown));
+                        }
+                    }
+                    catch (Exception) { }
+                }
+                else
+                {
+                    if (w != null) w.OnTick.Invoke(w, new EventArgs());
+                    if (w.Focus && (LeftDown || MiddleDown || RightDown))
+                    {
+                        w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
+                                                OldMouseX, OldMouseY,
+                                                oldleftdown, LeftDown,
+                                                oldrightdown, RightDown,
+                                                oldmiddledown, MiddleDown));
+                    }
                 }
             });
 
