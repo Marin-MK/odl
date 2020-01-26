@@ -187,8 +187,9 @@ namespace ODL
             bool oldmiddledown = MiddleDown;
 
             // Update all the windows
-            Windows.ForEach(w =>
+            for (int i = 0; i < Windows.Count; i++)
             {
+                Window w = Windows[i];
                 if (IgnoreErrors)
                 {
                     try
@@ -217,7 +218,7 @@ namespace ODL
                                                 oldmiddledown, MiddleDown));
                     }
                 }
-            });
+            }
 
             // Update button key states
             Input.IterationEnd();

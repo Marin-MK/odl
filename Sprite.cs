@@ -145,6 +145,30 @@ namespace ODL
             this.Viewport.Update();
         }
 
+        public Sprite(Sprite Copy)
+        {
+            this.Viewport = Copy.Viewport;
+            this.Name = Copy.Name;
+            this.SrcRect = new Rect(Copy.SrcRect.SDL_Rect);
+            this.Bitmap = Copy.Bitmap;
+            this.X = Copy.X;
+            this.Y = Copy.Y;
+            this.Z = Copy.Z;
+            this.ZoomX = Copy.ZoomX;
+            this.ZoomY = Copy.ZoomY;
+            this.Disposed = Copy.Disposed;
+            this.Visible = Copy.Visible;
+            this.Angle = Copy.Angle;
+            this.MirrorX = Copy.MirrorX;
+            this.MirrorY = Copy.MirrorY;
+            this.OX = Copy.OX;
+            this.OY = Copy.OY;
+            this.Color = Copy.Color;
+            this.TimeCreated = Copy.TimeCreated;
+            this.MultiplePositions = new List<Point>(Copy.MultiplePositions);
+            this.Opacity = Copy.Opacity;
+        }
+
         /// <summary>
         /// Forces the Renderer to redraw.
         /// </summary>
