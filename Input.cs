@@ -89,5 +89,21 @@ namespace ODL
             Graphics.LastCustomCursor = Cursor;
             SDL_SetCursor(Cursor);
         }
+
+        /// <summary>
+        /// Allows mouse events to fire when the mouse is outside of the window.
+        /// </summary>
+        public static void CaptureMouse()
+        {
+            SDL2.SDL.SDL_CaptureMouse(SDL2.SDL.SDL_bool.SDL_TRUE);
+        }
+
+        /// <summary>
+        /// Disallows mouse events to fire when the mouse is outside of the window.
+        /// </summary>
+        public static void ReleaseMouse()
+        {
+            SDL2.SDL.SDL_CaptureMouse(SDL2.SDL.SDL_bool.SDL_FALSE);
+        }
     }
 }
