@@ -33,11 +33,15 @@ namespace ODL
         /// <summary>
         /// The last used MouseEventArgs object.
         /// </summary>
-        public static MouseEventArgs LastMouseEvent;
+        public static MouseEventArgs LastMouseEvent = new MouseEventArgs(0, 0, 0, 0, false, false, false, false, false, false, 0);
         /// <summary>
         /// The last custom cursor that was set.
         /// </summary>
         public static IntPtr LastCustomCursor;
+        /// <summary>
+        /// Whether SDL and its componenents have been initialized.
+        /// </summary>
+        public static bool Initialized = false;
 
         /// <summary>
         /// Initializes SDL and its components.
@@ -61,6 +65,7 @@ namespace ODL
                 Screens.Add(new Rect(r));
             }
             SDL_StopTextInput();
+            Initialized = true;
         }
 
         /// <summary>
@@ -191,11 +196,12 @@ namespace ODL
             for (int i = 0; i < Windows.Count; i++)
             {
                 Window w = Windows[i];
+                if (w == null) continue;
                 if (IgnoreErrors)
                 {
                     try
                     {
-                        if (w != null) w.OnTick.Invoke(w, new EventArgs());
+                        w.OnTick.Invoke(w, new EventArgs());
                         if (w.Focus && (LeftDown || MiddleDown || RightDown))
                         {
                             w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
@@ -209,7 +215,7 @@ namespace ODL
                 }
                 else
                 {
-                    if (w != null) w.OnTick.Invoke(w, new EventArgs());
+                    w.OnTick.Invoke(w, new EventArgs());
                     if (w.Focus && (LeftDown || MiddleDown || RightDown))
                     {
                         w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
@@ -418,6 +424,7 @@ namespace ODL
             IMG_Quit();
             SDL_Quit();
             TTF_Quit();
+            Initialized = false;
         }
     }
 }

@@ -38,6 +38,8 @@ namespace ODL
         {
             if (this.Name != Name)
             {
+                if (Name == "Fire Red") Name = "fire_red";
+                if (Name == "Fire Red Small") Name = "fire_red_small";
                 this.Name = Name;
                 if (Reload) ReloadFont();
             }
