@@ -106,6 +106,8 @@ namespace ODL
                 SDL_FreeSurface(this.Surface);
                 SDL_DestroyTexture(this.Texture);
             }
+            if (ToneBmp != null) ToneBmp.Dispose();
+            ToneBmp = null;
             this.Disposed = true;
             if (this.Renderer != null) this.Renderer.Update();
         }
@@ -125,6 +127,8 @@ namespace ODL
             {
                 SDL_FreeSurface(this.Surface);
                 SDL_DestroyTexture(this.Texture);
+                if (ToneBmp != null) ToneBmp.Dispose();
+                ToneBmp = null;
                 this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
                 this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
                 this.RecreateTexture();
@@ -1265,7 +1269,7 @@ namespace ODL
         /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, Bitmap SrcBitmap, Rect SrcRect)
         {
-            this.Build(new Rect(DP, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, SrcRect);
+            this.Build(new Rect(DP, SrcRect.Width, SrcRect.Height), SrcBitmap, SrcRect);
         }
         /// <summary>
         /// Blits the Source bitmap on top of the Destination bitmap.
@@ -1278,7 +1282,7 @@ namespace ODL
         /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(Point DP, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
-            this.Build(new Rect(DP, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
+            this.Build(new Rect(DP, SWidth, SHeight), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
         /// <summary>
         /// Blits the Source bitmap on top of the Destination bitmap.
@@ -1289,7 +1293,7 @@ namespace ODL
         /// <param name="SrcRect">The rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, Bitmap SrcBitmap, Rect SrcRect)
         {
-            this.Build(new Rect(DX, DY, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, SrcRect);
+            this.Build(new Rect(DX, DY, SrcRect.Width, SrcRect.Height), SrcBitmap, SrcRect);
         }
         /// <summary>
         /// Blits the Source bitmap on top of the Destination bitmap.
@@ -1303,7 +1307,7 @@ namespace ODL
         /// <param name="SHeight">The height of the rectangle of the source bitmap to use for drawing.</param>
         public void Build(int DX, int DY, Bitmap SrcBitmap, int SX, int SY, int SWidth, int SHeight)
         {
-            this.Build(new Rect(DX, DY, SrcBitmap.Width, SrcBitmap.Height), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
+            this.Build(new Rect(DX, DY, SWidth, SHeight), SrcBitmap, new Rect(SX, SY, SWidth, SHeight));
         }
         /// <summary>
         /// Blits the Source bitmap on top of the Destination bitmap.
@@ -1344,7 +1348,9 @@ namespace ODL
             if (Locked) throw new BitmapLockedException();
             SDL_Rect Src = SrcRect.SDL_Rect;
             SDL_Rect Dest = DestRect.SDL_Rect;
-            SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+            if (Dest.w != Src.w || Dest.h != Src.h)
+                 SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+            else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
         }
 
         /// <summary>
@@ -1459,11 +1465,162 @@ namespace ODL
             if (!leftalign && !centeralign && !rightalign) leftalign = true;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             Bitmap TextBitmap;
-            if (aliased) TextBitmap = new Bitmap(TTF_RenderText_Solid(  SDL_Font, Text, c.SDL_Color));
+            if (aliased) TextBitmap = new Bitmap(TTF_RenderText_Solid  (SDL_Font, Text, c.SDL_Color));
             else         TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
             if (centeralign) X -= TextBitmap.Width / 2;
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
+            TextBitmap.Dispose();
+            SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
+        }
+
+        #region DrawText + Size Overloads
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="r">The rectangle in which to draw the text.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, Rect r, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, r.X, r.Y, r.Width, r.Height, c, DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="r">The rectangle in which to draw the text.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, Rect r, byte R, byte G, byte B, byte A, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, r.X, r.Y, r.Width, r.Height, new Color(R, G, B, A), DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="p">The position at which to draw the text.</param>
+        /// <param name="s">The size within which to draw the text.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, Point p, Size s, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, p.X, p.Y, s.Width, s.Height, c, DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="p">The position at which to draw the text.</param>
+        /// <param name="s">The size within which to draw the text.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, Point p, Size s, byte R, byte G, byte B, byte A, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, p.X, p.Y, s.Width, s.Height, new Color(R, G, B, A), DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="X">The X position at which to draw the text.</param>
+        /// <param name="Y">The Y position at which to draw the text.</param>
+        /// <param name="s">The size within which to draw the text.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, int X, int Y, Size s, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, X, Y, s.Width, s.Height, c, DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="X">The X position at which to draw the text.</param>
+        /// <param name="Y">The Y position at which to draw the text.</param>
+        /// <param name="s">The size within which to draw the text.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, int X, int Y, Size s, byte R, byte G, byte B, byte A, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, X, Y, s.Width, s.Height, new Color(R, G, B, A), DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="p">The position at which to draw the text.</param>
+        /// <param name="Width">The width within which to draw the text.</param>
+        /// <param name="Height">The height within which to draw the text.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, Point p, int Width, int Height, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, p.X, p.Y, Width, Height, c, DrawOptions);
+        }
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="p">The position at which to draw the text.</param>
+        /// <param name="Width">The width within which to draw the text.</param>
+        /// <param name="Height">The height within which to draw the text.</param>
+        /// <param name="R">The Red component of the color.</param>
+        /// <param name="G">The Green component of the color.</param>
+        /// <param name="B">The Blue component of the color.</param>
+        /// <param name="A">The Alpha component of the color.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public void DrawText(string Text, Point p, int Width, int Height, byte R, byte G, byte B, byte A, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            DrawText(Text, p.X, p.Y, Width, Height, new Color(R, G, B, A), DrawOptions);
+        }
+        #endregion
+        /// <summary>
+        /// Draws a string of text.
+        /// </summary>
+        /// <param name="Text">The text to draw.</param>
+        /// <param name="X">The X position to draw the text at.</param>
+        /// <param name="Y">The Y position to draw the text at.</param>
+        /// <param name="Width">The width within which to draw the text.</param>
+        /// <param name="Height">The height within which to draw the text.</param>
+        /// <param name="c">The color of the text to draw.</param>
+        /// <param name="DrawOptions">Additional options for drawing the text.</param>
+        public virtual void DrawText(string Text, int X, int Y, int Width, int Height, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            if (Locked) throw new BitmapLockedException();
+            if (this.Font == null)
+            {
+                throw new Exception("No Font specified for this Bitmap.");
+            }
+            if (string.IsNullOrEmpty(Text)) return;
+            IntPtr SDL_Font = this.Font.SDL_Font;
+            bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
+            bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
+            bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
+            bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
+            if (leftalign && centeralign || leftalign && rightalign || centeralign && rightalign)
+            {
+                throw new Exception("Multiple alignments specified in DrawText DrawOptions - can only contain one alignment setting");
+            }
+            if (!leftalign && !centeralign && !rightalign) leftalign = true;
+            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
+            Bitmap TextBitmap;
+            if (aliased) TextBitmap = new Bitmap(TTF_RenderText_Solid  (SDL_Font, Text, c.SDL_Color));
+            else         TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
+            if (centeralign) X -= TextBitmap.Width / 2;
+            if (rightalign) X -= TextBitmap.Width;
+            this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
             SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
         }
@@ -1557,7 +1714,34 @@ namespace ODL
             if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
             this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
             if (blend != SDL_BlendMode.SDL_BLENDMODE_NONE) SDL_SetTextureBlendMode(this.Texture, blend);
+            if (ToneBmp != null) ToneBmp.Dispose();
+            ToneBmp = null;
             this.Renderer.Update();
+        }
+
+        private Bitmap ToneBmp;
+
+        public IntPtr ToneTexture(Tone Tone)
+        {
+            if (ToneBmp != null) return ToneBmp.Texture;
+            ToneBmp = new Bitmap(Width, Height);
+            ToneBmp.Renderer = this.Renderer;
+            ToneBmp.Unlock();
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    Color c = GetPixel(x, y);
+                    Color n = new Color(c.Red, c.Green, c.Blue, c.Alpha);
+                    double Avg = (c.Red + c.Green + c.Blue) / 3d;
+                    n.Red = Convert.ToByte(Math.Round(c.Red - ((c.Red - Avg) * (Tone.Gray / 255d))) + Tone.Red);
+                    n.Green = Convert.ToByte(Math.Round(c.Green - ((c.Green - Avg) * (Tone.Gray / 255d))) + Tone.Green);
+                    n.Blue = Convert.ToByte(Math.Round(c.Blue - ((c.Blue - Avg) * (Tone.Gray / 255d))) + Tone.Blue);
+                    ToneBmp.SetPixel(x, y, n);
+                }
+            }
+            ToneBmp.Lock();
+            return ToneBmp.Texture;
         }
     }
 
