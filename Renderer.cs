@@ -42,9 +42,9 @@ namespace ODL
         /// <summary>
         /// Re-renders the entire screen.
         /// </summary>
-        public void UpdateImmediately()
+        public void Redraw(bool Force = false)
         {
-            if (NeedUpdate)
+            if (NeedUpdate || Force)
             {
                 Graphics.Log("=====================");
                 Graphics.Log("START render cycle");
@@ -68,15 +68,15 @@ namespace ODL
                         Graphics.Log("Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : "") + $" z={vp.Z} ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
-                        ViewportRect.x = vp.X;
-                        ViewportRect.y = vp.Y;
+                        ViewportRect.x = vp.X - vp.OX;
+                        ViewportRect.y = vp.Y - vp.OY;
                         if (vp.Width == -1) vp.Width = ViewportRect.w;
                         if (vp.Height == -1) vp.Height = ViewportRect.h;
                         ViewportRect.w = vp.Width;
                         ViewportRect.h = vp.Height;
                         SDL_RenderSetScale(SDL_Renderer, (float) vp.ZoomX, (float) vp.ZoomY);
-                        SDL_RenderSetViewport(this.SDL_Renderer, ref ViewportRect);
-                        vp.Sprites.Sort(delegate (Sprite s1, Sprite s2) 
+                        SDL_RenderSetViewport(SDL_Renderer, ref ViewportRect);
+                        vp.Sprites.Sort(delegate (Sprite s1, Sprite s2)
                         {
                             if (s1.Z != s2.Z) return s1.Z.CompareTo(s2.Z);
                             return s1.TimeCreated.CompareTo(s2.TimeCreated);
@@ -112,9 +112,20 @@ namespace ODL
         public void RenderSprite(Sprite s)
         {
             Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? s.Name + " " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({s.Bitmap.Width},{s.Bitmap.Height}) ox: {s.OX} oy: {s.OY}");
-            IntPtr Texture = s.Bitmap.Texture;
-            SDL_SetTextureColorMod(Texture, s.Color.Red, s.Color.Green, s.Color.Blue);
-            SDL_SetTextureAlphaMod(Texture, Convert.ToByte(255d * ((s.Color.Alpha / 255d) * (s.Opacity / 255d))));
+            IntPtr Texture = IntPtr.Zero;
+            if (s.Tone.Red == 0 && s.Tone.Green == 0 && s.Tone.Blue == 0 && s.Tone.Gray == 0)
+                 Texture = s.Bitmap.Texture;
+            else Texture = s.Bitmap.ToneTexture(s.Tone);
+
+            // Color
+            byte Red = s.Color.Red;
+            byte Green = s.Color.Green;
+            byte Blue = s.Color.Blue;
+            // Color.Alpha + Opacity
+            byte Alpha = Convert.ToByte(255d * (s.Color.Alpha / 255d) * (s.Opacity / 255d));
+
+            SDL_SetTextureColorMod(Texture, Red, Green, Blue);
+            SDL_SetTextureAlphaMod(Texture, Alpha);
 
             List<Point> Points;
             if (s.MultiplePositions.Count == 0) // Normal X,Y positions

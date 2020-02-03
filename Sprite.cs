@@ -100,6 +100,11 @@ namespace ODL
         /// The color of the sprite.
         /// </summary>
         public Color Color { get { return _Color; } set { if (value != _Color) Viewport.Update(); _Color = value; } }
+        private Tone _Tone = new Tone(0, 0, 0, 0);
+        /// <summary>
+        /// The tone of the sprite.
+        /// </summary>
+        public Tone Tone { get { return _Tone; } set { if (value != _Tone) Viewport.Update(); _Tone = value; } }
         /// <summary>
         /// The timestamp at which the sprite was created.
         /// </summary>

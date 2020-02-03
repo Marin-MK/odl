@@ -33,6 +33,16 @@ namespace ODL
         /// The z index of the viewport.
         /// </summary>
         public int Z { get { return _Z; } set { if (value != _Z) Update(); _Z = value; } }
+        private int _OX = 0;
+        /// <summary>
+        /// The x offset of the viewport.
+        /// </summary>
+        public int OX { get { return _OX; } set { if (value != _OX) Update(); _OX = value; } }
+        private int _OY = 0;
+        /// <summary>
+        /// The y offset of the viewport.
+        /// </summary>
+        public int OY { get { return _OY; } set { if (value != _OY) Update(); _OY = value; } }
         /// <summary>
         /// The width of the viewport.
         /// </summary>
@@ -64,6 +74,11 @@ namespace ODL
         /// The vertical zoom factor of the viewport.
         /// </summary>
         public double ZoomY { get { return _ZoomY; } set { if (value != _ZoomY) Update(); _ZoomY = value; } }
+        private Color _Color = new Color(255, 255, 255);
+        /// <summary>
+        /// The color effect applied to this viewport.
+        /// </summary>
+        public Color Color { get { return _Color; } set { if (value != _Color) Update(); _Color = value; } }
         /// <summary>
         /// The timestamp at which the viewport was created.
         /// </summary>
