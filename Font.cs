@@ -11,6 +11,8 @@ namespace ODL
         /// </summary>
         public static List<Font> Cache = new List<Font>();
 
+        public static string FontPath = null;
+
         /// <summary>
         /// The name of the font.
         /// </summary>
@@ -26,14 +28,43 @@ namespace ODL
 
         public Font(string Name, int Size = 12)
         {
-            this.Name = Name;
-            this.Size = Size;
-            this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
+            SetName(Name, false);
+            SetSize(Size, false);
+            ReloadFont();
+            Cache.Add(this);
+        }
+
+        public void SetName(string Name, bool Reload = true)
+        {
+            if (this.Name != Name)
+            {
+                this.Name = Name;
+                if (Reload) ReloadFont();
+            }
+        }
+
+        public void SetSize(int Size, bool Reload = true)
+        {
+            if (this.Size != Size)
+            {
+                this.Size = Size;
+                if (Reload) ReloadFont();
+            }
+        }
+
+        public void ReloadFont()
+        {
+            if (SDL_Font != IntPtr.Zero) TTF_CloseFont(SDL_Font);
+            SDL_Font = IntPtr.Zero;
+            if (System.IO.File.Exists(this.Name + ".ttf"))
+                this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
+            else if (!string.IsNullOrEmpty(FontPath))
+                this.SDL_Font = TTF_OpenFont(FontPath + "\\" + this.Name + ".ttf", this.Size);
+            else this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
             if (this.SDL_Font == IntPtr.Zero)
             {
                 throw new Exception("Invalid font: '" + this.Name + "'");
             }
-            Cache.Add(this);
         }
 
         /// <summary>
