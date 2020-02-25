@@ -3,7 +3,7 @@ using static SDL2.SDL;
 
 namespace ODL
 {
-    public class Tone
+    public class Tone : IDisposable
     {
         /// <summary>
         /// The Red component of the color.
@@ -35,6 +35,11 @@ namespace ODL
             this.Green = Green;
             this.Blue = Blue;
             this.Gray = Gray;
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
 
         public override string ToString()

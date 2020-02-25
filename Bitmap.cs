@@ -87,7 +87,10 @@ namespace ODL
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             if (!(this is SolidBitmap)) this.Lock();
         }
-
+        /// <summary>
+        /// Creates a bitmap object to wrap around an existing SDL_Surface.
+        /// </summary>
+        /// <param name="Surface"></param>
         public Bitmap(IntPtr Surface)
         {
             this.Surface = Surface;
@@ -134,6 +137,20 @@ namespace ODL
                 this.RecreateTexture();
                 if (this.Renderer != null) this.Renderer.Update();
             }
+        }
+
+        /// <summary>
+        /// Creates a clone of the bitmap.
+        /// </summary>
+        public virtual Bitmap Clone()
+        {
+            Bitmap bmp = new Bitmap(Width, Height);
+            bmp.Unlock();
+            bmp.Build(this);
+            bmp.Lock();
+            bmp.Font = this.Font;
+            bmp.Renderer = this.Renderer;
+            return bmp;
         }
 
         #region SetPixel Overloads
@@ -1351,6 +1368,7 @@ namespace ODL
             if (Dest.w != Src.w || Dest.h != Src.h)
                  SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
             else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         /// <summary>
@@ -1472,6 +1490,7 @@ namespace ODL
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
             SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region DrawText + Size Overloads
@@ -1623,6 +1642,7 @@ namespace ODL
             this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
             SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         #region DrawGlyph Overloads
@@ -1673,6 +1693,7 @@ namespace ODL
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
+            if (this.Renderer != null) this.Renderer.Update();
         }
 
         /// <summary>
@@ -1720,7 +1741,7 @@ namespace ODL
         }
 
         private Bitmap ToneBmp;
-
+        // Applies a Sprite's Tone on a Bitmap. CPU-intensive.
         public IntPtr ToneTexture(Tone Tone)
         {
             if (ToneBmp != null) return ToneBmp.Texture;

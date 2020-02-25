@@ -3,7 +3,7 @@ using static SDL2.SDL;
 
 namespace ODL
 {
-    public class Color
+    public class Color : IDisposable
     {
         /// <summary>
         /// A solid red color.
@@ -84,6 +84,11 @@ namespace ODL
         public override string ToString()
         {
             return $"(Color: {this.Red},{this.Green},{this.Blue},{this.Alpha})";
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace ODL
 {
-    public class Point
+    public class Point : IDisposable
     {
         public int X;
         public int Y;
@@ -11,6 +11,11 @@ namespace ODL
         {
             this.X = X;
             this.Y = Y;
+        }
+
+        public void Dispose()
+        {
+            
         }
 
         public override string ToString()

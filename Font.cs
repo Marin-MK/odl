@@ -4,7 +4,7 @@ using static SDL2.SDL_ttf;
 
 namespace ODL
 {
-    public class Font
+    public class Font : IDisposable
     {
         /// <summary>
         /// The internal font cache.
@@ -124,6 +124,11 @@ namespace ODL
                 if (f.Name == Name && f.Size == Size) return f;
             }
             return new Font(Name, Size);
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

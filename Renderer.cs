@@ -32,7 +32,7 @@ namespace ODL
         }
 
         /// <summary>
-        /// Forces a re-render.
+        /// Forces a re-render in the next Graphics update.
         /// </summary>
         public void Update()
         {

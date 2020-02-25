@@ -80,7 +80,7 @@ namespace ODL
             Graphics.LastMouseEvent = this;
         }
 
-        public bool Over(Sprite s)
+        public bool Over(ISprite s)
         {
             if (s.Bitmap == null) return false;
             if (X >= s.X && X < s.X + s.Bitmap.Width * s.ZoomX &&
