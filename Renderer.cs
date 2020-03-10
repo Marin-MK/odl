@@ -19,6 +19,10 @@ namespace ODL
         /// Whether the renderer is disposed.
         /// </summary>
         public bool Disposed = false;
+        /// <summary>
+        /// Scale multiplier for rendering viewports.
+        /// </summary>
+        public float RenderScale = 1f;
 
         /// <summary>
         /// Whether the renderer needs to re-render.
@@ -74,7 +78,11 @@ namespace ODL
                         if (vp.Height == -1) vp.Height = ViewportRect.h;
                         ViewportRect.w = vp.Width;
                         ViewportRect.h = vp.Height;
-                        SDL_RenderSetScale(SDL_Renderer, (float) vp.ZoomX, (float) vp.ZoomY);
+                        if (RenderScale != 1f)
+                        {
+                            SDL_RenderSetLogicalSize(SDL_Renderer, vp.Width, vp.Height);
+                            SDL_RenderSetScale(SDL_Renderer, RenderScale, RenderScale);
+                        }
                         SDL_RenderSetViewport(SDL_Renderer, ref ViewportRect);
                         vp.Sprites.Sort(delegate (Sprite s1, Sprite s2)
                         {

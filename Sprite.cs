@@ -7,6 +7,11 @@ namespace ODL
     public class Sprite : ISprite, IDisposable
     {
         /// <summary>
+        /// The default viewport assigned if no viewport is specified.
+        /// </summary>
+        public static Viewport DefaultViewport;
+
+        /// <summary>
         /// The debug name of the sprite.
         /// </summary>
         public string Name { get; set; }
@@ -149,6 +154,9 @@ namespace ODL
             this.Viewport.Sprites.Add(this);
             this.Viewport.Update();
         }
+
+        public Sprite()
+            : this(DefaultViewport) { }
 
         public Sprite(Sprite Copy)
         {

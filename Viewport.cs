@@ -7,6 +7,11 @@ namespace ODL
     public class Viewport : IDisposable
     {
         /// <summary>
+        /// The default renderer assigned if no renderer is specified.
+        /// </summary>
+        public static Renderer DefaultRenderer;
+
+        /// <summary>
         /// The debug name of the viewport.
         /// </summary>
         public string Name;
@@ -64,16 +69,16 @@ namespace ODL
         /// Whether the viewport is visible.
         /// </summary>
         public bool Visible { get { return _Visible; } set { if (value != _Visible) Update(); _Visible = value; } }
-        private double _ZoomX = 1;
+        private float _ZoomX = 1;
         /// <summary>
         /// The horizontal zoom factor of the viewport.
         /// </summary>
-        public double ZoomX { get { return _ZoomX; } set { if (value != _ZoomX) Update(); _ZoomX = value; } }
-        private double _ZoomY = 1;
+        public float ZoomX { get { return _ZoomX; } set { if (value != _ZoomX) Update(); _ZoomX = value; } }
+        private float _ZoomY = 1;
         /// <summary>
         /// The vertical zoom factor of the viewport.
         /// </summary>
-        public double ZoomY { get { return _ZoomY; } set { if (value != _ZoomY) Update(); _ZoomY = value; } }
+        public float ZoomY { get { return _ZoomY; } set { if (value != _ZoomY) Update(); _ZoomY = value; } }
         private Color _Color = new Color(255, 255, 255);
         /// <summary>
         /// The color effect applied to this viewport.
@@ -85,6 +90,16 @@ namespace ODL
         public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
 
         #region Constructor Overloads
+        public Viewport(int X, int Y, int Width, int Height)
+            : this(DefaultRenderer, X, Y, Width, Height) { }
+        public Viewport(Point p, Size s)
+            : this(DefaultRenderer, p.X, p.Y, s.Width, s.Height) { }
+        public Viewport(Point p, int Width, int Height)
+            : this(DefaultRenderer, p.X, p.Y, Width, Height) { }
+        public Viewport(int X, int Y, Size s)
+            : this(DefaultRenderer, X, Y, s.Width, s.Height) { }
+        public Viewport(Rect rect)
+            : this(DefaultRenderer, rect.X, rect.Y, rect.Width, rect.Height) { }
         public Viewport(Renderer Renderer, Point p, Size s)
             : this(Renderer, p.X, p.Y, s.Width, s.Height) { }
         public Viewport(Renderer Renderer, Point p, int Width, int Height)

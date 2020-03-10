@@ -77,6 +77,15 @@ namespace ODL
             return X >= this.X && X < this.X + this.Width && Y >= this.Y && Y < this.Y + this.Height;
         }
 
+        public bool Overlaps(Rect r)
+        {
+            if (this.X + this.Width < r.X) return false;
+            if (this.Y + this.Height < r.Y) return false;
+            if (this.X >= r.X + r.Width) return false;
+            if (this.Y >= r.Y + r.Height) return false;
+            return true;
+        }
+
         public override string ToString()
         {
             return $"(Rect: {this.X},{this.Y},{this.Width},{this.Height})";
