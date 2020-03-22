@@ -77,6 +77,9 @@ namespace ODL
             return X >= this.X && X < this.X + this.Width && Y >= this.Y && Y < this.Y + this.Height;
         }
 
+        /// <summary>
+        /// Does not work properly. Do not use.
+        /// </summary>
         public bool Overlaps(Rect r)
         {
             if (this.X + this.Width < r.X) return false;

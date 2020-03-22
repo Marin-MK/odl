@@ -124,6 +124,10 @@ namespace ODL
         /// The opacity at which the sprite is rendered.
         /// </summary>
         public byte Opacity { get { return _Opacity; } set { if (value != _Opacity) Viewport.Update(); _Opacity = value; } }
+        /// <summary>
+        /// Whether to destroy the bitmap upon disposal alongside the sprite.
+        /// </summary>
+        public bool DestroyBitmap = true;
 
         public Sprite(Viewport Viewport, string Filename)
             : this(Viewport)
@@ -182,6 +186,14 @@ namespace ODL
             this.Opacity = Copy.Opacity;
         }
 
+        ~Sprite()
+        {
+            if (!Disposed)
+            {
+                Console.WriteLine($"An undisposed sprite is being collected by the GC! This is likely a memory leak!");
+            }
+        }
+
         /// <summary>
         /// Forces the Renderer to redraw.
         /// </summary>
@@ -195,9 +207,9 @@ namespace ODL
         /// </summary>
         public void Dispose()
         {
-            if (this.Bitmap != null) this.Bitmap.Dispose();
+            if (this.DestroyBitmap && this.Bitmap != null) this.Bitmap.Dispose();
             this.Disposed = true;
-            this.Viewport.Sprites.Remove(this);
+            if (this.Viewport.Sprites != null) this.Viewport.Sprites.Remove(this);
             this.Viewport.Update();
         }
     }

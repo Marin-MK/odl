@@ -207,10 +207,7 @@ namespace ODL
         /// </summary>
         public void Dispose()
         {
-            for (int i = 0; i < Viewports.Count; i++)
-            {
-                Viewports[i].Dispose();
-            }
+            while (Viewports.Count > 0) Viewports[0].Dispose();
             SDL_DestroyRenderer(this.SDL_Renderer);
             this.Disposed = true;
         }

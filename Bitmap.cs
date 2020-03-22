@@ -98,6 +98,14 @@ namespace ODL
             this.Lock();
         }
 
+        ~Bitmap()
+        {
+            if (!Disposed)
+            {
+                Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
+            }
+        }
+
         /// <summary>
         /// Disposes and destroys the bitmap.
         /// </summary>

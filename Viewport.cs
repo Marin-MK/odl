@@ -119,6 +119,14 @@ namespace ODL
             this.Renderer.Viewports.Add(this);
         }
 
+        ~Viewport()
+        {
+            if (!Disposed)
+            {
+                Console.WriteLine($"An undisposed viewport is being collected by the GC! This is most likely a memory leak!");
+            }
+        }
+
         /// <summary>
         /// Forces the Renderer to redraw.
         /// </summary>
@@ -132,11 +140,7 @@ namespace ODL
         /// </summary>
         public void Dispose()
         {
-            for (int i = 0; i < Sprites.Count; i++)
-            {
-                Sprites[i].Dispose();
-            }
-            Sprites.Clear();
+            while (Sprites.Count > 0) Sprites[0].Dispose();
             Sprites = null;
             this.Renderer.Viewports.Remove(this);
             this.Renderer.Update();
