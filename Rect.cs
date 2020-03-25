@@ -61,7 +61,6 @@ namespace ODL
         /// Returns whether the given point is within the rectangle boundaries.
         /// </summary>
         /// <param name="p">The point to test.</param>
-        /// <returns></returns>
         public bool Contains(Point p)
         {
             return Contains(p.X, p.Y);
@@ -71,22 +70,18 @@ namespace ODL
         /// </summary>
         /// <param name="X">The x position to test.</param>
         /// <param name="Y">The y position to test.</param>
-        /// <returns></returns>
         public bool Contains(int X, int Y)
         {
             return X >= this.X && X < this.X + this.Width && Y >= this.Y && Y < this.Y + this.Height;
         }
 
         /// <summary>
-        /// Does not work properly. Do not use.
+        /// Whether this rectangle overlaps the given rectangle or vice-versa.
         /// </summary>
         public bool Overlaps(Rect r)
         {
-            if (this.X + this.Width < r.X) return false;
-            if (this.Y + this.Height < r.Y) return false;
-            if (this.X >= r.X + r.Width) return false;
-            if (this.Y >= r.Y + r.Height) return false;
-            return true;
+            return this.X + this.Width > r.X && this.X < r.X + r.Width &&
+                   this.Y + this.Height > r.Y && this.Y < r.Y + r.Height;
         }
 
         public override string ToString()

@@ -127,7 +127,7 @@ namespace ODL
         /// <summary>
         /// Whether to destroy the bitmap upon disposal alongside the sprite.
         /// </summary>
-        public bool DestroyBitmap = true;
+        public bool DestroyBitmap { get; set; } = true;
 
         public Sprite(Viewport Viewport, string Filename)
             : this(Viewport)

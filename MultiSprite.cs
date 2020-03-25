@@ -29,6 +29,7 @@ namespace ODL
         public Color Color { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public List<Point> MultiplePositions { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public byte Opacity { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
+        public bool DestroyBitmap { get; set; } = true;
 
         public MultiSprite(Viewport viewport)
         {
