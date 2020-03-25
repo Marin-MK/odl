@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static SDL2.SDL;
@@ -52,14 +53,39 @@ namespace ODL
         /// <param name="Filename">The file to load into a bitmap.</param>
         public Bitmap(string Filename)
         {
-            if (!System.IO.File.Exists(Filename))
+            if (!File.Exists(Filename))
             {
-                if (System.IO.File.Exists(Filename + ".png")) Filename += ".png";
-                else throw new System.IO.FileNotFoundException($"File could not be found -- {Filename}");
+                if (File.Exists(Filename + ".png")) Filename += ".png";
+                else throw new FileNotFoundException($"File could not be found -- {Filename}");
             }
+
+            Size ImageSize = ValidatePNG(Filename);
+            if (ImageSize.Width > Graphics.MaxTextureSize.Width || ImageSize.Height > Graphics.MaxTextureSize.Height)
+                throw new Exception($"The given file exceeds the texture size limit of {Graphics.MaxTextureSize}: '{Filename}'");
+
             this.Surface = SDL2.SDL_image.IMG_Load(Filename);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
+        }
+
+        public Size ValidatePNG(string Filename)
+        {
+            BinaryReader br = new BinaryReader(File.OpenRead(Filename));
+            byte[] pngsignature = new byte[8] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+            for (int i = 0; i < 8; i++)
+            {
+                if (br.ReadByte() != pngsignature[i])
+                    throw new Exception($"The given file is not a valid PNG file: '{Filename}'");
+            }
+
+            br.BaseStream.Position = 16;
+            byte[] widthbytes = new byte[sizeof(int)];
+            for (int i = 0; i < sizeof(int); i++) widthbytes[sizeof(int) - 1 - i] = br.ReadByte();
+            int width = BitConverter.ToInt32(widthbytes, 0);
+            byte[] heightbytes = new byte[sizeof(int)];
+            for (int i = 0; i < sizeof(int); i++) heightbytes[sizeof(int) - 1 - i] = br.ReadByte();
+            int height = BitConverter.ToInt32(heightbytes, 0);
+            return new Size(width, height);
         }
 
         /// <summary>

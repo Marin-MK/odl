@@ -202,6 +202,7 @@ namespace ODL
                 SDL_RendererInfo info;
                 SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
                 Graphics.MaxTextureSize = new Size(info.max_texture_width, info.max_texture_height);
+                Console.WriteLine($"Maximum Texture Size: {info.max_texture_width}x{info.max_texture_height}");
             }
 
             this.Viewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
