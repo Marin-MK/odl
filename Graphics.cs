@@ -244,7 +244,7 @@ namespace ODL
         {
             // Get events
             SDL_Event e;
-            if (SDL_WaitEventTimeout(out e, 5) > 0)
+            while (SDL_PollEvent(out e) > 0)
             {
                 EvaluateEvent(e);
             }

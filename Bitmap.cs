@@ -53,6 +53,7 @@ namespace ODL
         /// <param name="Filename">The file to load into a bitmap.</param>
         public Bitmap(string Filename)
         {
+            while (Filename.Contains('\\')) Filename = Filename.Replace('\\', '/');
             if (!File.Exists(Filename))
             {
                 if (File.Exists(Filename + ".png")) Filename += ".png";

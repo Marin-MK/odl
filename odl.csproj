@@ -6,17 +6,8 @@
     <ApplicationIcon />
     <StartupObject />
     <Authors>Marijn Herrebout</Authors>
-    <Platforms>Debgu;x86;x64</Platforms>
+    <Platform>x64</Platform>
     <Version>0.1.0</Version>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -26,7 +17,7 @@
 
   <ItemGroup>
     <Reference Include="SDL2-CS">
-      <HintPath>bin\Debug\netcoreapp3.1\SDL2-CS.dll</HintPath>
+      <HintPath>SDL2-CS.dll</HintPath>
     </Reference>
   </ItemGroup>
 
