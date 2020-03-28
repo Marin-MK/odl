@@ -36,7 +36,12 @@ namespace ODL
                 if (value != null)
                 {
                     value.Renderer = this.Viewport.Renderer;
-                    value.RecreateTexture();
+                    if (value is LargeBitmap)
+                    {
+                        if (value.Locked) value.Unlock();
+                        value.Lock();
+                    }
+                    else value.RecreateTexture();
                     this.SrcRect = new Rect(value.Width, value.Height);
                 }
             }

@@ -99,7 +99,26 @@ namespace ODL
                             }
                             else if (s.Visible)
                             {
-                                if (s.Bitmap != null && !s.Bitmap.Disposed) RenderSprite(s);
+                                if (s.Bitmap != null && !s.Bitmap.Disposed)
+                                {
+                                    if (s.Bitmap is LargeBitmap)
+                                    {
+                                        int SX = s.X;
+                                        int SY = s.Y;
+                                        foreach (Bitmap bmp in ((LargeBitmap) s.Bitmap).InternalBitmaps)
+                                        {
+                                            s.X = SX + (int) Math.Round(bmp.InternalX * s.ZoomX);
+                                            s.Y = SY + (int) Math.Round(bmp.InternalY * s.ZoomY);
+                                            RenderSprite(s, bmp);
+                                        }
+                                        s.X = SX;
+                                        s.Y = SY;
+                                    }
+                                    else
+                                    {
+                                        RenderSprite(s, s.Bitmap);
+                                    }
+                                }
                             }
                         }
                         Graphics.Log("");
@@ -117,13 +136,13 @@ namespace ODL
         /// Renders an individual sprite.
         /// </summary>
         /// <param name="s">The sprite to render.</param>
-        public void RenderSprite(Sprite s)
+        public void RenderSprite(Sprite s, Bitmap bmp)
         {
-            Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? s.Name + " " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({s.Bitmap.Width},{s.Bitmap.Height}) ox: {s.OX} oy: {s.OY}");
+            Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? s.Name + " " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({bmp.Width},{bmp.Height}) ox: {s.OX} oy: {s.OY}");
             IntPtr Texture = IntPtr.Zero;
             if (s.Tone.Red == 0 && s.Tone.Green == 0 && s.Tone.Blue == 0 && s.Tone.Gray == 0)
-                 Texture = s.Bitmap.Texture;
-            else Texture = s.Bitmap.ToneTexture(s.Tone);
+                 Texture = bmp.Texture;
+            else Texture = bmp.ToneTexture(s.Tone);
 
             // Color
             byte Red = s.Color.Red;
@@ -148,13 +167,22 @@ namespace ODL
 
             SDL_Rect Src = new SDL_Rect();
             SDL_Rect Dest = new SDL_Rect();
-            if (!(s.Bitmap is SolidBitmap))
+            if (bmp is SolidBitmap)
+            {
+                Src.x = 0;
+                Src.y = 0;
+                Src.w = 1;
+                Src.h = 1;
+                Dest.w = (bmp as SolidBitmap).BitmapWidth;
+                Dest.h = (bmp as SolidBitmap).BitmapHeight;
+            }
+            else
             {
                 Src = s.SrcRect.SDL_Rect;
 
                 // Make sure the Dest size is never bigger than the Bitmap size (otherwise it'll stretch the bitmap)
-                if (Src.w > s.Bitmap.Width * s.ZoomX) Src.w = s.Bitmap.Width;
-                if (Src.h > s.Bitmap.Height * s.ZoomY) Src.h = s.Bitmap.Height;
+                if (Src.w > bmp.Width * s.ZoomX) Src.w = bmp.Width;
+                if (Src.h > bmp.Height * s.ZoomY) Src.h = bmp.Height;
 
                 // Additional checks, since ZoomX/ZoomY are 1 99% of the time, this way it skips the extra calculation.
                 if (s.ZoomX == 1) Dest.w = Src.w;
@@ -162,17 +190,8 @@ namespace ODL
                 if (s.ZoomY == 1) Dest.h = Src.h;
                 else Dest.h = (int) Math.Round(Src.h * s.ZoomY);
             }
-            else // If s.Bitmap is SolidBitmap
-            {
-                Src.x = 0;
-                Src.y = 0;
-                Src.w = 1;
-                Src.h = 1;
-                Dest.w = (s.Bitmap as SolidBitmap).BitmapWidth;
-                Dest.h = (s.Bitmap as SolidBitmap).BitmapHeight;
-            }
 
-            if (!s.Bitmap.Locked && !(s.Bitmap is SolidBitmap))
+            if (!bmp.Locked && !(bmp is SolidBitmap))
             {
                 Graphics.Log("ERR: Bitmap is locked");
                 throw new Exception("Bitmap not locked for writing - can't render it");

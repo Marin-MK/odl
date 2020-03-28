@@ -13,7 +13,7 @@ namespace ODL
         /// <summary>
         /// The pointer to the SDL_Surface.
         /// </summary>
-        public IntPtr Surface { get; protected set; }
+        public IntPtr Surface { get; protected set; } = IntPtr.Zero;
         /// <summary>
         /// The SDL_Surface object.
         /// </summary>
@@ -21,7 +21,7 @@ namespace ODL
         /// <summary>
         /// The pointer to the SDL_Texture.
         /// </summary>
-        public IntPtr Texture { get; protected set; } 
+        public IntPtr Texture { get; protected set; } = IntPtr.Zero;
         /// <summary>
         /// The width of the bitmap.
         /// </summary>
@@ -37,15 +37,18 @@ namespace ODL
         /// <summary>
         /// The Renderer object associated with the bitmap.
         /// </summary>
-        public Renderer Renderer { get; set; }
+        public virtual Renderer Renderer { get; set; }
         /// <summary>
         /// The Font object associated with the bitmap.
         /// </summary>
-        public Font Font { get; set; }
+        public virtual Font Font { get; set; }
         /// <summary>
         /// Whether the bitmap can be written on.
         /// </summary>
         public bool Locked { get; protected set; }
+
+        public int InternalX = 0;
+        public int InternalY = 0;
 
         /// <summary>
         /// Loads the specified file into a bitmap.
@@ -68,6 +71,8 @@ namespace ODL
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
         }
+
+        protected Bitmap() { }
 
         public Size ValidatePNG(string Filename)
         {
@@ -127,7 +132,7 @@ namespace ODL
 
         ~Bitmap()
         {
-            if (!Disposed)
+            if (!Disposed && (this.Surface != IntPtr.Zero || this.Texture != IntPtr.Zero))
             {
                 Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
             }
@@ -1754,7 +1759,7 @@ namespace ODL
         /// Saves the current bitmap to a file as a PNG.
         /// </summary>
         /// <param name="filename">The filename to save the bitmap as.</param>
-        public void SaveToPNG(string filename)
+        public virtual void SaveToPNG(string filename)
         {
             SDL2.SDL_image.IMG_SavePNG(Surface, filename);
         }
@@ -1762,7 +1767,7 @@ namespace ODL
         /// <summary>
         /// Converts the SDL_Surface to an SDL_Texture used when rendering.
         /// </summary>
-        public void RecreateTexture()
+        public virtual void RecreateTexture()
         {
             if (this.Renderer == null) return;
             SDL_BlendMode blend;
@@ -1777,7 +1782,7 @@ namespace ODL
 
         private Bitmap ToneBmp;
         // Applies a Sprite's Tone on a Bitmap. CPU-intensive.
-        public IntPtr ToneTexture(Tone Tone)
+        public virtual IntPtr ToneTexture(Tone Tone)
         {
             if (ToneBmp != null) return ToneBmp.Texture;
             ToneBmp = new Bitmap(Width, Height);
