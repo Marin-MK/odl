@@ -195,7 +195,7 @@ namespace ODL
             {
                 SDL_SetWindowIcon(this.SDL_Window, this.Icon.Surface);
             }
-            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE | SDL_RendererFlags.SDL_RENDERER_ACCELERATED));
+            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_ACCELERATED));
             
             if (Graphics.MaxTextureSize == null)
             {
