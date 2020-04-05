@@ -9,6 +9,8 @@
     <Platform>x64</Platform>
     <Version>0.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Debug</Configurations>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +19,7 @@
 
   <ItemGroup>
     <Reference Include="SDL2-CS">
-      <HintPath>bin\Debug\netcoreapp3.1\SDL2-CS.dll</HintPath>
+      <HintPath>bin\x64\Debug\netcoreapp3.1\SDL2-CS.dll</HintPath>
     </Reference>
   </ItemGroup>
 

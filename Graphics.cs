@@ -33,7 +33,7 @@ namespace ODL
         /// <summary>
         /// The last used MouseEventArgs object.
         /// </summary>
-        public static MouseEventArgs LastMouseEvent = new MouseEventArgs(0, 0, 0, 0, false, false, false, false, false, false, 0);
+        public static MouseEventArgs LastMouseEvent = new MouseEventArgs(0, 0, false, false, false, false, false, false, 0);
         /// <summary>
         /// The last custom cursor that was set.
         /// </summary>
@@ -201,28 +201,26 @@ namespace ODL
                 {
                     try
                     {
-                        w.OnTick.Invoke(w, new EventArgs());
+                        w.OnTick(new BaseEventArgs());
                         if (w.Focus && (LeftDown || MiddleDown || RightDown))
                         {
-                            w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                                    OldMouseX, OldMouseY,
-                                                    oldleftdown, LeftDown,
-                                                    oldrightdown, RightDown,
-                                                    oldmiddledown, MiddleDown));
-                        }
+                            w.OnMousePress(new MouseEventArgs(OldMouseX, OldMouseY,
+                                                              oldleftdown, LeftDown,
+                                                              oldrightdown, RightDown,
+                                                              oldmiddledown, MiddleDown));
+                        } 
                     }
                     catch (Exception) { }
                 }
                 else
                 {
-                    w.OnTick.Invoke(w, new EventArgs());
+                    w.OnTick(new BaseEventArgs());
                     if (w.Focus && (LeftDown || MiddleDown || RightDown))
                     {
-                        w.OnMousePress.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                                OldMouseX, OldMouseY,
-                                                oldleftdown, LeftDown,
-                                                oldrightdown, RightDown,
-                                                oldmiddledown, MiddleDown));
+                        w.OnMousePress(new MouseEventArgs(OldMouseX, OldMouseY,
+                                                          oldleftdown, LeftDown,
+                                                          oldrightdown, RightDown,
+                                                          oldmiddledown, MiddleDown));
                     }
                 }
             }
@@ -267,12 +265,12 @@ namespace ODL
                 switch (e.window.windowEvent)
                 {
                     case SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
-                        CancelEventArgs ClosingArgs = new CancelEventArgs();
-                        w.OnClosing.Invoke(w, ClosingArgs);
-                        if (!ClosingArgs.Cancel)
+                        BoolEventArgs ClosingArgs = new BoolEventArgs();
+                        w.OnClosing(ClosingArgs);
+                        if (!ClosingArgs.Value)
                         {
                             SDL_DestroyWindow(w.SDL_Window);
-                            w.OnClosed.Invoke(w, new ClosedEventArgs());
+                            w.OnClosed(new BaseEventArgs());
                             w.Dispose();
                             Windows[idx] = null;
                         }
@@ -283,22 +281,22 @@ namespace ODL
                         int width1;
                         int height1;
                         SDL_GetWindowSize(w.SDL_Window, out width1, out height1);
-                        w.OnWindowSizeChanged.Invoke(w, new WindowEventArgs(width1, height1));
-                        w.OnWindowResized.Invoke(w, new WindowEventArgs(width1, height1));
+                        w.OnWindowSizeChanged(new BaseEventArgs());
+                        w.OnWindowResized(new BaseEventArgs());
                         break;
                     case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
                         int width2;
                         int height2;
                         SDL_GetWindowSize(w.SDL_Window, out width2, out height2);
-                        w.OnWindowSizeChanged.Invoke(w, new WindowEventArgs(width2, height2));
+                        w.OnWindowSizeChanged(new BaseEventArgs());
                         break;
                     case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                         w.Focus = true;
-                        w.OnFocusGained(w, new FocusEventArgs(true));
+                        w.OnFocusGained(new BaseEventArgs());
                         break;
                     case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                         w.Focus = false;
-                        w.OnFocusLost(w, new FocusEventArgs(false));
+                        w.OnFocusLost(new BaseEventArgs());
                         break;
                 }
             }
@@ -310,14 +308,13 @@ namespace ODL
                     case SDL_EventType.SDL_MOUSEMOTION:
                         if (e.motion.x != OldMouseX || e.motion.y != OldMouseY)
                         {
-                            LeftDown = (e.button.button & Convert.ToInt32(MouseButtons.Left)) == Convert.ToInt32(MouseButtons.Left);
-                            RightDown = (e.button.button & Convert.ToInt32(MouseButtons.Right)) == Convert.ToInt32(MouseButtons.Right);
-                            MiddleDown = (e.button.button & Convert.ToInt32(MouseButtons.Middle)) == Convert.ToInt32(MouseButtons.Middle);
-                            w.OnMouseMoving.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                    e.motion.x, e.motion.y,
-                                    oldleftdown, LeftDown,
-                                    oldrightdown, RightDown,
-                                    oldmiddledown, MiddleDown));
+                            LeftDown = (e.button.button & 1) == 1;
+                            RightDown = (e.button.button & 2) == 2;
+                            MiddleDown = (e.button.button & 4) == 4;
+                            w.OnMouseMoving(new MouseEventArgs(e.motion.x, e.motion.y,
+                                                               oldleftdown, LeftDown,
+                                                               oldrightdown, RightDown,
+                                                               oldmiddledown, MiddleDown));
                         }
                         OldMouseX = e.motion.x;
                         OldMouseY = e.motion.y;
@@ -330,11 +327,10 @@ namespace ODL
                             if (e.button.button == 1) LeftDown = true;
                             if (e.button.button == 2) MiddleDown = true;
                             if (e.button.button == 3) RightDown = true;
-                            w.OnMouseDown.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                    e.motion.x, e.motion.y,
-                                    oldleftdown, LeftDown,
-                                    oldrightdown, RightDown,
-                                    oldmiddledown, MiddleDown));
+                            w.OnMouseDown(new MouseEventArgs(e.motion.x, e.motion.y,
+                                                             oldleftdown, LeftDown,
+                                                             oldrightdown, RightDown,
+                                                             oldmiddledown, MiddleDown));
                         }
                         break;
                     case SDL_EventType.SDL_MOUSEBUTTONUP:
@@ -345,20 +341,18 @@ namespace ODL
                             if (e.button.button == 1 && LeftDown) LeftDown = false;
                             if (e.button.button == 2 && MiddleDown) MiddleDown = false;
                             if (e.button.button == 3 && RightDown) RightDown = false;
-                            w.OnMouseUp.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                    e.motion.x, e.motion.y,
-                                    oldleftdown, LeftDown,
-                                    oldrightdown, RightDown,
-                                    oldmiddledown, MiddleDown));
+                            w.OnMouseUp(new MouseEventArgs(e.motion.x, e.motion.y,
+                                                           oldleftdown, LeftDown,
+                                                           oldrightdown, RightDown,
+                                                           oldmiddledown, MiddleDown));
                         }
                         break;
                     case SDL_EventType.SDL_MOUSEWHEEL:
-                        w.OnMouseWheel.Invoke(w, new MouseEventArgs(OldMouseX, OldMouseY,
-                                OldMouseX, OldMouseY,
-                                oldleftdown, LeftDown,
-                                oldrightdown, RightDown,
-                                oldmiddledown, MiddleDown,
-                                e.wheel.y));
+                        w.OnMouseWheel(new MouseEventArgs(OldMouseX, OldMouseY,
+                                                          oldleftdown, LeftDown,
+                                                          oldrightdown, RightDown,
+                                                          oldmiddledown, MiddleDown,
+                                                          e.wheel.y));
                         break;
                     case SDL_EventType.SDL_KEYDOWN:
                         SDL_Keycode sym1 = e.key.keysym.sym;
@@ -371,7 +365,7 @@ namespace ODL
                         if (sym1 == SDL_Keycode.SDLK_DELETE) delete = true;
                         if (txt.Length > 0 || backspace || delete)
                         {
-                            w.OnTextInput.Invoke(w, new TextInputEventArgs(txt, backspace, delete));
+                            w.OnTextInput(new TextEventArgs(txt, backspace, delete));
                         }
                         break;
                     case SDL_EventType.SDL_KEYUP:
@@ -394,7 +388,7 @@ namespace ODL
                         }
                         string text = "";
                         foreach (char c in Encoding.UTF8.GetChars(bytes)) text += c;
-                        w.OnTextInput.Invoke(w, new TextInputEventArgs(text.TrimEnd('\x00')));
+                        w.OnTextInput(new TextEventArgs(text.TrimEnd('\x00')));
                         break;
                 }
             }

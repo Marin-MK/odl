@@ -96,60 +96,60 @@ namespace ODL
         /// <summary>
         /// The event called whenever the window has been fully loaded.
         /// </summary>
-        public EventHandler<TimeEventArgs> OnLoaded;
+        public TimespanEvent OnLoaded;
         /// <summary>
         /// The event called whenever the window is about to close.
         /// This event can cancel the close event.
         /// </summary>
-        public EventHandler<CancelEventArgs> OnClosing;
+        public BoolEvent OnClosing;
         /// <summary>
         /// The event called when the window has been closed.
         /// </summary>
-        public EventHandler<ClosedEventArgs> OnClosed;
+        public BaseEvent OnClosed;
         /// <summary>
         /// The event called when the mouse is moving.
         /// </summary>
-        public EventHandler<MouseEventArgs> OnMouseMoving;
+        public MouseEvent OnMouseMoving;
         /// <summary>
         /// The event called once one of the mouse buttons is held down.
         /// </summary>
-        public EventHandler<MouseEventArgs> OnMouseDown;
+        public MouseEvent OnMouseDown;
         /// <summary>
         /// The event called so long as one of the mouse buttons is held down.
         /// </summary>
-        public EventHandler<MouseEventArgs> OnMousePress;
+        public MouseEvent OnMousePress;
         /// <summary>
         /// The event called once one of the mouse buttons is released.
         /// </summary>
-        public EventHandler<MouseEventArgs> OnMouseUp;
+        public MouseEvent OnMouseUp;
         /// <summary>
         ///  The event called so long as the mouse wheel is being scrolled.
         /// </summary>
-        public EventHandler<MouseEventArgs> OnMouseWheel;
+        public MouseEvent OnMouseWheel;
         /// <summary>
         /// The event called every frame.
         /// </summary>
-        public EventHandler<EventArgs> OnTick;
+        public BaseEvent OnTick;
         /// <summary>
         /// The event called when the window gains focus.
         /// </summary>
-        public EventHandler<FocusEventArgs> OnFocusGained;
+        public BaseEvent OnFocusGained;
         /// <summary>
         /// The event called when the window loses focus.
         /// </summary>
-        public EventHandler<FocusEventArgs> OnFocusLost;
+        public BaseEvent OnFocusLost;
         /// <summary>
         /// The event called when free text input has been enabled.
         /// </summary>
-        public EventHandler<TextInputEventArgs> OnTextInput;
+        public TextEvent OnTextInput;
         /// <summary>
         /// The event called when the window has been resized.
         /// </summary>
-        public EventHandler<WindowEventArgs> OnWindowResized;
+        public BaseEvent OnWindowResized;
         /// <summary>
         /// The event called when the window has changed size.
         /// </summary>
-        public EventHandler<WindowEventArgs> OnWindowSizeChanged;
+        public BaseEvent OnWindowSizeChanged;
 
         private DateTime _StartTime;
         private bool Init = false;
@@ -157,20 +157,20 @@ namespace ODL
         public Window(Window Parent = null)
         {
             this.Parent = Parent;
-            this.OnLoaded = new EventHandler<TimeEventArgs>(Window_Loaded);
-            this.OnClosing = new EventHandler<CancelEventArgs>(Window_Closing);
-            this.OnClosed = new EventHandler<ClosedEventArgs>(Window_Closed);
-            this.OnMouseMoving = new EventHandler<MouseEventArgs>(Window_MouseMoving);
-            this.OnMouseDown = new EventHandler<MouseEventArgs>(Window_MouseDown);
-            this.OnMousePress = new EventHandler<MouseEventArgs>(Window_MousePress);
-            this.OnMouseUp = new EventHandler<MouseEventArgs>(Window_MouseUp);
-            this.OnMouseWheel = new EventHandler<MouseEventArgs>(Window_MouseWheel);
-            this.OnTick = new EventHandler<EventArgs>(Window_Tick);
-            this.OnFocusGained = new EventHandler<FocusEventArgs>(Window_FocusGained);
-            this.OnFocusLost = new EventHandler<FocusEventArgs>(Window_FocusLost);
-            this.OnTextInput = new EventHandler<TextInputEventArgs>(Window_TextInput);
-            this.OnWindowResized = new EventHandler<WindowEventArgs>(Window_Resized);
-            this.OnWindowSizeChanged = new EventHandler<WindowEventArgs>(Window_SizeChanged);
+            this.OnLoaded = Window_Loaded;
+            this.OnClosing = Window_Closing;
+            this.OnClosed = Window_Closed;
+            this.OnMouseMoving = Window_MouseMoving;
+            this.OnMouseDown = Window_MouseDown;
+            this.OnMousePress = Window_MousePress;
+            this.OnMouseUp = Window_MouseUp;
+            this.OnMouseWheel = Window_MouseWheel;
+            this.OnTick = Window_Tick;
+            this.OnFocusGained = Window_FocusGained;
+            this.OnFocusLost = Window_FocusLost;
+            this.OnTextInput = Window_TextInput;
+            this.OnWindowResized = Window_Resized;
+            this.OnWindowSizeChanged = Window_SizeChanged;
 
             if (this.GetType() == typeof(Window)) { Initialize(); }
         }
@@ -232,11 +232,11 @@ namespace ODL
         }
 
         /// <summary>
-        /// Marks the window as fully loaded and launched the OnLoaded event.
+        /// Marks the window as fully loaded and launches the OnLoaded event.
         /// </summary>
         public void Start()
         {
-            this.OnLoaded.Invoke(this, new TimeEventArgs(DateTime.Now - _StartTime));
+            this.OnLoaded(new TimespanEventArgs(DateTime.Now - _StartTime));
         }
 
         /// <summary>
@@ -389,50 +389,47 @@ namespace ODL
             SDL_RaiseWindow(this.SDL_Window);
         }
 
-        public void Window_Closing(object sender, CancelEventArgs e) { }
+        public void Window_Closing(BoolEventArgs e) { }
 
-        public void Window_Closed(object sender, ClosedEventArgs e)
+        public void Window_Closed(BaseEventArgs e)
         {
             this.Closed = true;
         }
         
-        public void Window_Loaded(object sender, TimeEventArgs e) { }
+        public void Window_Loaded(TimespanEventArgs e) { }
 
-        public void Window_MouseMoving(object sender, MouseEventArgs e) { }
+        public void Window_MouseMoving(MouseEventArgs e) { }
 
-        public void Window_MouseDown(object sender, MouseEventArgs e) { }
+        public void Window_MouseDown(MouseEventArgs e) { }
 
-        public void Window_MousePress(object sender, MouseEventArgs e) { }
+        public void Window_MousePress(MouseEventArgs e) { }
 
-        public void Window_MouseUp(object sender, MouseEventArgs e) { }
+        public void Window_MouseUp(MouseEventArgs e) { }
 
-        public void Window_MouseWheel(object sender, MouseEventArgs e) { }
+        public void Window_MouseWheel(MouseEventArgs e) { }
 
-        public void Window_Tick(object sender, EventArgs e)
+        public void Window_Tick(BaseEventArgs e) { }
+
+        private void Window_FocusGained(BaseEventArgs e) { }
+
+        private void Window_FocusLost(BaseEventArgs e) { }
+
+        public void Window_TextInput(TextEventArgs e) { }
+
+        private void Window_SizeChanged(BaseEventArgs e)
         {
-            
-        }
-
-        private void Window_FocusGained(object sender, FocusEventArgs e) { }
-
-        private void Window_FocusLost(object sender, FocusEventArgs e) { }
-
-        public void Window_TextInput(object sender, TextInputEventArgs e) { }
-
-        private void Window_SizeChanged(object sender, WindowEventArgs e)
-        {
-            this.Viewport.Width = e.Width;
-            this.Viewport.Height = e.Height;
-            this.BackgroundViewport.Width = e.Width;
-            this.BackgroundViewport.Height = e.Height;
-            this.TopViewport.Width = e.Width;
-            this.TopViewport.Height = e.Height;
+            UpdateSize();
+            this.Viewport.Width = this.Width;
+            this.Viewport.Height = this.Height;
+            this.BackgroundViewport.Width = this.Width;
+            this.BackgroundViewport.Height = this.Height;
+            this.TopViewport.Width = this.Width;
+            this.TopViewport.Height = this.Height;
             (BackgroundSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
             (TopSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
-            UpdateSize();
         }
 
-        private void Window_Resized(object sender, WindowEventArgs e) { }
+        private void Window_Resized(BaseEventArgs e) { }
 
         /// <summary>
         /// Updates the window and renderer every frame.
@@ -456,13 +453,13 @@ namespace ODL
         /// </summary>
         public void Close()
         {
-            CancelEventArgs e = new CancelEventArgs();
-            this.OnClosing.Invoke(this, e);
-            if (!e.Cancel)
+            BoolEventArgs e = new BoolEventArgs();
+            this.OnClosing(e);
+            if (!e.Value)
             {
                 this.Dispose();
                 SDL_DestroyWindow(this.SDL_Window);
-                this.OnClosed.Invoke(this, new ClosedEventArgs());
+                this.OnClosed(new BaseEventArgs());
             }
         }
 
