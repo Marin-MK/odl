@@ -281,14 +281,14 @@ namespace ODL
                         int width1;
                         int height1;
                         SDL_GetWindowSize(w.SDL_Window, out width1, out height1);
-                        w.OnWindowSizeChanged(new BaseEventArgs());
-                        w.OnWindowResized(new BaseEventArgs());
+                        w.OnSizeChanged(new BaseEventArgs());
+                        w.OnResized(new BaseEventArgs());
                         break;
                     case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
                         int width2;
                         int height2;
                         SDL_GetWindowSize(w.SDL_Window, out width2, out height2);
-                        w.OnWindowSizeChanged(new BaseEventArgs());
+                        w.OnSizeChanged(new BaseEventArgs());
                         break;
                     case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                         w.Focus = true;
@@ -309,8 +309,8 @@ namespace ODL
                         if (e.motion.x != OldMouseX || e.motion.y != OldMouseY)
                         {
                             LeftDown = (e.button.button & 1) == 1;
-                            RightDown = (e.button.button & 2) == 2;
-                            MiddleDown = (e.button.button & 4) == 4;
+                            MiddleDown = (e.button.button & 2) == 2;
+                            RightDown = (e.button.button & 4) == 4;
                             w.OnMouseMoving(new MouseEventArgs(e.motion.x, e.motion.y,
                                                                oldleftdown, LeftDown,
                                                                oldrightdown, RightDown,
@@ -320,32 +320,22 @@ namespace ODL
                         OldMouseY = e.motion.y;
                         break;
                     case SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                        if (e.button.button == 1 && !LeftDown ||
-                            e.button.button == 2 && !MiddleDown ||
-                            e.button.button == 3 && !RightDown)
-                        {
-                            if (e.button.button == 1) LeftDown = true;
-                            if (e.button.button == 2) MiddleDown = true;
-                            if (e.button.button == 3) RightDown = true;
-                            w.OnMouseDown(new MouseEventArgs(e.motion.x, e.motion.y,
-                                                             oldleftdown, LeftDown,
-                                                             oldrightdown, RightDown,
-                                                             oldmiddledown, MiddleDown));
-                        }
+                        if (e.button.button == 1) LeftDown = true;
+                        if (e.button.button == 2) MiddleDown = true;
+                        if (e.button.button == 3) RightDown = true;
+                        w.OnMouseDown(new MouseEventArgs(e.motion.x, e.motion.y,
+                                                         oldleftdown, LeftDown,
+                                                         oldrightdown, RightDown,
+                                                         oldmiddledown, MiddleDown));
                         break;
                     case SDL_EventType.SDL_MOUSEBUTTONUP:
-                        if (e.button.button == 1 && LeftDown ||
-                            e.button.button == 2 && MiddleDown ||
-                            e.button.button == 3 && RightDown)
-                        {
-                            if (e.button.button == 1 && LeftDown) LeftDown = false;
-                            if (e.button.button == 2 && MiddleDown) MiddleDown = false;
-                            if (e.button.button == 3 && RightDown) RightDown = false;
-                            w.OnMouseUp(new MouseEventArgs(e.motion.x, e.motion.y,
-                                                           oldleftdown, LeftDown,
-                                                           oldrightdown, RightDown,
-                                                           oldmiddledown, MiddleDown));
-                        }
+                        if (e.button.button == 1) LeftDown = false;
+                        if (e.button.button == 2) MiddleDown = false;
+                        if (e.button.button == 3) RightDown = false;
+                        w.OnMouseUp(new MouseEventArgs(e.motion.x, e.motion.y,
+                                                       oldleftdown, LeftDown,
+                                                       oldrightdown, RightDown,
+                                                       oldmiddledown, MiddleDown));
                         break;
                     case SDL_EventType.SDL_MOUSEWHEEL:
                         w.OnMouseWheel(new MouseEventArgs(OldMouseX, OldMouseY,

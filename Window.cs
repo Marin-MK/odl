@@ -63,7 +63,7 @@ namespace ODL
         /// <summary>
         /// Whether or not the window has been closed.
         /// </summary>
-        public bool Closed { get; protected set; } = false;
+        public bool IsClosed { get; protected set; } = false;
         /// <summary>
         /// The index of the screen the window is displayed on.
         /// </summary>
@@ -145,11 +145,11 @@ namespace ODL
         /// <summary>
         /// The event called when the window has been resized.
         /// </summary>
-        public BaseEvent OnWindowResized;
+        public BaseEvent OnResized;
         /// <summary>
         /// The event called when the window has changed size.
         /// </summary>
-        public BaseEvent OnWindowSizeChanged;
+        public BaseEvent OnSizeChanged;
 
         private DateTime _StartTime;
         private bool Init = false;
@@ -157,20 +157,20 @@ namespace ODL
         public Window(Window Parent = null)
         {
             this.Parent = Parent;
-            this.OnLoaded = Window_Loaded;
-            this.OnClosing = Window_Closing;
-            this.OnClosed = Window_Closed;
-            this.OnMouseMoving = Window_MouseMoving;
-            this.OnMouseDown = Window_MouseDown;
-            this.OnMousePress = Window_MousePress;
-            this.OnMouseUp = Window_MouseUp;
-            this.OnMouseWheel = Window_MouseWheel;
-            this.OnTick = Window_Tick;
-            this.OnFocusGained = Window_FocusGained;
-            this.OnFocusLost = Window_FocusLost;
-            this.OnTextInput = Window_TextInput;
-            this.OnWindowResized = Window_Resized;
-            this.OnWindowSizeChanged = Window_SizeChanged;
+            this.OnLoaded = Loaded;
+            this.OnClosing = Closing;
+            this.OnClosed = Closed;
+            this.OnMouseMoving = MouseMoving;
+            this.OnMouseDown = MouseDown;
+            this.OnMousePress = MousePress;
+            this.OnMouseUp = MouseUp;
+            this.OnMouseWheel = MouseWheel;
+            this.OnTick = Tick;
+            this.OnFocusGained = FocusGained;
+            this.OnFocusLost = FocusLost;
+            this.OnTextInput = TextInput;
+            this.OnResized = Resized;
+            this.OnSizeChanged = SizeChanged;
 
             if (this.GetType() == typeof(Window)) { Initialize(); }
         }
@@ -389,34 +389,31 @@ namespace ODL
             SDL_RaiseWindow(this.SDL_Window);
         }
 
-        public void Window_Closing(BoolEventArgs e) { }
-
-        public void Window_Closed(BaseEventArgs e)
-        {
-            this.Closed = true;
-        }
-        
-        public void Window_Loaded(TimespanEventArgs e) { }
-
-        public void Window_MouseMoving(MouseEventArgs e) { }
-
-        public void Window_MouseDown(MouseEventArgs e) { }
-
-        public void Window_MousePress(MouseEventArgs e) { }
-
-        public void Window_MouseUp(MouseEventArgs e) { }
-
-        public void Window_MouseWheel(MouseEventArgs e) { }
-
-        public void Window_Tick(BaseEventArgs e) { }
-
-        private void Window_FocusGained(BaseEventArgs e) { }
-
-        private void Window_FocusLost(BaseEventArgs e) { }
-
-        public void Window_TextInput(TextEventArgs e) { }
-
-        private void Window_SizeChanged(BaseEventArgs e)
+        public virtual void Closing(BoolEventArgs e) { }
+               
+        public virtual void Closed(BaseEventArgs e) { this.IsClosed = true; }
+               
+        public virtual void Loaded(TimespanEventArgs e) { }
+               
+        public virtual void MouseMoving(MouseEventArgs e) { }
+               
+        public virtual void MouseDown(MouseEventArgs e) { }
+               
+        public virtual void MousePress(MouseEventArgs e) { }
+               
+        public virtual void MouseUp(MouseEventArgs e) { }
+               
+        public virtual void MouseWheel(MouseEventArgs e) { }
+               
+        public virtual void Tick(BaseEventArgs e) { }
+               
+        public virtual void FocusGained(BaseEventArgs e) { }
+               
+        public virtual void FocusLost(BaseEventArgs e) { }
+               
+        public virtual void TextInput(TextEventArgs e) { }
+                
+        public virtual void SizeChanged(BaseEventArgs e)
         {
             UpdateSize();
             this.Viewport.Width = this.Width;
@@ -429,7 +426,7 @@ namespace ODL
             (TopSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
         }
 
-        private void Window_Resized(BaseEventArgs e) { }
+        public virtual void Resized(BaseEventArgs e) { }
 
         /// <summary>
         /// Updates the window and renderer every frame.
