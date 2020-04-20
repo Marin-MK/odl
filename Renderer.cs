@@ -109,6 +109,7 @@ namespace ODL
                                         {
                                             s.X = SX + (int) Math.Round(bmp.InternalX * s.ZoomX);
                                             s.Y = SY + (int) Math.Round(bmp.InternalY * s.ZoomY);
+                                            s.SrcRect = new Rect(0, 0, bmp.Width, bmp.Height);
                                             RenderSprite(s, bmp);
                                         }
                                         s.X = SX;
