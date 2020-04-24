@@ -182,8 +182,8 @@ namespace ODL
                 Src = s.SrcRect.SDL_Rect;
 
                 // Make sure the Dest size is never bigger than the Bitmap size (otherwise it'll stretch the bitmap)
-                if (Src.w > bmp.Width * s.ZoomX) Src.w = bmp.Width;
-                if (Src.h > bmp.Height * s.ZoomY) Src.h = bmp.Height;
+                //if (Src.w > bmp.Width * s.ZoomX) Src.w = bmp.Width;
+                //if (Src.h > bmp.Height * s.ZoomY) Src.h = bmp.Height;
 
                 // Additional checks, since ZoomX/ZoomY are 1 99% of the time, this way it skips the extra calculation.
                 if (s.ZoomX == 1) Dest.w = Src.w;
