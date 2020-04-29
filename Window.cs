@@ -143,10 +143,6 @@ namespace ODL
         /// </summary>
         public TextEvent OnTextInput;
         /// <summary>
-        /// The event called when the window has been resized.
-        /// </summary>
-        public BaseEvent OnResized;
-        /// <summary>
         /// The event called when the window has changed size.
         /// </summary>
         public BaseEvent OnSizeChanged;
@@ -169,7 +165,6 @@ namespace ODL
             this.OnFocusGained = FocusGained;
             this.OnFocusLost = FocusLost;
             this.OnTextInput = TextInput;
-            this.OnResized = Resized;
             this.OnSizeChanged = SizeChanged;
 
             if (this.GetType() == typeof(Window)) { Initialize(); }
@@ -425,8 +420,6 @@ namespace ODL
             (BackgroundSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
             (TopSprite.Bitmap as SolidBitmap).SetSize(this.Width, this.Height);
         }
-
-        public virtual void Resized(BaseEventArgs e) { }
 
         /// <summary>
         /// Updates the window and renderer every frame.

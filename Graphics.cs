@@ -282,7 +282,6 @@ namespace ODL
                         int height1;
                         SDL_GetWindowSize(w.SDL_Window, out width1, out height1);
                         w.OnSizeChanged(new BaseEventArgs());
-                        w.OnResized(new BaseEventArgs());
                         break;
                     case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
                         int width2;
@@ -387,10 +386,10 @@ namespace ODL
         /// <summary>
         /// Updates input, graphics and the window.
         /// </summary>
-        public static void Update(bool IgnoreErrors = false)
+        public static void Update(bool IgnoreErrors = false, bool ForceRerender = false)
         {
             UpdateInput(IgnoreErrors);
-            UpdateGraphics();
+            UpdateGraphics(ForceRerender);
             UpdateWindows();
         }
 
