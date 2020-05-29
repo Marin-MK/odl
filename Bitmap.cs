@@ -165,18 +165,8 @@ namespace ODL
         /// </summary>
         public virtual void Clear()
         {
-            if (Locked) throw new BitmapLockedException();
-            if (this.Surface != IntPtr.Zero && this.Surface != null)
-            {
-                SDL_FreeSurface(this.Surface);
-                SDL_DestroyTexture(this.Texture);
-                if (ToneBmp != null) ToneBmp.Dispose();
-                ToneBmp = null;
-                this.Surface = SDL_CreateRGBSurface(0, this.Width, this.Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-                this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-                this.RecreateTexture();
-                if (this.Renderer != null) this.Renderer.Update();
-            }
+            // Filling an alpha rectangle is faster than recreating the bitmap.
+            FillRect(0, 0, this.Width, this.Height, Color.ALPHA);
         }
 
         /// <summary>
@@ -393,7 +383,7 @@ namespace ODL
             if (Locked) throw new BitmapLockedException();
             for (int x = x1 > x2 ? x2 : x1; (x1 > x2) ? (x <= x1) : (x <= x2); x++)
             {
-                double fact = ((double)x - x1) / (x2 - x1);
+                double fact = ((double) x - x1) / (x2 - x1);
                 int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
                 if (y >= 0) SetPixel(x, y, r, g, b, a);
             }
@@ -1828,7 +1818,7 @@ namespace ODL
 
     public class BitmapLockedException : Exception
     {
-        public BitmapLockedException() : base("The bitmap was locked for writing, making it unchangeable.")
+        public BitmapLockedException() : base("The bitmap was locked for writing.")
         {
 
         }

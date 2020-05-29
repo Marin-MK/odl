@@ -61,7 +61,7 @@ namespace ODL
             if (System.IO.File.Exists(this.Name + ".ttf"))
                 this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
             else if (!string.IsNullOrEmpty(FontPath))
-                this.SDL_Font = TTF_OpenFont(FontPath + "\\" + this.Name + ".ttf", this.Size);
+                this.SDL_Font = TTF_OpenFont(FontPath + "/" + this.Name + ".ttf", this.Size);
             else this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
             if (this.SDL_Font == IntPtr.Zero)
             {
@@ -124,6 +124,13 @@ namespace ODL
                 if (f.Name == Name && f.Size == Size) return f;
             }
             return new Font(Name, Size);
+        }
+
+        public static bool Exists(string Name)
+        {
+            if (System.IO.File.Exists(Name + ".ttf")) return true;
+            else if (!string.IsNullOrEmpty(FontPath) && System.IO.File.Exists(FontPath + "/" + Name + ".ttf")) return true;
+            return false;
         }
 
         public void Dispose()

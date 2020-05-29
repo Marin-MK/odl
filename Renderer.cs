@@ -195,7 +195,7 @@ namespace ODL
             if (!bmp.Locked && !(bmp is SolidBitmap))
             {
                 Graphics.Log("ERR: Bitmap is locked");
-                throw new Exception("Bitmap not locked for writing - can't render it");
+                throw new BitmapLockedException();
             }
             foreach (Point p in Points)
             {
