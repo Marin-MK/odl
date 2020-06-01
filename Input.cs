@@ -32,14 +32,20 @@ namespace ODL
 
         public static bool Trigger(SDL_Keycode code)
         {
-            long key = Convert.ToInt64(code);
-            return !OldKeysDown.Contains(key) && KeysDown.Contains(key);
+            return Trigger(Convert.ToInt64(code));
+        }
+        public static bool Trigger(long Code)
+        {
+            return !OldKeysDown.Contains(Code) && KeysDown.Contains(Code);
         }
 
         public static bool Press(SDL_Keycode code)
         {
-            long key = Convert.ToInt64(code);
-            return KeysDown.Contains(key);
+            return Press(Convert.ToInt64(code));
+        }
+        public static bool Press(long Code)
+        {
+            return KeysDown.Contains(Code);
         }
 
         public static void StartTextInput()

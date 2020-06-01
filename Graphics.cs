@@ -43,13 +43,26 @@ namespace ODL
         /// </summary>
         public static bool Initialized = false;
 
+        private static ObjectCollection CurrentObjects;
+
+        public static void MarkObjects()
+        {
+            CurrentObjects = new ObjectCollection(Renderers[0]);
+        }
+
+        public static void ShowDifferences()
+        {
+            if (CurrentObjects == null) return;
+            CurrentObjects.CompareWith(new ObjectCollection(Renderers[0]));
+        }
+
         /// <summary>
         /// Initializes SDL and its components.
         /// </summary>
         public static void Start()
         {
             if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
-                IMG_Init(IMG_InitFlags.IMG_INIT_PNG) < 0 ||
+                IMG_Init(IMG_InitFlags.IMG_INIT_PNG) != (int) IMG_InitFlags.IMG_INIT_PNG ||
                 TTF_Init() < 0)
             {
                 throw new Exception(SDL_GetError());
