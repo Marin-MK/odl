@@ -259,6 +259,13 @@ namespace ODL
         {
             this.Width = width;
             this.Height = height;
+            this.Viewport.Width = width;
+            this.Viewport.Height = height;
+            BackgroundViewport.Width = width;
+            BackgroundViewport.Height = height;
+            ((SolidBitmap) BackgroundSprite.Bitmap).SetSize(width, height);
+            TopViewport.Width = width;
+            TopViewport.Height = height;
             if (Initialized())
             {
                 SDL_SetWindowSize(this.SDL_Window, width, height);
@@ -316,7 +323,6 @@ namespace ODL
         public void SetIcon(string filename)
         {
             Bitmap bmp = new Bitmap(filename);
-            this.Icon = bmp;
             if (Initialized()) SetIcon(bmp);
         }
         /// <summary>
@@ -470,6 +476,18 @@ namespace ODL
             {
                 (BackgroundSprite.Bitmap as SolidBitmap).SetColor(c);
             }
+        }
+
+        public Bitmap Screenshot()
+        {
+            Bitmap bmp = new Bitmap(SDL_CreateRGBSurfaceWithFormat(0, this.Width, this.Height, 32, SDL_PIXELFORMAT_RGBA8888));
+            SDL_Rect rect = new SDL_Rect();
+            rect.x = 0;
+            rect.y = 0;
+            rect.w = bmp.Width;
+            rect.h = bmp.Height;
+            SDL_RenderReadPixels(this.Renderer.SDL_Renderer, ref rect, SDL_PIXELFORMAT_RGBA8888, bmp.SurfaceObject.pixels, bmp.SurfaceObject.pitch);
+            return bmp;
         }
     }
 
