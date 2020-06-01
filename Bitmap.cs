@@ -149,8 +149,8 @@ namespace ODL
                 SDL_FreeSurface(this.Surface);
                 SDL_DestroyTexture(this.Texture);
             }
-            if (ToneBmp != null) ToneBmp.Dispose();
-            ToneBmp = null;
+            if (ColorToneBmp != null) ColorToneBmp.Dispose();
+            ColorToneBmp = null;
             this.Disposed = true;
             if (this.Renderer != null) this.Renderer.Update();
         }
@@ -1765,34 +1765,50 @@ namespace ODL
             if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
             this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
             if (blend != SDL_BlendMode.SDL_BLENDMODE_NONE) SDL_SetTextureBlendMode(this.Texture, blend);
-            if (ToneBmp != null) ToneBmp.Dispose();
-            ToneBmp = null;
+            if (ColorToneBmp != null) ColorToneBmp.Dispose();
+            ColorToneBmp = null;
             this.Renderer.Update();
         }
 
-        private Bitmap ToneBmp;
-        // Applies a Sprite's Tone on a Bitmap. CPU-intensive.
-        public virtual IntPtr ToneTexture(Tone Tone)
+        private Bitmap ColorToneBmp;
+        private Color ColorToneColor;
+        private Tone ColorToneTone;
+        // Applies a Sprite's Color and Tone. CPU-intensive.
+        public virtual IntPtr ColorToneTexture(Color Color, Tone Tone)
         {
-            if (ToneBmp != null) return ToneBmp.Texture;
-            ToneBmp = new Bitmap(Width, Height);
-            ToneBmp.Renderer = this.Renderer;
-            ToneBmp.Unlock();
+            if (ColorToneBmp != null &&
+                ColorToneColor.Red == Color.Red && ColorToneColor.Green == Color.Green && ColorToneColor.Blue == Color.Blue && ColorToneColor.Alpha == Color.Alpha &&
+                ColorToneTone.Red == Tone.Red && ColorToneTone.Green == Tone.Green && ColorToneTone.Blue == Tone.Blue && ColorToneTone.Gray == Tone.Gray)
+            {
+                return ColorToneBmp.Texture;
+            }
+            ColorToneBmp?.Dispose();
+            ColorToneBmp = new Bitmap(Width, Height);
+            ColorToneBmp.Renderer = this.Renderer;
+            ColorToneBmp.Unlock();
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
                     Color c = GetPixel(x, y);
+                    if (c.Alpha == 0) continue;
                     Color n = new Color(c.Red, c.Green, c.Blue, c.Alpha);
                     double Avg = (c.Red + c.Green + c.Blue) / 3d;
+                    // Tone
                     n.Red = Convert.ToByte(Math.Round(c.Red - ((c.Red - Avg) * (Tone.Gray / 255d))) + Tone.Red);
                     n.Green = Convert.ToByte(Math.Round(c.Green - ((c.Green - Avg) * (Tone.Gray / 255d))) + Tone.Green);
                     n.Blue = Convert.ToByte(Math.Round(c.Blue - ((c.Blue - Avg) * (Tone.Gray / 255d))) + Tone.Blue);
-                    ToneBmp.SetPixel(x, y, n);
+                    // Color - Additive blending (with double RGB strength so it can range between 0 and 255)
+                    n.Red = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Red) * Color.Alpha / 255d + n.Red)));
+                    n.Green = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Green) * Color.Alpha / 255d + n.Green)));
+                    n.Blue = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Blue) * Color.Alpha / 255d + n.Blue)));
+                    ColorToneBmp.SetPixel(x, y, n);
                 }
             }
-            ToneBmp.Lock();
-            return ToneBmp.Texture;
+            ColorToneBmp.Lock();
+            ColorToneColor = Color.Clone();
+            ColorToneTone = Tone.Clone();
+            return ColorToneBmp.Texture;
         }
     }
 

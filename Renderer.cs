@@ -20,9 +20,25 @@ namespace ODL
         /// </summary>
         public bool Disposed = false;
         /// <summary>
-        /// Scale multiplier for rendering viewports.
+        /// An X offset for rendering viewports.
         /// </summary>
-        public float RenderScale = 1f;
+        public int RenderOffsetX = 0;
+        /// <summary>
+        /// A Y offset for rendering viewports.
+        /// </summary>
+        public int RenderOffsetY = 0;
+        /// <summary>
+        /// X Scale multiplier for rendering viewports.
+        /// </summary>
+        public float RenderScaleX = 1f;
+        /// <summary>
+        /// Y Scale multiplier for rendering viewports.
+        /// </summary>
+        public float RenderScaleY = 1f;
+        /// <summary>
+        /// Additional renderer opacity factor that applies to all sprites and viewports.
+        /// </summary>
+        public byte Opacity = 255;
 
         /// <summary>
         /// Whether the renderer needs to re-render.
@@ -72,16 +88,30 @@ namespace ODL
                         Graphics.Log("Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : "") + $" z={vp.Z} ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
                         SDL_Rect ViewportRect = new SDL_Rect();
                         SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
-                        ViewportRect.x = vp.X - vp.OX;
-                        ViewportRect.y = vp.Y - vp.OY;
+                        ViewportRect.x = vp.X - vp.OX + RenderOffsetX;
+                        ViewportRect.y = vp.Y - vp.OY + RenderOffsetY;
                         if (vp.Width == -1) vp.Width = ViewportRect.w;
                         if (vp.Height == -1) vp.Height = ViewportRect.h;
                         ViewportRect.w = vp.Width;
                         ViewportRect.h = vp.Height;
-                        if (RenderScale != 1f)
+                        int xoffset = 0;
+                        int yoffset = 0;
+                        if (ViewportRect.x < 0)
+                        {
+                            xoffset = ViewportRect.x;
+                            ViewportRect.x = 0;
+                            ViewportRect.w -= -xoffset;
+                        }
+                        if (ViewportRect.y < 0)
+                        {
+                            yoffset = ViewportRect.y;
+                            ViewportRect.y = 0;
+                            ViewportRect.h -= -yoffset;
+                        }
+                        if (RenderScaleX != 1f || RenderScaleY != 1f)
                         {
                             SDL_RenderSetLogicalSize(SDL_Renderer, vp.Width, vp.Height);
-                            SDL_RenderSetScale(SDL_Renderer, RenderScale, RenderScale);
+                            SDL_RenderSetScale(SDL_Renderer, RenderScaleX, RenderScaleY);
                         }
                         SDL_RenderSetViewport(SDL_Renderer, ref ViewportRect);
                         vp.Sprites.Sort(delegate (Sprite s1, Sprite s2)
@@ -97,28 +127,25 @@ namespace ODL
                                 vp.Sprites.RemoveAt(j);
                                 Graphics.Log("Sprite " + j.ToString() + " removed as it was disposed");
                             }
-                            else if (s.Visible)
+                            else if (s.Visible && s.Bitmap != null && !s.Bitmap.Disposed && s.Opacity > 0 && s.ZoomX != 0 && s.ZoomY != 0)
                             {
-                                if (s.Bitmap != null && !s.Bitmap.Disposed)
+                                if (s.Bitmap is LargeBitmap)
                                 {
-                                    if (s.Bitmap is LargeBitmap)
+                                    int SX = s.X;
+                                    int SY = s.Y;
+                                    foreach (Bitmap bmp in ((LargeBitmap) s.Bitmap).InternalBitmaps)
                                     {
-                                        int SX = s.X;
-                                        int SY = s.Y;
-                                        foreach (Bitmap bmp in ((LargeBitmap) s.Bitmap).InternalBitmaps)
-                                        {
-                                            s.X = SX + (int) Math.Round(bmp.InternalX * s.ZoomX);
-                                            s.Y = SY + (int) Math.Round(bmp.InternalY * s.ZoomY);
-                                            s.SrcRect = new Rect(0, 0, bmp.Width, bmp.Height);
-                                            RenderSprite(s, bmp);
-                                        }
-                                        s.X = SX;
-                                        s.Y = SY;
+                                        s.X = SX + (int) Math.Round(bmp.InternalX * s.ZoomX);
+                                        s.Y = SY + (int) Math.Round(bmp.InternalY * s.ZoomY);
+                                        s.SrcRect = new Rect(0, 0, bmp.Width, bmp.Height);
+                                        RenderSprite(s, bmp, xoffset, yoffset);
                                     }
-                                    else
-                                    {
-                                        RenderSprite(s, s.Bitmap);
-                                    }
+                                    s.X = SX;
+                                    s.Y = SY;
+                                }
+                                else
+                                {
+                                    RenderSprite(s, s.Bitmap, xoffset, yoffset);
                                 }
                             }
                         }
@@ -137,22 +164,18 @@ namespace ODL
         /// Renders an individual sprite.
         /// </summary>
         /// <param name="s">The sprite to render.</param>
-        public void RenderSprite(Sprite s, Bitmap bmp)
+        public void RenderSprite(Sprite s, Bitmap bmp, int XOffset, int YOffset)
         {
             Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? s.Name + " " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({bmp.Width},{bmp.Height}) ox: {s.OX} oy: {s.OY}");
             IntPtr Texture = IntPtr.Zero;
-            if (s.Tone.Red == 0 && s.Tone.Green == 0 && s.Tone.Blue == 0 && s.Tone.Gray == 0)
+            if (s.Tone.Red == 0 && s.Tone.Green == 0 && s.Tone.Blue == 0 && s.Tone.Gray == 0 &&
+                s.Color.Alpha == 0)
                  Texture = bmp.Texture;
-            else Texture = bmp.ToneTexture(s.Tone);
+            else Texture = bmp.ColorToneTexture(s.Color, s.Tone);
 
-            // Color
-            byte Red = s.Color.Red;
-            byte Green = s.Color.Green;
-            byte Blue = s.Color.Blue;
-            // Color.Alpha + Opacity
-            byte Alpha = Convert.ToByte(255d * (s.Color.Alpha / 255d) * (s.Opacity / 255d));
+            // Sprite Opacity + Renderer opacity
+            byte Alpha = Convert.ToByte(255d * (s.Opacity / 255d) * (this.Opacity / 255d));
 
-            SDL_SetTextureColorMod(Texture, Red, Green, Blue);
             SDL_SetTextureAlphaMod(Texture, Alpha);
 
             List<Point> Points;
@@ -181,10 +204,6 @@ namespace ODL
             {
                 Src = s.SrcRect.SDL_Rect;
 
-                // Make sure the Dest size is never bigger than the Bitmap size (otherwise it'll stretch the bitmap)
-                //if (Src.w > bmp.Width * s.ZoomX) Src.w = bmp.Width;
-                //if (Src.h > bmp.Height * s.ZoomY) Src.h = bmp.Height;
-
                 // Additional checks, since ZoomX/ZoomY are 1 99% of the time, this way it skips the extra calculation.
                 if (s.ZoomX == 1) Dest.w = Src.w;
                 else Dest.w = (int) Math.Round(Src.w * s.ZoomX);
@@ -199,8 +218,8 @@ namespace ODL
             }
             foreach (Point p in Points)
             {
-                Dest.x = p.X - s.OX;
-                Dest.y = p.Y - s.OY;
+                Dest.x = p.X - (int) Math.Round(s.OX * s.ZoomX) + XOffset;
+                Dest.y = p.Y - (int) Math.Round(s.OY * s.ZoomY) + YOffset;
 
                 if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
                 {

@@ -81,6 +81,11 @@ namespace ODL
             this.Alpha = Alpha;
         }
 
+        public Color Clone()
+        {
+            return new Color(this.Red, this.Green, this.Blue, this.Alpha);
+        }
+
         public override string ToString()
         {
             return $"(Color: {this.Red},{this.Green},{this.Blue},{this.Alpha})";

@@ -19,7 +19,7 @@ namespace ODL
         /// The viewport associated with the sprite.
         /// </summary>
         public Viewport Viewport { get; protected set; }
-        private Rect _SrcRect;
+        private Rect _SrcRect = new Rect(0, 0, 0, 0);
         /// <summary>
         /// The rectangle within the bitmap displayed when rendered.
         /// </summary>
@@ -105,7 +105,7 @@ namespace ODL
         /// The origin y position of the sprite.
         /// </summary>
         public int OY { get { return _OY; } set { if (value != _OY) Viewport.Update(); _OY = value; } }
-        private Color _Color = new Color(255, 255, 255, 255);
+        private Color _Color = new Color(255, 255, 255, 0);
         /// <summary>
         /// The color of the sprite.
         /// </summary>

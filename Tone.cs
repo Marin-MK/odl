@@ -37,6 +37,11 @@ namespace ODL
             this.Gray = Gray;
         }
 
+        public Tone Clone()
+        {
+            return new Tone(this.Red, this.Green, this.Blue, this.Gray);
+        }
+
         public void Dispose()
         {
             throw new NotImplementedException();

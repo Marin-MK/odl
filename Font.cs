@@ -38,8 +38,6 @@ namespace ODL
         {
             if (this.Name != Name)
             {
-                if (Name == "Fire Red") Name = "fire_red";
-                if (Name == "Fire Red Small") Name = "fire_red_small";
                 this.Name = Name;
                 if (Reload) ReloadFont();
             }
@@ -58,11 +56,7 @@ namespace ODL
         {
             if (SDL_Font != IntPtr.Zero) TTF_CloseFont(SDL_Font);
             SDL_Font = IntPtr.Zero;
-            if (System.IO.File.Exists(this.Name + ".ttf"))
-                this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
-            else if (!string.IsNullOrEmpty(FontPath))
-                this.SDL_Font = TTF_OpenFont(FontPath + "/" + this.Name + ".ttf", this.Size);
-            else this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
+            if (System.IO.File.Exists(this.Name + ".ttf")) this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
             if (this.SDL_Font == IntPtr.Zero)
             {
                 throw new Exception("Invalid font: '" + this.Name + "'");
