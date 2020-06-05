@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using static SDL2.SDL;
 
-namespace ODL
+namespace odl
 {
     public class SolidBitmap : Bitmap
     {

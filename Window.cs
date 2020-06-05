@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using static SDL2.SDL;
 
-namespace ODL
+namespace odl
 {
     public class Window : IDisposable
     {
@@ -166,14 +166,12 @@ namespace ODL
             this.OnFocusLost = FocusLost;
             this.OnTextInput = TextInput;
             this.OnSizeChanged = SizeChanged;
-
-            if (this.GetType() == typeof(Window)) { Initialize(); }
         }
 
         /// <summary>
-        /// Called in the constructor to actually create the window and renderer.
+        /// Called to actually create the window and renderer.
         /// </summary>
-        public void Initialize()
+        public void Initialize(bool HardwareAcceleration = true, bool VSync = false)
         {
             if (Graphics.Windows.Contains(this)) return;
             _StartTime = DateTime.Now;
@@ -190,7 +188,10 @@ namespace ODL
             {
                 SDL_SetWindowIcon(this.SDL_Window, this.Icon.Surface);
             }
-            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, SDL_RendererFlags.SDL_RENDERER_ACCELERATED));
+            SDL_RendererFlags renderflags = 0;
+            if (HardwareAcceleration) renderflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
+            if (VSync) renderflags |= SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC;
+            this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, renderflags));
             
             if (Graphics.MaxTextureSize == null)
             {
@@ -469,7 +470,7 @@ namespace ODL
         /// <summary>
         /// Sets the inner background color for the window.
         /// </summary>
-        public void SetBackgroundColor(Color c)
+        public virtual void SetBackgroundColor(Color c)
         {
             this.BackgroundColor = c;
             if (Initialized())

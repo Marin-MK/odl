@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using static SDL2.SDL_ttf;
 
-namespace ODL
+namespace odl
 {
     public class Font : IDisposable
     {

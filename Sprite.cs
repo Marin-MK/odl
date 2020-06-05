@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ODL
+namespace odl
 {
     public class Sprite : ISprite, IDisposable
     {

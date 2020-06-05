@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using static SDL2.SDL;
 using static SDL2.SDL_ttf;
 
-namespace ODL
+namespace odl
 {
     public class LargeBitmap : Bitmap
     {

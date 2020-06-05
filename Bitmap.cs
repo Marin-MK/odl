@@ -6,10 +6,12 @@ using System.Runtime.InteropServices;
 using static SDL2.SDL;
 using static SDL2.SDL_ttf;
 
-namespace ODL
+namespace odl
 {
     public class Bitmap : IDisposable
     {
+        public static BlendMode DefaultBlendMode = BlendMode.Blend;
+
         /// <summary>
         /// The pointer to the SDL_Surface.
         /// </summary>
@@ -132,7 +134,7 @@ namespace ODL
 
         ~Bitmap()
         {
-            if (!Disposed && (this.Surface != IntPtr.Zero || this.Texture != IntPtr.Zero))
+            if (!Disposed || this.Surface != IntPtr.Zero || this.Texture != IntPtr.Zero)
             {
                 Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
             }
@@ -149,8 +151,11 @@ namespace ODL
                 SDL_FreeSurface(this.Surface);
                 SDL_DestroyTexture(this.Texture);
             }
-            if (ColorToneBmp != null) ColorToneBmp.Dispose();
+            ColorToneBmp?.Dispose();
             ColorToneBmp = null;
+            this.Surface = IntPtr.Zero;
+            this.Texture = IntPtr.Zero;
+            this.SurfaceObject = new SDL_Surface();
             this.Disposed = true;
             if (this.Renderer != null) this.Renderer.Update();
         }
@@ -1519,7 +1524,11 @@ namespace ODL
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
-            SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
+            SDL_BlendMode blendmode = SDL_BlendMode.SDL_BLENDMODE_NONE;
+            if (DefaultBlendMode == BlendMode.Addition) blendmode = SDL_BlendMode.SDL_BLENDMODE_ADD;
+            else if (DefaultBlendMode == BlendMode.Blend) blendmode = SDL_BlendMode.SDL_BLENDMODE_BLEND;
+            else if (DefaultBlendMode == BlendMode.Modulation) blendmode = SDL_BlendMode.SDL_BLENDMODE_MOD;
+            SDL_SetTextureBlendMode(this.Texture, blendmode);
             if (this.Renderer != null) this.Renderer.Update();
         }
 
@@ -1671,7 +1680,11 @@ namespace ODL
             if (rightalign) X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
             TextBitmap.Dispose();
-            SDL_SetTextureBlendMode(this.Texture, SDL_BlendMode.SDL_BLENDMODE_ADD);
+            SDL_BlendMode blendmode = SDL_BlendMode.SDL_BLENDMODE_NONE;
+            if (DefaultBlendMode == BlendMode.Addition) blendmode = SDL_BlendMode.SDL_BLENDMODE_ADD;
+            else if (DefaultBlendMode == BlendMode.Blend) blendmode = SDL_BlendMode.SDL_BLENDMODE_BLEND;
+            else if (DefaultBlendMode == BlendMode.Modulation) blendmode = SDL_BlendMode.SDL_BLENDMODE_MOD;
+            SDL_SetTextureBlendMode(this.Texture, blendmode);
             if (this.Renderer != null) this.Renderer.Update();
         }
 
@@ -1810,6 +1823,14 @@ namespace ODL
             ColorToneTone = Tone.Clone();
             return ColorToneBmp.Texture;
         }
+    }
+
+    public enum BlendMode
+    {
+        Addition,
+        Modulation,
+        Blend,
+        None
     }
 
     public enum DrawOptions

@@ -1,7 +1,7 @@
 ﻿using System;
 using static SDL2.SDL;
 
-namespace ODL
+namespace odl
 {
     public class Tone : IDisposable
     {

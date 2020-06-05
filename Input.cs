@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using static SDL2.SDL;
 
-namespace ODL
+namespace odl
 {
     public static class Input
     {

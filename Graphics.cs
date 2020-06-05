@@ -6,7 +6,7 @@ using static SDL2.SDL;
 using static SDL2.SDL_image;
 using static SDL2.SDL_ttf;
 
-namespace ODL
+namespace odl
 {
     public static class Graphics
     {

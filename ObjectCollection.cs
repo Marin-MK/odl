@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ODL
+namespace odl
 {
     public class ObjectCollection
     {

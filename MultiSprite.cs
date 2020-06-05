@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ODL
+namespace odl
 {
     public class MultiSprite : ISprite, IDisposable
     {

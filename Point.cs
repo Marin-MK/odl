@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ODL
+namespace odl
 {
     public class Point : IDisposable
     {

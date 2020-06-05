@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ODL
+namespace odl
 {
     public delegate void BaseEvent(BaseEventArgs Args);
     public delegate void BoolEvent(BoolEventArgs Args);
