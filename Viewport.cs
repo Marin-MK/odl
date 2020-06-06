@@ -7,9 +7,9 @@ namespace odl
     public class Viewport : IDisposable
     {
         /// <summary>
-        /// The default renderer assigned if no renderer is specified.
+        /// The default window assigned if no window is specified.
         /// </summary>
-        public static Renderer DefaultRenderer;
+        public static Window DefaultWindow;
 
         /// <summary>
         /// The debug name of the viewport.
@@ -91,27 +91,27 @@ namespace odl
 
         #region Constructor Overloads
         public Viewport(int X, int Y, int Width, int Height)
-            : this(DefaultRenderer, X, Y, Width, Height) { }
+            : this(DefaultWindow, X, Y, Width, Height) { }
         public Viewport(Point p, Size s)
-            : this(DefaultRenderer, p.X, p.Y, s.Width, s.Height) { }
+            : this(DefaultWindow, p.X, p.Y, s.Width, s.Height) { }
         public Viewport(Point p, int Width, int Height)
-            : this(DefaultRenderer, p.X, p.Y, Width, Height) { }
+            : this(DefaultWindow, p.X, p.Y, Width, Height) { }
         public Viewport(int X, int Y, Size s)
-            : this(DefaultRenderer, X, Y, s.Width, s.Height) { }
+            : this(DefaultWindow, X, Y, s.Width, s.Height) { }
         public Viewport(Rect rect)
-            : this(DefaultRenderer, rect.X, rect.Y, rect.Width, rect.Height) { }
-        public Viewport(Renderer Renderer, Point p, Size s)
-            : this(Renderer, p.X, p.Y, s.Width, s.Height) { }
-        public Viewport(Renderer Renderer, Point p, int Width, int Height)
-            : this(Renderer, p.X, p.Y, Width, Height) { }
-        public Viewport(Renderer Renderer, int X, int Y, Size s)
-            : this(Renderer, X, Y, s.Width, s.Height) { }
-        public Viewport(Renderer Renderer, Rect rect)
-            : this(Renderer, rect.X, rect.Y, rect.Width, rect.Height) { }
+            : this(DefaultWindow, rect.X, rect.Y, rect.Width, rect.Height) { }
+        public Viewport(Window Window, Point p, Size s)
+            : this(Window, p.X, p.Y, s.Width, s.Height) { }
+        public Viewport(Window Window, Point p, int Width, int Height)
+            : this(Window, p.X, p.Y, Width, Height) { }
+        public Viewport(Window Window, int X, int Y, Size s)
+            : this(Window, X, Y, s.Width, s.Height) { }
+        public Viewport(Window Window, Rect rect)
+            : this(Window, rect.X, rect.Y, rect.Width, rect.Height) { }
         #endregion
-        public Viewport(Renderer Renderer, int X, int Y, int Width, int Height)
+        public Viewport(Window Window, int X, int Y, int Width, int Height)
         {
-            this.Renderer = Renderer;
+            this.Renderer = Window.Renderer;
             this.X = X;
             this.Y = Y;
             this.Width = Width;
