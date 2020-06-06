@@ -257,9 +257,9 @@ namespace odl
 
         public class ToneData
         {
-            public sbyte Red;
-            public sbyte Green;
-            public sbyte Blue;
+            public short Red;
+            public short Green;
+            public short Blue;
             public byte Grey;
 
             public ToneData(Tone t)

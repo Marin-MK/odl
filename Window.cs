@@ -203,6 +203,7 @@ namespace odl
 
             this.Viewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
             this.Viewport.Name = "Main Viewport";
+            if (Sprite.DefaultViewport == null) Sprite.DefaultViewport = this.Viewport;
 
             BackgroundViewport = new Viewport(this.Renderer, 0, 0, this.Width, this.Height);
             BackgroundViewport.Name = "Background Viewport";
@@ -452,7 +453,7 @@ namespace odl
         {
             BoolEventArgs e = new BoolEventArgs();
             this.OnClosing(e);
-            if (!e.Value)
+            if (e.Value)
             {
                 this.Dispose();
                 SDL_DestroyWindow(this.SDL_Window);

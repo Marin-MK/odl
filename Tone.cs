@@ -8,15 +8,15 @@ namespace odl
         /// <summary>
         /// The Red component of the color.
         /// </summary>
-        public sbyte Red = 0;
+        public short Red = 0;
         /// <summary>
         /// The Green component of the color.
         /// </summary>
-        public sbyte Green = 0;
+        public short Green = 0;
         /// <summary>
         /// The Blue component of the color.
         /// </summary>
-        public sbyte Blue = 0;
+        public short Blue = 0;
         /// <summary>
         /// The Alpha component of the color.
         /// </summary>
@@ -29,11 +29,11 @@ namespace odl
         /// <param name="Green">The Green component of the color.</param>
         /// <param name="Blue">The Blue component of the color.</param>
         /// <param name="Gray">The Grayscale component of the color.</param>
-        public Tone(sbyte Red = 0, sbyte Green = 0, sbyte Blue = 0, byte Gray = 0)
+        public Tone(short Red = 0, short Green = 0, short Blue = 0, byte Gray = 0)
         {
-            this.Red = Red;
-            this.Green = Green;
-            this.Blue = Blue;
+            this.Red = Math.Max((short) -255, Math.Min((short) 255, Red));
+            this.Green = Math.Max((short) -255, Math.Min((short) 255, Green));
+            this.Blue = Math.Max((short) -255, Math.Min((short) 255, Blue));
             this.Gray = Gray;
         }
 
