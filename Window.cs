@@ -203,6 +203,7 @@ namespace odl
 
             this.Viewport = new Viewport(this, 0, 0, this.Width, this.Height);
             this.Viewport.Name = "Main Viewport";
+            if (Viewport.DefaultWindow == null) Viewport.DefaultWindow = this;
             if (Sprite.DefaultViewport == null) Sprite.DefaultViewport = this.Viewport;
 
             BackgroundViewport = new Viewport(this, 0, 0, this.Width, this.Height);

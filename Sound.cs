@@ -12,13 +12,13 @@ namespace odl
         // General
         public string Filename;
         public int __volume__ = 100;
-        public int Volume { get { return __sound__ == null ? __volume__ : (int)Math.Round(__sound__.Volume * 100); } set { if (__sound__ != null) __sound__.Volume = value / 100f; __volume__ = value; } }
+        public int Volume { get { return __sound__ == null ? __volume__ : (int) Math.Round(__sound__.Volume * 100); } set { if (__sound__ != null) __sound__.Volume = value / 100f; __volume__ = value; } }
         public uint __position__ = 0;
         public uint Position { get { return __sound__ == null ? __position__ : __sound__.PlayPosition; } set { if (__sound__ != null) __sound__.PlayPosition = value; __position__ = value; __oldpos__ = value; } }
         public int __pan__ = 0;
-        public int Pan { get { return __sound__ == null ? __pan__ : (int)Math.Round(__sound__.Pan * -100); } set { if (__sound__ != null) __sound__.Pan = value / -100f; __pan__ = value; } }
+        public int Pan { get { return __sound__ == null ? __pan__ : (int) Math.Round(__sound__.Pan * -100); } set { if (__sound__ != null) __sound__.Pan = value / -100f; __pan__ = value; } }
         public bool Paused { get { return __sound__ == null ? false : __sound__.Paused; } }
-        public bool Playing { get { return __sound__ != null && !Paused; } }
+        public bool Playing { get { return __sound__ != null && !Paused && !__sound__.Finished; } }
         public bool Disposed = false;
 
         // Looping

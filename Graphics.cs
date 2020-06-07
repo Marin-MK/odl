@@ -182,7 +182,11 @@ namespace odl
         /// </summary>
         public static bool CanUpdate()
         {
-            return Windows.Count(w => w != null && !w.Disposed) > 0;
+            for (int i = 0; i < Windows.Count; i++)
+            {
+                if (Windows[i] != null && !Windows[i].Disposed) return true;
+            }
+            return false;
         }
 
         /// <summary>

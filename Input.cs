@@ -101,7 +101,7 @@ namespace odl
         /// </summary>
         public static void CaptureMouse()
         {
-            SDL2.SDL.SDL_CaptureMouse(SDL2.SDL.SDL_bool.SDL_TRUE);
+            SDL_CaptureMouse(SDL_bool.SDL_TRUE);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace odl
         /// </summary>
         public static void ReleaseMouse()
         {
-            SDL2.SDL.SDL_CaptureMouse(SDL2.SDL.SDL_bool.SDL_FALSE);
+            SDL_CaptureMouse(SDL_bool.SDL_FALSE);
         }
     }
 }

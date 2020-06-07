@@ -23,9 +23,9 @@ namespace odl
             Thread thread = null;
             thread = new Thread(delegate ()
             {
-                if (Stopped) thread.Abort();
-                else Update();
+                while (!Stopped) Update();
             });
+            thread.Start();
         }
 
         public static void Stop()
@@ -69,10 +69,6 @@ namespace odl
             Sound.Volume = Sound.__volume__;
             Sound.Position = Sound.__position__;
             Sound.Pan = Sound.__pan__;
-            //Sound.__sound__.Volume = Sound.Volume / 100f;
-            //Sound.__sound__.PlayPosition = Sound.Position;
-            //Sound.__sound__.Pan = Sound.Pan / -100f;
-            //Console.WriteLine($"Volume({Sound.__sound__.Volume}) Position({Sound.__sound__.PlayPosition}) Pan({Sound.__sound__.Pan})");
             Sound.__sound__.setSoundStopEventReceiver(new InternalStopReceiver(Sound));
             Sounds.Add(Sound);
         }
@@ -82,7 +78,7 @@ namespace odl
             for (int i = 0; i < Sounds.Count; i++)
             {
                 Sound Sound = Sounds[i];
-                if (Sound.__sound__ == null) throw new Exception("Shoulda been removed error");
+                if (Sound.__sound__ == null || Sound.__sound__.Finished) continue;
                 if (Sound.Loop && (Sound.LoopTimes == -1 || Sound.TimesLooped < Sound.LoopTimes))
                 {
                     if (Sound.__sound__.PlayPosition < Sound.__oldpos__ ||
@@ -101,7 +97,7 @@ namespace odl
                 }
                 if (Sound.FadeInLength != 0 && Sound.Position < Sound.FadeInLength && Sound.TimesLooped == 0)
                 {
-                    float fraction = (float)Sound.Position / Sound.FadeInLength;
+                    float fraction = (float) Sound.Position / Sound.FadeInLength;
                     Sound.__sound__.Volume = Sound.__volume__ / 100f * fraction;
                     Sound.__fade_in__ = true;
                 }
@@ -114,7 +110,7 @@ namespace odl
                 if (Sound.FadeOutLength != 0 && Sound.Position >= Sound.__sound__.PlayLength - Sound.FadeOutLength &&
                     (Sound.LoopTimes != -1 && Sound.TimesLooped == Sound.LoopTimes || Sound.LoopTimes == -1 && !Sound.Loop))
                 {
-                    float fraction = (float)(Sound.__sound__.PlayLength - Sound.Position) / Sound.FadeOutLength;
+                    float fraction = (float) (Sound.__sound__.PlayLength - Sound.Position) / Sound.FadeOutLength;
                     Sound.__sound__.Volume = Sound.__volume__ / 100f * fraction;
                     if (!Sound.__fade_out__)
                     {
@@ -139,8 +135,6 @@ namespace odl
             public void OnSoundStopped(ISound sound, StopEventCause reason, object userData)
             {
                 this.Sound.OnStopped?.Invoke(new BaseEventArgs());
-                //this.Sound.__sound__ = null;
-                //Sounds.Remove(this.Sound);
             }
         }
     }
