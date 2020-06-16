@@ -53,6 +53,29 @@ namespace odl
         public int InternalY = 0;
 
         /// <summary>
+        /// Creates a new bitmap with the given size.
+        /// </summary>
+        /// <param name="Size">The size of the new bitmap.</param>
+        public Bitmap(Size Size)
+            : this(Size.Width, Size.Height) { }
+        /// <summary>
+        /// Creates a Bitmap from an RGBA byte list in memory.
+        /// </summary>
+        /// <param name="Pixels">List of RGBA bytes representing pixels.</param>
+        /// <param name="Width">The width of the bitmap.</param>
+        /// <param name="Height">The height of the bitmap.</param>
+        public Bitmap(List<byte> Pixels, int Width, int Height)
+            : this(Pixels.ToArray(), Width, Height) { }
+        /// <summary>
+        /// Creates a Bitmap from a Color array in memory.
+        /// </summary>
+        /// <param name="Pixels">The array of colors representing pixels.</param>
+        /// <param name="Width">The width of the bitmap.</param>
+        /// <param name="Height">The height of the bitmap.</param>
+        public Bitmap(Color[] Pixels, int Width, int Height)
+            : this(Pixels.ToList(), Width, Height) { }
+
+        /// <summary>
         /// Loads the specified file into a bitmap.
         /// </summary>
         /// <param name="Filename">The file to load into a bitmap.</param>
@@ -76,32 +99,6 @@ namespace odl
 
         protected Bitmap() { }
 
-        public Size ValidatePNG(string Filename)
-        {
-            BinaryReader br = new BinaryReader(File.OpenRead(Filename));
-            byte[] pngsignature = new byte[8] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-            for (int i = 0; i < 8; i++)
-            {
-                if (br.ReadByte() != pngsignature[i])
-                    throw new Exception($"The given file is not a valid PNG file: '{Filename}'");
-            }
-
-            br.BaseStream.Position = 16;
-            byte[] widthbytes = new byte[sizeof(int)];
-            for (int i = 0; i < sizeof(int); i++) widthbytes[sizeof(int) - 1 - i] = br.ReadByte();
-            int width = BitConverter.ToInt32(widthbytes, 0);
-            byte[] heightbytes = new byte[sizeof(int)];
-            for (int i = 0; i < sizeof(int); i++) heightbytes[sizeof(int) - 1 - i] = br.ReadByte();
-            int height = BitConverter.ToInt32(heightbytes, 0);
-            return new Size(width, height);
-        }
-
-        /// <summary>
-        /// Creates a new bitmap with the given size.
-        /// </summary>
-        /// <param name="Size">The size of the new bitmap.</param>
-        public Bitmap(Size Size)
-            : this(Size.Width, Size.Height) { }
         /// <summary>
         /// Creates a new bitmap with the given size.
         /// </summary>
@@ -121,6 +118,7 @@ namespace odl
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             if (!(this is SolidBitmap)) this.Lock();
         }
+
         /// <summary>
         /// Creates a bitmap object to wrap around an existing SDL_Surface.
         /// </summary>
@@ -130,6 +128,66 @@ namespace odl
             this.Surface = Surface;
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
+        }
+
+        /// <summary>
+        /// Creates a Bitmap from an RGBA byte array in memory.
+        /// </summary>
+        /// <param name="Pixels">Array of RGBA bytes representing pixels.</param>
+        /// <param name="Width">The width of the bitmap.</param>
+        /// <param name="Height">The height of the bitmap.</param>
+        public Bitmap(byte[] Pixels, int Width, int Height)
+        {
+            IntPtr pixelptr = Marshal.AllocHGlobal(Pixels.Length);
+            Marshal.Copy(Pixels, 0, pixelptr, Pixels.Length);
+            this.Surface = SDL_CreateRGBSurfaceFrom(pixelptr, Width, Height, 32, Width * 4, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Lock();
+            Marshal.FreeHGlobal(pixelptr);
+        }
+
+        /// <summary>
+        /// Creates a Bitmap from a Color list in memory.
+        /// </summary>
+        /// <param name="Pixels">The list of colors representing pixels.</param>
+        /// <param name="Width">The width of the bitmap.</param>
+        /// <param name="Height">The height of the bitmap.</param>
+        public Bitmap(List<Color> Pixels, int Width, int Height)
+        {
+            byte[] BytePixels = new byte[Pixels.Count * 4];
+            for (int i = 0; i < Pixels.Count; i++)
+            {
+                BytePixels[i * 4] = Pixels[i].Red;
+                BytePixels[i * 4 + 1] = Pixels[i].Green;
+                BytePixels[i * 4 + 2] = Pixels[i].Blue;
+                BytePixels[i * 4 + 3] = Pixels[i].Alpha;
+            }
+            IntPtr pixelptr = Marshal.AllocHGlobal(BytePixels.Length);
+            Marshal.Copy(BytePixels, 0, pixelptr, BytePixels.Length);
+            this.Surface = SDL_CreateRGBSurfaceFrom(pixelptr, Width, Height, 32, Width * 4, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Lock();
+            Marshal.FreeHGlobal(pixelptr);
+        }
+
+        public Size ValidatePNG(string Filename)
+        {
+            BinaryReader br = new BinaryReader(File.OpenRead(Filename));
+            byte[] pngsignature = new byte[8] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+            for (int i = 0; i < 8; i++)
+            {
+                if (br.ReadByte() != pngsignature[i])
+                    throw new Exception($"The given file is not a valid PNG file: '{Filename}'");
+            }
+
+            br.BaseStream.Position = 16;
+            byte[] widthbytes = new byte[sizeof(int)];
+            for (int i = 0; i < sizeof(int); i++) widthbytes[sizeof(int) - 1 - i] = br.ReadByte();
+            int width = BitConverter.ToInt32(widthbytes, 0);
+            byte[] heightbytes = new byte[sizeof(int)];
+            for (int i = 0; i < sizeof(int); i++) heightbytes[sizeof(int) - 1 - i] = br.ReadByte();
+            int height = BitConverter.ToInt32(heightbytes, 0);
+            return new Size(width, height);
         }
 
         ~Bitmap()
