@@ -87,6 +87,17 @@ namespace odl
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) == SDL_WindowFlags.SDL_WINDOW_MAXIMIZED;
             }
         }
+        /// <summary>
+        /// Whether or not the window is minimized.
+        /// </summary>
+        public bool Minimized
+        {
+            get
+            {
+                SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(SDL_Window);
+                return (flags & SDL_WindowFlags.SDL_WINDOW_MINIMIZED) == SDL_WindowFlags.SDL_WINDOW_MINIMIZED;
+            }
+        }
 
         protected Sprite BackgroundSprite;
         protected Viewport BackgroundViewport;
@@ -171,11 +182,12 @@ namespace odl
         /// <summary>
         /// Called to actually create the window and renderer.
         /// </summary>
-        public void Initialize(bool HardwareAcceleration = true, bool VSync = false)
+        public virtual void Initialize(bool HardwareAcceleration = true, bool VSync = false, bool Borderless = false)
         {
             if (Graphics.Windows.Contains(this)) return;
             _StartTime = DateTime.Now;
             SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+            if (Borderless) flags |= SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
             this.SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                 this.Width, this.Height, flags);
             int WX;
@@ -232,7 +244,7 @@ namespace odl
         /// <summary>
         /// Marks the window as fully loaded and launches the OnLoaded event.
         /// </summary>
-        public void Start()
+        public virtual void Start()
         {
             this.OnLoaded(new TimespanEventArgs(DateTime.Now - _StartTime));
         }
@@ -258,7 +270,7 @@ namespace odl
         /// Resizes the window.
         /// </summary>
         /// <param name="s">The new window size</param>
-        public void SetSize(int width, int height)
+        public virtual void SetSize(int width, int height)
         {
             this.Width = width;
             this.Height = height;
@@ -285,14 +297,14 @@ namespace odl
         /// <summary>
         /// Sets the minimum size the window can be resized to.
         /// </summary>
-        public void SetMinimumSize(int width, int height)
+        public virtual void SetMinimumSize(int width, int height)
         {
             SetMinimumSize(new Size(width, height));
         }
         /// <summary>
         /// Sets the minimum size the window can be resized to.
         /// </summary>
-        public void SetMinimumSize(Size s)
+        public virtual void SetMinimumSize(Size s)
         {
             this.MinimumSize = s;
             if (Initialized()) SDL_SetWindowMinimumSize(SDL_Window, s.Width, s.Height);
@@ -301,7 +313,7 @@ namespace odl
         /// <summary>
         /// Specifies whether the window can be resized.
         /// </summary>
-        public void SetResizable(bool Resizable)
+        public virtual void SetResizable(bool Resizable)
         {
             this.Resizable = Resizable;
             if (Initialized()) SDL_SetWindowResizable(this.SDL_Window, Resizable ? SDL_bool.SDL_TRUE : SDL_bool.SDL_FALSE);
@@ -310,7 +322,7 @@ namespace odl
         /// <summary>
         /// Sets the title of the window.
         /// </summary>
-        public void SetText(string title)
+        public virtual void SetText(string title)
         {
             this.Text = title;
             if (Initialized())
@@ -332,7 +344,7 @@ namespace odl
         /// Sets the icon of the window.
         /// </summary>
         /// <param name="bmp">The bitmap that will be used for the icon.</param>
-        public void SetIcon(Bitmap bmp)
+        public virtual void SetIcon(Bitmap bmp)
         {
             if (this.Icon != null) this.Icon.Dispose();
             this.Icon = bmp;
@@ -342,21 +354,17 @@ namespace odl
         /// <summary>
         /// The absolute window position on screen.
         /// </summary>
-        public void SetPosition(int X, int Y)
+        public virtual void SetPosition(int X, int Y)
         {
             if (Maximized) return;
             this.X = X + Graphics.Screens[this.Screen].X;
             this.Y = Y + Graphics.Screens[this.Screen].Y;
             if (Initialized())
             {
-                int oldscreen = this.Screen;
                 SDL_SetWindowPosition(this.SDL_Window, this.X, this.Y);
                 this.Screen = SDL_GetWindowDisplayIndex(this.SDL_Window);
-                if (this.Screen != oldscreen)
-                {
-                    this.X -= Graphics.Screens[this.Screen].X;
-                    this.Y -= Graphics.Screens[this.Screen].Y;
-                }
+                this.X -= Graphics.Screens[this.Screen].X;
+                this.Y -= Graphics.Screens[this.Screen].Y;
             }
         }
 
@@ -364,7 +372,7 @@ namespace odl
         /// Shows the window on a different screen.
         /// </summary>
         /// <param name="screen">The index of the screen to display the window on.</param>
-        public void SetScreen(int screen)
+        public virtual void SetScreen(int screen)
         {
             int displaycount = SDL_GetNumVideoDisplays();
             if (screen >= displaycount)
@@ -379,15 +387,31 @@ namespace odl
         /// <summary>
         /// Shows the window if it had been hidden.
         /// </summary>
-        public void Show()
+        public virtual void Show()
         {
             SDL_ShowWindow(this.SDL_Window);
         }
 
         /// <summary>
+        /// Minimizes the window to the system trey.
+        /// </summary>
+        public virtual void Minimize()
+        {
+            if (Initialized()) SDL_MinimizeWindow(SDL_Window);
+        }
+
+        /// <summary>
+        /// Maximizes the window.
+        /// </summary>
+        public virtual void Maximize()
+        {
+            SDL_MaximizeWindow(SDL_Window);
+        }
+
+        /// <summary>
         /// Makes the window the active and focused window.
         /// </summary>
-        public void ForceFocus()
+        public virtual void ForceFocus()
         {
             Focus = true;
             SDL_RaiseWindow(this.SDL_Window);
@@ -433,7 +457,7 @@ namespace odl
         /// <summary>
         /// Updates the window and renderer every frame.
         /// </summary>
-        public void Update()
+        public virtual void Update()
         {
             this.Renderer.Update();
         }
@@ -441,7 +465,7 @@ namespace odl
         /// <summary>
         /// Disposes the window.
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             this.Renderer.Dispose();
             this.Disposed = true;
@@ -450,7 +474,7 @@ namespace odl
         /// <summary>
         /// Closes the window.
         /// </summary>
-        public void Close()
+        public virtual void Close()
         {
             BoolEventArgs e = new BoolEventArgs();
             this.OnClosing(e);
@@ -481,7 +505,7 @@ namespace odl
             }
         }
 
-        public Bitmap Screenshot()
+        public virtual Bitmap Screenshot()
         {
             Bitmap bmp = new Bitmap(SDL_CreateRGBSurfaceWithFormat(0, this.Width, this.Height, 32, SDL_PIXELFORMAT_RGBA8888));
             SDL_Rect rect = new SDL_Rect();
