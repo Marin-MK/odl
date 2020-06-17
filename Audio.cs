@@ -78,6 +78,12 @@ namespace odl
             for (int i = 0; i < Sounds.Count; i++)
             {
                 Sound Sound = Sounds[i];
+                if (Sound == null)
+                {
+                    Sounds.RemoveAt(i);
+                    i--;
+                    continue;
+                }
                 if (Sound.__sound__ == null || Sound.__sound__.Finished) continue;
                 if (Sound.Loop && (Sound.LoopTimes == -1 || Sound.TimesLooped < Sound.LoopTimes))
                 {
