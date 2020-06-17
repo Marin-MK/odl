@@ -138,12 +138,17 @@ namespace odl
         /// <param name="Height">The height of the bitmap.</param>
         public Bitmap(byte[] Pixels, int Width, int Height)
         {
-            IntPtr pixelptr = Marshal.AllocHGlobal(Pixels.Length);
-            Marshal.Copy(Pixels, 0, pixelptr, Pixels.Length);
-            this.Surface = SDL_CreateRGBSurfaceFrom(pixelptr, Width, Height, 32, Width * 4, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+            unsafe
+            {
+                fixed (byte* pixelptr = Pixels)
+                {
+                    this.Surface = SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) pixelptr, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
+                }
+            }
+            if (this.Surface == IntPtr.Zero)
+                throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
-            Marshal.FreeHGlobal(pixelptr);
         }
 
         /// <summary>
@@ -162,12 +167,17 @@ namespace odl
                 BytePixels[i * 4 + 2] = Pixels[i].Blue;
                 BytePixels[i * 4 + 3] = Pixels[i].Alpha;
             }
-            IntPtr pixelptr = Marshal.AllocHGlobal(BytePixels.Length);
-            Marshal.Copy(BytePixels, 0, pixelptr, BytePixels.Length);
-            this.Surface = SDL_CreateRGBSurfaceFrom(pixelptr, Width, Height, 32, Width * 4, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+            unsafe
+            {
+                fixed (byte* pixelptr = BytePixels)
+                {
+                    this.Surface = SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) pixelptr, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
+                }
+            }
+            if (this.Surface == IntPtr.Zero)
+                throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Lock();
-            Marshal.FreeHGlobal(pixelptr);
         }
 
         public Size ValidatePNG(string Filename)
