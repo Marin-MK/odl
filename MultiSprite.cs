@@ -29,6 +29,8 @@ namespace odl
         public Color Color { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public List<Point> MultiplePositions { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public byte Opacity { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
+        private bool _FactorZoomIntoOrigin = true;
+        public bool FactorZoomIntoOrigin { get { return _FactorZoomIntoOrigin; } set { _FactorZoomIntoOrigin = value; this.Update(); } }
         public bool DestroyBitmap { get; set; } = true;
 
         public MultiSprite(Viewport viewport)

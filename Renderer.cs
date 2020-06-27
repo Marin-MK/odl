@@ -218,8 +218,10 @@ namespace odl
             }
             foreach (Point p in Points)
             {
-                Dest.x = p.X - (int) Math.Round(s.OX * s.ZoomX) + XOffset;
-                Dest.y = p.Y - (int) Math.Round(s.OY * s.ZoomY) + YOffset;
+                int oxoffset = s.FactorZoomIntoOrigin ? (int) Math.Round((double) s.OX * s.ZoomX) : s.OX;
+                int oyoffset = s.FactorZoomIntoOrigin ? (int) Math.Round((double) s.OY * s.ZoomY) : s.OY;
+                Dest.x = p.X - oxoffset + XOffset;
+                Dest.y = p.Y - oyoffset + YOffset;
 
                 if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
                 {

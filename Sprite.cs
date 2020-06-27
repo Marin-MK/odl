@@ -129,6 +129,11 @@ namespace odl
         /// The opacity at which the sprite is rendered.
         /// </summary>
         public byte Opacity { get { return _Opacity; } set { if (value != _Opacity) Viewport.Update(); _Opacity = value; } }
+        private bool _FactorZoomIntoOrigin = true;
+        /// <summary>
+        /// Whether or not the zoom factor should factor in with the origin point calculation.
+        /// </summary>
+        public bool FactorZoomIntoOrigin { get { return _FactorZoomIntoOrigin; } set { if (value != _FactorZoomIntoOrigin) Viewport.Update(); _FactorZoomIntoOrigin = value; } }
         /// <summary>
         /// Whether to destroy the bitmap upon disposal alongside the sprite.
         /// </summary>

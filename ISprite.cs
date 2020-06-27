@@ -27,6 +27,7 @@ namespace odl
         Color Color { get; set; }
         List<Point> MultiplePositions { get; set; }
         byte Opacity { get; set; }
+        bool FactorZoomIntoOrigin { get; set; }
         bool DestroyBitmap { get; set; }
 
         void Update();
