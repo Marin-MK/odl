@@ -45,6 +45,16 @@ namespace odl
         /// </summary>
         public virtual Font Font { get; set; }
         /// <summary>
+        /// The pointer to the raw pixel data.
+        /// </summary>
+        public virtual unsafe byte* PixelPointer
+        {
+            get
+            {
+                return (byte*) SurfaceObject.pixels;
+            }
+        }
+        /// <summary>
         /// Whether the bitmap can be written on.
         /// </summary>
         public bool Locked { get; protected set; }
@@ -209,6 +219,50 @@ namespace odl
         }
 
         /// <summary>
+        /// Creates a bitmap with a mask.
+        /// </summary>
+        /// <param name="Source">The bitmap to sample.</param>
+        /// <param name="Mask">The bitmap whose alpha values will be checked for masking.</param>
+        /// <param name="XOffset">An x offset for sampling.</param>
+        /// <param name="YOffset">An y ofset for sampling.</param>
+        public static Bitmap Mask(Bitmap Mask, Bitmap Source, int XOffset = 0, int YOffset = 0)
+        {
+            return Bitmap.Mask(Mask, Source, new Rect(0, 0, Source.Width, Source.Height), XOffset, YOffset);
+        }
+        /// <summary>
+        /// Creates a bitmap with a mask.
+        /// </summary>
+        /// <param name="Source">The bitmap to sample.</param>
+        /// <param name="Mask">The bitmap whose alpha values will be checked for masking.</param>
+        /// <param name="SourceRect">The rectangle inside the Source bitmap to sample from.</param>
+        /// <param name="XOffset">An x offset for sampling, within the source rectangle.</param>
+        /// <param name="YOffset">An y ofset for sampling, within the source rectangle.</param>
+        public static unsafe Bitmap Mask(Bitmap Mask, Bitmap Source, Rect SourceRect, int XOffset = 0, int YOffset = 0)
+        {
+            byte* sourcepixels = Source.PixelPointer;
+            byte* maskpixels = Mask.PixelPointer;
+            Bitmap Result = new Bitmap(Mask.Width, Mask.Height);
+            Result.Unlock();
+            byte* resultpixels = Result.PixelPointer;
+            for (int x = 0; x < Mask.Width; x++)
+            {
+                for (int y = 0; y < Mask.Height; y++)
+                {
+                    byte maskalpha = maskpixels[y * Mask.Width * 4 + x * 4 + 3];
+                    if (maskalpha == 0) continue;
+                    int srcx = SourceRect.X + (x + XOffset) % SourceRect.Width;
+                    int srcy = SourceRect.Y + (y + YOffset) % SourceRect.Height;
+                    resultpixels[y * Result.Width * 4 + x * 4] = sourcepixels[srcy * Source.Width * 4 + srcx * 4];
+                    resultpixels[y * Result.Width * 4 + x * 4 + 1] = sourcepixels[srcy * Source.Width * 4 + srcx * 4 + 1];
+                    resultpixels[y * Result.Width * 4 + x * 4 + 2] = sourcepixels[srcy * Source.Width * 4 + srcx * 4 + 2];
+                    resultpixels[y * Result.Width * 4 + x * 4 + 3] = sourcepixels[srcy * Source.Width * 4 + srcx * 4 + 3];
+                }
+            }
+            Result.Lock();
+            return Result;
+        }
+
+        /// <summary>
         /// Disposes and destroys the bitmap.
         /// </summary>
         public virtual void Dispose()
@@ -298,23 +352,15 @@ namespace odl
         /// <param name="g">The Green component of the color to set the pixel to.</param>
         /// <param name="b">The Blue component of the color to set the pixel to.</param>
         /// <param name="a">The Alpha component of the color to set the pixel to.</param>
-        public virtual void SetPixel(int X, int Y, byte r, byte g, byte b, byte a = 255)
+        public virtual unsafe void SetPixel(int X, int Y, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
-            if (X < 0 || Y < 0)
-            {
-                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
-            }
-            if (X >= this.Width || Y >= this.Height)
-            {
-                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
-            }
-            int Offset = this.Width * 4 * Y + 4 * X;
-            bool e = BitConverter.IsLittleEndian;
-            Marshal.WriteByte(SurfaceObject.pixels, Offset, e ? r : b);
-            Marshal.WriteByte(SurfaceObject.pixels, Offset + 1, g);
-            Marshal.WriteByte(SurfaceObject.pixels, Offset + 2, e ? b : r);
-            Marshal.WriteByte(SurfaceObject.pixels, Offset + 3, a);
+            if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+            if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            PixelPointer[Width * Y * 4 + X * 4] = r;
+            PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
+            PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
+            PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
             if (this.Renderer != null) this.Renderer.Update();
         }
 
@@ -333,24 +379,16 @@ namespace odl
         /// </summary>
         /// <param name="X">The X position in the bitmap.</param>
         /// <param name="Y">The Y position in the bitmap.</param>
-        public virtual Color GetPixel(int X, int Y)
+        public virtual unsafe Color GetPixel(int X, int Y)
         {
-            if (X < 0 || Y < 0)
-            {
-                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
-            }
-            if (X >= this.Width || Y >= this.Height)
-            {
-                throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
-            }
-            int Offset = this.Width * 4 * Y + 4 * X;
-            byte[] color = new byte[4];
-            color[0] = Marshal.ReadByte(SurfaceObject.pixels, Offset);
-            color[1] = Marshal.ReadByte(SurfaceObject.pixels, Offset + 1);
-            color[2] = Marshal.ReadByte(SurfaceObject.pixels, Offset + 2);
-            color[3] = Marshal.ReadByte(SurfaceObject.pixels, Offset + 3);
-            if (BitConverter.IsLittleEndian) return new Color(color[0], color[1], color[2], color[3]);
-            return new Color(color[2], color[1], color[0], color[3]);
+            if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+            if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+            return new Color(
+                PixelPointer[Width * Y * 4 + X * 4],
+                PixelPointer[Width * Y * 4 + X * 4 + 1],
+                PixelPointer[Width * Y * 4 + X * 4 + 2],
+                PixelPointer[Width * Y * 4 + X * 4 + 3]
+            );
         }
 
         #region DrawLine Overloads
