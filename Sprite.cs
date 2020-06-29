@@ -15,10 +15,32 @@ namespace odl
         /// The debug name of the sprite.
         /// </summary>
         public string Name { get; set; }
+        private Viewport _Viewport;
         /// <summary>
         /// The viewport associated with the sprite.
         /// </summary>
-        public Viewport Viewport { get; protected set; }
+        public Viewport Viewport
+        {
+            get
+            {
+                return _Viewport;
+            }
+            set
+            {
+                Viewport newvp = value ?? DefaultViewport;
+                if (newvp != _Viewport)
+                {
+                    if (_Viewport != null)
+                    {
+                        _Viewport.Sprites.Remove(this);
+                        _Viewport.Update();
+                    }
+                    newvp.Sprites.Add(this);
+                    newvp.Update();
+                    _Viewport = newvp;
+                }
+            }
+        }
         private Rect _SrcRect = new Rect(0, 0, 0, 0);
         /// <summary>
         /// The rectangle within the bitmap displayed when rendered.
@@ -165,8 +187,6 @@ namespace odl
         public Sprite(Viewport Viewport)
         {
             this.Viewport = Viewport;
-            this.Viewport.Sprites.Add(this);
-            this.Viewport.Update();
         }
 
         public Sprite()
