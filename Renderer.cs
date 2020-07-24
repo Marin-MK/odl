@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using static SDL2.SDL;
 
 namespace odl
@@ -129,11 +130,11 @@ namespace odl
                             }
                             else if (s.Visible && s.Bitmap != null && !s.Bitmap.Disposed && s.Opacity > 0 && s.ZoomX != 0 && s.ZoomY != 0)
                             {
-                                if (s.Bitmap is LargeBitmap)
+                                if (s.Bitmap.IsChunky)
                                 {
                                     int SX = s.X;
                                     int SY = s.Y;
-                                    foreach (Bitmap bmp in ((LargeBitmap) s.Bitmap).InternalBitmaps)
+                                    foreach (Bitmap bmp in s.Bitmap.InternalBitmaps)
                                     {
                                         s.X = SX + (int) Math.Round(bmp.InternalX * s.ZoomX);
                                         s.Y = SY + (int) Math.Round(bmp.InternalY * s.ZoomY);
@@ -172,6 +173,8 @@ namespace odl
                 s.Color.Alpha == 0)
                  Texture = bmp.Texture;
             else Texture = bmp.ColorToneTexture(s.Color, s.Tone);
+
+            if (Texture == IntPtr.Zero) throw new Exception("Attempted to render a zero-pointer texture.");
 
             // Sprite Opacity + Renderer opacity
             byte Alpha = Convert.ToByte(255d * (s.Opacity / 255d) * (this.Opacity / 255d));

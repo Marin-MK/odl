@@ -58,8 +58,14 @@ namespace odl
                 if (value != null)
                 {
                     value.Renderer = this.Viewport.Renderer;
-                    if (value is LargeBitmap)
+                    if (value.IsChunky)
                     {
+                        foreach (Bitmap bmp in value.InternalBitmaps)
+                        {
+                            bool wasnull = bmp.Texture == IntPtr.Zero;
+                            bmp.Renderer = this.Viewport.Renderer;
+                            if (wasnull) bmp.Unlock();
+                        }
                         if (value.Locked) value.Unlock();
                         value.Lock();
                     }

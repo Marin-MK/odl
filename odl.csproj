@@ -10,8 +10,12 @@
     <Version>0.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>Debug</Configurations>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Decodl\decodl.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="irrKlang.NET4">

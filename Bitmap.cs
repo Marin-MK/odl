@@ -24,22 +24,25 @@ namespace odl
         /// The pointer to the SDL_Texture.
         /// </summary>
         public IntPtr Texture { get; protected set; } = IntPtr.Zero;
+        protected int _width;
         /// <summary>
         /// The width of the bitmap.
         /// </summary>
-        public virtual int Width { get { return this.SurfaceObject.w; } protected set { } }
+        public int Width { get { return _width; } protected set { _width = value; } }
+        protected int _height;
         /// <summary>
         /// The height of the bitmap.
         /// </summary>
-        public virtual int Height { get { return this.SurfaceObject.h; } protected set { } }
+        public int Height { get { return _height; } protected set { _height = value; } }
         /// <summary>
         /// Whether or not the bitmap has been disposed.
         /// </summary>
         public bool Disposed { get; protected set; }
+        private Renderer _renderer;
         /// <summary>
         /// The Renderer object associated with the bitmap.
         /// </summary>
-        public virtual Renderer Renderer { get; set; }
+        public Renderer Renderer { get { return _renderer; } set { _renderer = value; if (IsChunky) foreach (Bitmap b in this.InternalBitmaps) b.Renderer = value; } }
         /// <summary>
         /// The Font object associated with the bitmap.
         /// </summary>
@@ -58,6 +61,18 @@ namespace odl
         /// Whether the bitmap can be written on.
         /// </summary>
         public bool Locked { get; protected set; }
+        /// <summary>
+        /// A list of internal bitmaps, used when a bitmap is split up into several bitmap chunks.
+        /// </summary>
+        public List<Bitmap> InternalBitmaps = new List<Bitmap>();
+        /// <summary>
+        /// Whether or not the bitmap is split up into multiple chunks.
+        /// </summary>
+        public bool IsChunky { get { return InternalBitmaps.Count > 0; } }
+        /// <summary>
+        /// The size of the internal bitmap chunks.
+        /// </summary>
+        public Size ChunkSize { get; protected set; }
 
         public int InternalX = 0;
         public int InternalY = 0;
@@ -99,11 +114,65 @@ namespace odl
             }
 
             Size ImageSize = ValidatePNG(Filename);
-            if (ImageSize.Width > Graphics.MaxTextureSize.Width || ImageSize.Height > Graphics.MaxTextureSize.Height)
-                throw new Exception($"The given file exceeds the texture size limit of {Graphics.MaxTextureSize}: '{Filename}'");
-
-            this.Surface = SDL2.SDL_image.IMG_Load(Filename);
-            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            if (ImageSize.Width > Graphics.MaxTextureSize.Width && ImageSize.Height > Graphics.MaxTextureSize.Height)
+            {
+                (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(Filename);
+                byte[] bytes = data.Bytes;
+                int width = data.Width;
+                int height = data.Height;
+                this.ChunkSize = new Size(Math.Min(width, Graphics.MaxTextureSize.Width), Math.Min(height, Graphics.MaxTextureSize.Height));
+                int xbmps = (int) Math.Ceiling((double) width / Graphics.MaxTextureSize.Width);
+                int ybmps = (int) Math.Ceiling((double) height / Graphics.MaxTextureSize.Height);
+                for (int ybmp = 0; ybmp < ybmps; ybmp++)
+                {
+                    for (int xbmp = 0; xbmp < xbmps; xbmp++)
+                    {
+                        int wbmp = xbmp == xbmps - 1 ? width - (xbmps - 1) * Graphics.MaxTextureSize.Width : Graphics.MaxTextureSize.Width;
+                        int hbmp = ybmp == ybmps - 1 ? height - (ybmps - 1) * Graphics.MaxTextureSize.Height : Graphics.MaxTextureSize.Height;
+                        byte[] curbmp = new byte[wbmp * hbmp * 4];
+                        for (int y = 0; y < hbmp; y++)
+                        {
+                            Array.Copy(bytes, xbmp * Graphics.MaxTextureSize.Width * 4 + ybmp * width * 4, curbmp, 0, wbmp * hbmp * 4);
+                        }
+                        Bitmap bmp = new Bitmap(curbmp, wbmp, hbmp);
+                        bmp.InternalX = xbmp * Graphics.MaxTextureSize.Width;
+                        bmp.InternalY = ybmp * Graphics.MaxTextureSize.Height;
+                        InternalBitmaps.Add(bmp);
+                    }
+                }
+                this.Width = width;
+                this.Height = height;
+            }
+            else if (ImageSize.Height > Graphics.MaxTextureSize.Height)
+            {
+                (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(Filename);
+                byte[] bytes = data.Bytes;
+                int width = data.Width;
+                int height = data.Height;
+                this.ChunkSize = new Size(width, Math.Min(height, Graphics.MaxTextureSize.Height));
+                int ybmps = (int) Math.Ceiling((double) height / Graphics.MaxTextureSize.Height);
+                for (int ybmp = 0; ybmp < ybmps; ybmp++)
+                {
+                    int hbmp = ybmp == ybmps - 1 ? height - (ybmps - 1) * Graphics.MaxTextureSize.Height : Graphics.MaxTextureSize.Height;
+                    byte[] curbmp = new byte[width * hbmp * 4];
+                    int pos = ybmp * Graphics.MaxTextureSize.Height * width * 4;
+                    int len = width * hbmp * 4;
+                    Array.Copy(bytes, pos, curbmp, 0, len);
+                    Bitmap bmp = new Bitmap(curbmp, width, hbmp);
+                    bmp.InternalX = 0;
+                    bmp.InternalY = ybmp * Graphics.MaxTextureSize.Height;
+                    InternalBitmaps.Add(bmp);
+                }
+                this.Width = width;
+                this.Height = height;
+            }
+            else
+            {
+                this.Surface = SDL2.SDL_image.IMG_Load(Filename);
+                this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+                this.Width = SurfaceObject.w;
+                this.Height = SurfaceObject.h;
+            }
             this.Lock();
         }
 
@@ -126,7 +195,37 @@ namespace odl
             }
             this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Width = SurfaceObject.w;
+            this.Height = SurfaceObject.h;
             if (!(this is SolidBitmap)) this.Lock();
+        }
+
+        public Bitmap(int Width, int Height, Size ChunkSize) : this(Width, Height, ChunkSize.Width, ChunkSize.Height) { }
+        public Bitmap(int Width, int Height, int ChunkWidth, int ChunkHeight)
+        {
+            if (Width < 1 || Height < 1)
+            {
+                throw new Exception($"Invalid Bitmap size ({Width},{Height}) -- must be at least (1,1)");
+            }
+            this.Width = Width;
+            this.Height = Height;
+            this.ChunkSize = ChunkSize;
+            int ChunkCountHor = (int) Math.Ceiling((double) Width / ChunkWidth);
+            int ChunkCountVer = (int) Math.Ceiling((double) Height / ChunkHeight);
+            for (int x = 0; x < ChunkCountHor; x++)
+            {
+                for (int y = 0; y < ChunkCountVer; y++)
+                {
+                    int w = Math.Min(ChunkWidth, Width - x * ChunkWidth);
+                    int h = Math.Min(ChunkHeight, Height - y * ChunkHeight);
+                    Bitmap b = new Bitmap(w, h);
+                    b.InternalX = x * ChunkWidth;
+                    b.InternalY = y * ChunkHeight;
+                    InternalBitmaps.Add(b);
+                }
+            }
+            this.ChunkSize = new Size(ChunkWidth, ChunkHeight);
+            this.Lock();
         }
 
         /// <summary>
@@ -137,6 +236,8 @@ namespace odl
         {
             this.Surface = Surface;
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Width = SurfaceObject.w;
+            this.Height = SurfaceObject.h;
             this.Lock();
         }
 
@@ -158,6 +259,8 @@ namespace odl
             if (this.Surface == IntPtr.Zero)
                 throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Width = this.SurfaceObject.w;
+            this.Height = this.SurfaceObject.h;
             this.Lock();
         }
 
@@ -187,6 +290,8 @@ namespace odl
             if (this.Surface == IntPtr.Zero)
                 throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Width = SurfaceObject.w;
+            this.Height = SurfaceObject.h;
             this.Lock();
         }
 
@@ -268,16 +373,24 @@ namespace odl
         public virtual void Dispose()
         {
             if (Disposed) return;
-            if (this.Surface != IntPtr.Zero && this.Surface != null)
+            if (IsChunky)
             {
-                SDL_FreeSurface(this.Surface);
-                SDL_DestroyTexture(this.Texture);
+                foreach (Bitmap b in this.InternalBitmaps) b.Dispose();
+                this.InternalBitmaps.Clear();
             }
-            ColorToneBmp?.Dispose();
-            ColorToneBmp = null;
-            this.Surface = IntPtr.Zero;
-            this.Texture = IntPtr.Zero;
-            this.SurfaceObject = new SDL_Surface();
+            else
+            {
+                if (this.Surface != IntPtr.Zero && this.Surface != null)
+                {
+                    SDL_FreeSurface(this.Surface);
+                    SDL_DestroyTexture(this.Texture);
+                }
+                ColorToneBmp?.Dispose();
+                ColorToneBmp = null;
+                this.Surface = IntPtr.Zero;
+                this.Texture = IntPtr.Zero;
+                this.SurfaceObject = new SDL_Surface();
+            }
             this.Disposed = true;
             if (this.Renderer != null) this.Renderer.Update();
         }
@@ -292,8 +405,26 @@ namespace odl
         /// </summary>
         public virtual void Clear()
         {
-            // Filling an alpha rectangle is faster than recreating the bitmap.
-            FillRect(0, 0, this.Width, this.Height, Color.ALPHA);
+            if (IsChunky)
+            {
+                foreach (Bitmap b in this.InternalBitmaps) b.Clear();
+            }
+            else
+            {
+                // Filling an alpha rectangle is faster than recreating the bitmap.
+                FillRect(0, 0, this.Width, this.Height, Color.ALPHA);
+            }
+        }
+
+        private Bitmap GetBitmapFromCoordinate(int X, int Y)
+        {
+            foreach (Bitmap b in this.InternalBitmaps)
+            {
+                if (X >= b.InternalX && X < b.InternalX + this.ChunkSize.Width &&
+                    Y >= b.InternalY && Y < b.InternalY + this.ChunkSize.Height)
+                    return b;
+            }
+            return null;
         }
 
         /// <summary>
@@ -301,13 +432,20 @@ namespace odl
         /// </summary>
         public virtual Bitmap Clone()
         {
-            Bitmap bmp = new Bitmap(Width, Height);
-            bmp.Unlock();
-            bmp.Build(this);
-            bmp.Lock();
-            bmp.Font = this.Font;
-            bmp.Renderer = this.Renderer;
-            return bmp;
+            if (IsChunky)
+            {
+                throw new Exception("Cannot clone chunky Bitmap yet!");
+            }
+            else
+            {
+                Bitmap bmp = new Bitmap(Width, Height);
+                bmp.Unlock();
+                bmp.Build(this);
+                bmp.Lock();
+                bmp.Font = this.Font;
+                bmp.Renderer = this.Renderer;
+                return bmp;
+            }
         }
 
         #region SetPixel Overloads
@@ -357,10 +495,19 @@ namespace odl
             if (Locked) throw new BitmapLockedException();
             if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
             if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
-            PixelPointer[Width * Y * 4 + X * 4] = r;
-            PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
-            PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
-            PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+            if (IsChunky)
+            {
+                Bitmap bmp = GetBitmapFromCoordinate(X, Y);
+                if (bmp.Locked) bmp.Unlock();
+                bmp.SetPixel(X - bmp.InternalX, Y - bmp.InternalY, r, g, b, a);
+            }
+            else
+            {
+                PixelPointer[Width * Y * 4 + X * 4] = r;
+                PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
+                PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
+                PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+            }
             if (this.Renderer != null) this.Renderer.Update();
         }
 
@@ -383,12 +530,20 @@ namespace odl
         {
             if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
             if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
-            return new Color(
-                PixelPointer[Width * Y * 4 + X * 4],
-                PixelPointer[Width * Y * 4 + X * 4 + 1],
-                PixelPointer[Width * Y * 4 + X * 4 + 2],
-                PixelPointer[Width * Y * 4 + X * 4 + 3]
-            );
+            if (IsChunky)
+            {
+                Bitmap bmp = GetBitmapFromCoordinate(X, Y);
+                return bmp.GetPixel(X - bmp.InternalX, Y - bmp.InternalY);
+            }
+            else
+            {
+                return new Color(
+                    PixelPointer[Width * Y * 4 + X * 4],
+                    PixelPointer[Width * Y * 4 + X * 4 + 1],
+                    PixelPointer[Width * Y * 4 + X * 4 + 2],
+                    PixelPointer[Width * Y * 4 + X * 4 + 3]
+                );
+            }
         }
 
         #region DrawLine Overloads
@@ -1282,8 +1437,32 @@ namespace odl
             {
                 throw new Exception($"Invalid rectangle ({X},{Y},{Width},{Height}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
             }
-            SDL_Rect Rect = new Rect(X, Y, Width, Height).SDL_Rect;
-            SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
+            Rect DestRect = new Rect(X, Y, Width, Height);
+            if (IsChunky)
+            {
+                foreach (Bitmap bmp in this.InternalBitmaps)
+                {
+                    Rect bmprect = new Rect(bmp.InternalX, bmp.InternalY, this.ChunkSize);
+                    if (DestRect.Overlaps(bmprect))
+                    {
+                        int nx = Math.Max(DestRect.X, bmprect.X);
+                        int ny = Math.Max(DestRect.Y, bmprect.Y);
+                        int nw = Math.Min(DestRect.X + DestRect.Width, bmprect.X + bmprect.Width) - nx;
+                        int nh = Math.Min(DestRect.Y + DestRect.Height, bmprect.Y + bmprect.Height) - ny;
+                        if (bmp.Locked) bmp.Unlock();
+                        int DX = nx - bmp.InternalX;
+                        int DY = ny - bmp.InternalY;
+                        int DW = nw;
+                        int DH = nh;
+                        bmp.FillRect(DX, DY, nw, nh, r, g, b, a);
+                    }
+                }
+            }
+            else
+            {
+                SDL_Rect Rect = DestRect.SDL_Rect;
+                SDL_FillRect(this.Surface, ref Rect, SDL_MapRGBA(this.SurfaceObject.format, r, g, b, a));
+            }
             if (this.Renderer != null) this.Renderer.Update();
         }
 
@@ -1504,11 +1683,42 @@ namespace odl
         public virtual void Build(Rect DestRect, Bitmap SrcBitmap, Rect SrcRect)
         {
             if (Locked) throw new BitmapLockedException();
-            SDL_Rect Src = SrcRect.SDL_Rect;
-            SDL_Rect Dest = DestRect.SDL_Rect;
-            if (Dest.w != Src.w || Dest.h != Src.h)
-                 SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
-            else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+            if (IsChunky)
+            {
+                foreach (Bitmap bmp in this.InternalBitmaps)
+                {
+                    Rect bmprect = new Rect(bmp.InternalX, bmp.InternalY, this.ChunkSize);
+                    if (DestRect.Overlaps(bmprect))
+                    {
+                        int nx = Math.Max(DestRect.X, bmprect.X);
+                        int ny = Math.Max(DestRect.Y, bmprect.Y);
+                        int nw = Math.Min(DestRect.X + DestRect.Width, bmprect.X + bmprect.Width) - nx;
+                        int nh = Math.Min(DestRect.Y + DestRect.Height, bmprect.Y + bmprect.Height) - ny;
+                        if (bmp.Locked) bmp.Unlock();
+                        int DX = nx - bmp.InternalX;
+                        int DY = ny - bmp.InternalY;
+                        int DW = nw;
+                        int DH = nh;
+                        int SX = SrcRect.X + nx - DestRect.X;
+                        int SY = SrcRect.Y + ny - DestRect.Y;
+                        int SW = DW;
+                        int SH = DH;
+                        bmp.Build(
+                            DX, DY, DW, DH,
+                            SrcBitmap,
+                            SX, SY, SW, SH
+                        );
+                    }
+                }
+            }
+            else
+            {
+                SDL_Rect Src = SrcRect.SDL_Rect;
+                SDL_Rect Dest = DestRect.SDL_Rect;
+                if (Dest.w != Src.w || Dest.h != Src.h)
+                     SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+                else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+            }
             if (this.Renderer != null) this.Renderer.Update();
         }
 
@@ -1852,7 +2062,20 @@ namespace odl
         {
             if (Locked) throw new BitmapLockedException();
             this.Locked = true;
-            this.RecreateTexture();
+            if (IsChunky)
+            {
+                foreach (Bitmap b in this.InternalBitmaps)
+                {
+                    if (!b.Locked && b.Renderer != null)
+                    {
+                        b.Lock();
+                    }
+                }
+            }
+            else
+            {
+                this.RecreateTexture();
+            }
         }
 
         /// <summary>
@@ -1870,7 +2093,14 @@ namespace odl
         /// <param name="filename">The filename to save the bitmap as.</param>
         public virtual void SaveToPNG(string filename)
         {
-            SDL2.SDL_image.IMG_SavePNG(Surface, filename);
+            if (IsChunky)
+            {
+                throw new Exception("Cannot save chunky bitmap to PNG!");
+            }
+            else
+            {
+                SDL2.SDL_image.IMG_SavePNG(Surface, filename);
+            }
         }
 
         /// <summary>
