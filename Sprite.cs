@@ -64,7 +64,7 @@ namespace odl
                         {
                             bool wasnull = bmp.Texture == IntPtr.Zero;
                             bmp.Renderer = this.Viewport.Renderer;
-                            if (wasnull) bmp.Unlock();
+                            if (wasnull && bmp.Locked) bmp.Unlock();
                         }
                         if (value.Locked) value.Unlock();
                         value.Lock();

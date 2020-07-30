@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml;
 using static SDL2.SDL;
 
 namespace odl
@@ -182,10 +183,12 @@ namespace odl
         /// <summary>
         /// Called to actually create the window and renderer.
         /// </summary>
-        public virtual void Initialize(bool HardwareAcceleration = true, bool VSync = false, bool Borderless = false)
+        public virtual void Initialize(bool HardwareAcceleration = true, bool VSync = false, bool Borderless = false, bool ForceOpenGL = false)
         {
             if (Graphics.Windows.Contains(this)) return;
             _StartTime = DateTime.Now;
+            if (ForceOpenGL) SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+
             SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
             if (Borderless) flags |= SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
             this.SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -415,6 +418,52 @@ namespace odl
         {
             Focus = true;
             SDL_RaiseWindow(this.SDL_Window);
+        }
+
+        public virtual bool GetVSync()
+        {
+            SDL_RendererInfo info;
+            SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
+            SDL_RendererFlags flags = (SDL_RendererFlags)info.flags;
+            bool VSync = (flags & SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC) != 0;
+            return VSync;
+        }
+
+        public virtual void SetVSync(bool VSync)
+        {
+            SDL_RendererInfo info;
+            SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
+            SDL_RendererFlags flags = (SDL_RendererFlags) info.flags;
+            bool HardwareAcceleration = (flags & SDL_RendererFlags.SDL_RENDERER_ACCELERATED) != 0;
+            bool SoftwareRendering = (flags & SDL_RendererFlags.SDL_RENDERER_SOFTWARE) != 0;
+            bool TargetTexture = (flags & SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE) != 0;
+            bool OldVSync = (flags & SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC) != 0;
+            if (OldVSync == VSync) return;
+            SDL_RendererFlags newflags = 0;
+            if (HardwareAcceleration) newflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
+            if (SoftwareRendering) newflags |= SDL_RendererFlags.SDL_RENDERER_SOFTWARE;
+            if (TargetTexture) newflags |= SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE;
+            if (VSync) newflags |= SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC;
+            SDL_DestroyRenderer(this.Renderer.SDL_Renderer);
+            this.Renderer.SDL_Renderer = SDL_CreateRenderer(this.SDL_Window, -1, newflags);
+            foreach (Viewport vp in this.Renderer.Viewports)
+            {
+                foreach (Sprite s in vp.Sprites)
+                {
+                    if (s.Bitmap == null) continue;
+                    if (s.Bitmap.IsChunky)
+                    {
+                        foreach (Bitmap bmp in s.Bitmap.InternalBitmaps)
+                        {
+                            bmp.RecreateTexture();
+                        }
+                    }
+                    else
+                    {
+                        s.Bitmap.RecreateTexture();
+                    }
+                }
+            }
         }
 
         public virtual void Closing(BoolEventArgs e) { }
