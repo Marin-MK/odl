@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="irrKlang.NET4">
-      <HintPath>bin\x64\Debug\netcoreapp3.1\irrKlang.NET4.dll</HintPath>
+    <Reference Include="Bass.Net">
+      <HintPath>bin\x64\Debug\netcoreapp3.1\Bass.Net.dll</HintPath>
     </Reference>
     <Reference Include="SDL2-CS">
       <HintPath>bin\x64\Debug\netcoreapp3.1\SDL2-CS.dll</HintPath>
