@@ -40,7 +40,14 @@ namespace odl
                 FXPlugin = BASS_PluginLoad("libbass_fx.so");
             }
             #else
-            if (UseBassFX) FXPlugin = BASS_PluginLoad("bass_fx.dll");
+            IntPtr bass = Graphics.LoadLibrary("./lib/bass.dll");
+            if (bass == IntPtr.Zero) throw new Exception("Could not find BASS at 'lib/bass.dll'.");
+            if (UseBassFX)
+            {
+                IntPtr bass_fx = Graphics.LoadLibrary("./lib/bass_fx.dll");
+                if (bass_fx == IntPtr.Zero) throw new Exception("Could not find Zlib at 'lib/zlib1.dll'.");
+                FXPlugin = BASS_PluginLoad("bass_fx.dll");
+            }
             #endif
             #endregion
             BASS_Init(-1, 44100, 0, IntPtr.Zero);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
@@ -56,11 +57,27 @@ namespace odl
             CurrentObjects.CompareWith(new ObjectCollection(Renderers[0]));
         }
 
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
+        public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+
         /// <summary>
         /// Initializes SDL and its components.
         /// </summary>
         public static void Start()
         {
+            IntPtr zlib = LoadLibrary("./lib/zlib1.dll");
+            IntPtr libpng = LoadLibrary("./lib/libpng16-16.dll");
+            IntPtr libfreetype = LoadLibrary("./lib/libfreetype-6.dll");
+            IntPtr sdl2 = LoadLibrary("./lib/SDL2.dll");
+            IntPtr sdl2_image = LoadLibrary("./lib/SDL2_image.dll");
+            IntPtr sdl2_ttf = LoadLibrary("./lib/SDL2_ttf.dll");
+            if (zlib == IntPtr.Zero) throw new Exception("Could not find zlib at 'lib/zlib1.dll'.");
+            if (libpng == IntPtr.Zero) throw new Exception("Could not find libpng at 'lib/libpng16-16.dll'.");
+            if (libfreetype == IntPtr.Zero) throw new Exception("Could not find libfreetype at 'lib/libfreetype-6.dll'.");
+            if (sdl2 == IntPtr.Zero) throw new Exception("Could not find SDL2 at 'lib/SDL2.dll'.");
+            if (sdl2_image == IntPtr.Zero) throw new Exception("Could not find SDL2_image at 'lib/SDL2_image.dll'.");
+            if (sdl2_ttf == IntPtr.Zero) throw new Exception("Could not find SDL2_ttf at 'lib/SDL2_ttf.dll'.");
+
             if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
                 IMG_Init(IMG_InitFlags.IMG_INIT_PNG) != (int) IMG_InitFlags.IMG_INIT_PNG ||
                 TTF_Init() < 0)
