@@ -34,7 +34,7 @@ namespace odl
         /// <summary>
         /// The last used MouseEventArgs object.
         /// </summary>
-        public static MouseEventArgs LastMouseEvent = new MouseEventArgs(0, 0, false, false, false, false, false, false, 0);
+        public static MouseEventArgs LastMouseEvent = new MouseEventArgs(0, 0, false, false, false, false, false, false, 0, 0);
         /// <summary>
         /// The last custom cursor that was set.
         /// </summary>
@@ -43,6 +43,25 @@ namespace odl
         /// Whether SDL and its componenents have been initialized.
         /// </summary>
         public static bool Initialized = false;
+
+        private static Platform? _platform;
+        /// <summary>
+        /// The current OS.
+        /// </summary>
+        public static Platform Platform
+        {
+            get
+            {
+                if (_platform != null) return (Platform) _platform;
+                string p = SDL2.SDL.SDL_GetPlatform();
+                if (p == "Windows") _platform = Platform.Windows;
+                if (p == "Linux") _platform = Platform.Linux;
+                if (p == "Mac OS X") _platform = Platform.MacOS;
+                if (p == "iOS") _platform = Platform.IOS;
+                if (p == "Android") _platform = Platform.Android;
+                return (Platform)_platform;
+            }
+        }
 
         private static ObjectCollection CurrentObjects;
 
@@ -57,20 +76,37 @@ namespace odl
             CurrentObjects.CompareWith(new ObjectCollection(Renderers[0]));
         }
 
+        // Windows
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
         public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+
+        [DllImport("user32")]
+        public static extern bool SetProcessDPIAware();
 
         /// <summary>
         /// Initializes SDL and its components.
         /// </summary>
         public static void Start()
         {
-            IntPtr zlib = LoadLibrary("./lib/zlib1.dll");
-            IntPtr libpng = LoadLibrary("./lib/libpng16-16.dll");
-            IntPtr libfreetype = LoadLibrary("./lib/libfreetype-6.dll");
-            IntPtr sdl2 = LoadLibrary("./lib/SDL2.dll");
-            IntPtr sdl2_image = LoadLibrary("./lib/SDL2_image.dll");
-            IntPtr sdl2_ttf = LoadLibrary("./lib/SDL2_ttf.dll");
+            bool windows = true;
+            bool linux = false;
+            bool mac = false;
+            IntPtr zlib = IntPtr.Zero,
+                   libpng = IntPtr.Zero,
+                   libfreetype = IntPtr.Zero,
+                   sdl2 = IntPtr.Zero,
+                   sdl2_image = IntPtr.Zero,
+                   sdl2_ttf = IntPtr.Zero;
+            if (windows)
+            {
+                SetProcessDPIAware();
+                zlib = LoadLibrary("./lib/zlib1.dll");
+                libpng = LoadLibrary("./lib/libpng16-16.dll");
+                libfreetype = LoadLibrary("./lib/libfreetype-6.dll");
+                sdl2 = LoadLibrary("./lib/SDL2.dll");
+                sdl2_image = LoadLibrary("./lib/SDL2_image.dll");
+                sdl2_ttf = LoadLibrary("./lib/SDL2_ttf.dll");
+            }
             if (zlib == IntPtr.Zero) throw new Exception("Could not find zlib at 'lib/zlib1.dll'.");
             if (libpng == IntPtr.Zero) throw new Exception("Could not find libpng at 'lib/libpng16-16.dll'.");
             if (libfreetype == IntPtr.Zero) throw new Exception("Could not find libfreetype at 'lib/libfreetype-6.dll'.");
@@ -375,7 +411,7 @@ namespace odl
                                                           oldleftdown, LeftDown,
                                                           oldrightdown, RightDown,
                                                           oldmiddledown, MiddleDown,
-                                                          e.wheel.y));
+                                                          e.wheel.x, e.wheel.y));
                         break;
                     case SDL_EventType.SDL_KEYDOWN:
                         SDL_Keycode sym1 = e.key.keysym.sym;
@@ -443,5 +479,15 @@ namespace odl
             TTF_Quit();
             Initialized = false;
         }
+    }
+
+    public enum Platform
+    {
+        Unknown,
+        Windows,
+        Linux,
+        MacOS,
+        IOS,
+        Android
     }
 }

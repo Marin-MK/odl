@@ -36,13 +36,14 @@ namespace odl
         public bool RightButton { get; }
         public bool OldMiddleButton { get; }
         public bool MiddleButton { get; }
+        public int WheelX { get; }
         public int WheelY { get; }
 
         public MouseEventArgs(int X, int Y,
                 bool OldLeftButton, bool LeftButton,
                 bool OldRightButton, bool RightButton,
                 bool OldMiddleButton, bool MiddleButton,
-                int WheelY = 0)
+                int WheelX = 0, int WheelY = 0)
         {
             this.X = X;
             this.Y = Y;
@@ -52,6 +53,7 @@ namespace odl
             this.RightButton = RightButton;
             this.OldMiddleButton = OldMiddleButton;
             this.MiddleButton = MiddleButton;
+            this.WheelX = WheelX;
             this.WheelY = WheelY;
             Graphics.LastMouseEvent = this;
         }
@@ -63,6 +65,7 @@ namespace odl
             this.OldLeftButton = this.LeftButton = Left;
             this.OldRightButton = this.RightButton = Right;
             this.OldMiddleButton = this.MiddleButton = Middle;
+            this.WheelX = 0;
             this.WheelY = 0;
         }
 

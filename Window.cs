@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -84,7 +85,7 @@ namespace odl
         {
             get
             {
-                SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(SDL_Window);
+                SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(SDL_Window);
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) == SDL_WindowFlags.SDL_WINDOW_MAXIMIZED;
             }
         }
@@ -95,7 +96,7 @@ namespace odl
         {
             get
             {
-                SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(SDL_Window);
+                SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(SDL_Window);
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MINIMIZED) == SDL_WindowFlags.SDL_WINDOW_MINIMIZED;
             }
         }
@@ -188,7 +189,7 @@ namespace odl
             if (Graphics.Windows.Contains(this)) return;
             _StartTime = DateTime.Now;
             if (ForceOpenGL) SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-
+            
             SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
             if (Borderless) flags |= SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
             this.SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
