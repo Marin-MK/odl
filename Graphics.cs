@@ -1,11 +1,12 @@
-﻿using System;
+﻿using odl.SDL2;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using static SDL2.SDL;
-using static SDL2.SDL_image;
-using static SDL2.SDL_ttf;
+using static odl.SDL2.SDL;
+using static odl.SDL2.SDL_image;
+using static odl.SDL2.SDL_ttf;
 
 namespace odl
 {
@@ -53,13 +54,11 @@ namespace odl
             get
             {
                 if (_platform != null) return (Platform) _platform;
-                string p = SDL2.SDL.SDL_GetPlatform();
-                if (p == "Windows") _platform = Platform.Windows;
-                if (p == "Linux") _platform = Platform.Linux;
-                if (p == "Mac OS X") _platform = Platform.MacOS;
-                if (p == "iOS") _platform = Platform.IOS;
-                if (p == "Android") _platform = Platform.Android;
-                return (Platform)_platform;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) _platform = Platform.Windows;
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) _platform = Platform.MacOS;
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) _platform = Platform.Linux;
+                else _platform = Platform.Unknown;
+                return (Platform) _platform;
             }
         }
 
@@ -79,43 +78,53 @@ namespace odl
         // Windows
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
         public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
-
+        
+        // Linux
+        [DllImport("libdl.so")]
+        public static extern IntPtr dlopen(string filename, int flags);
+        
+        [DllImport("libdl.so")]
+        public static extern IntPtr dlsym(IntPtr Handle, string FunctionName);
+        
+        [DllImport("libdl.so")]
+        public static extern string dlerror();
+        
         [DllImport("user32")]
         public static extern bool SetProcessDPIAware();
+        
+        [DllImport("lib/linux/SDL2.dll")]
+        public static extern IntPtr SDL_LoadObject(string Filename);
 
         /// <summary>
         /// Initializes SDL and its components.
         /// </summary>
         public static void Start()
         {
-            bool windows = true;
-            bool linux = false;
-            bool mac = false;
-            IntPtr zlib = IntPtr.Zero,
-                   libpng = IntPtr.Zero,
-                   libfreetype = IntPtr.Zero,
-                   sdl2 = IntPtr.Zero,
-                   sdl2_image = IntPtr.Zero,
-                   sdl2_ttf = IntPtr.Zero;
-            if (windows)
+            Console.WriteLine("Start loading dependencies...");
+            if (Platform == Platform.Windows)
             {
                 SetProcessDPIAware();
-                zlib = LoadLibrary("./lib/zlib1.dll");
-                libpng = LoadLibrary("./lib/libpng16-16.dll");
-                libfreetype = LoadLibrary("./lib/libfreetype-6.dll");
-                sdl2 = LoadLibrary("./lib/SDL2.dll");
-                sdl2_image = LoadLibrary("./lib/SDL2_image.dll");
-                sdl2_ttf = LoadLibrary("./lib/SDL2_ttf.dll");
+                SDL.Bind("./lib/windows/SDL2.dll", "./lib/windows/zlib1.dll");
+                SDL_image.Bind("./lib/windows/SDL2_image.dll", "./lib/windows/libpng16-16.dll");
+                SDL_ttf.Bind("./lib/windows/SDL2_ttf.dll", "./lib/windows/libfreetype-6.dll");
             }
-            if (zlib == IntPtr.Zero) throw new Exception("Could not find zlib at 'lib/zlib1.dll'.");
-            if (libpng == IntPtr.Zero) throw new Exception("Could not find libpng at 'lib/libpng16-16.dll'.");
-            if (libfreetype == IntPtr.Zero) throw new Exception("Could not find libfreetype at 'lib/libfreetype-6.dll'.");
-            if (sdl2 == IntPtr.Zero) throw new Exception("Could not find SDL2 at 'lib/SDL2.dll'.");
-            if (sdl2_image == IntPtr.Zero) throw new Exception("Could not find SDL2_image at 'lib/SDL2_image.dll'.");
-            if (sdl2_ttf == IntPtr.Zero) throw new Exception("Could not find SDL2_ttf at 'lib/SDL2_ttf.dll'.");
+            else if (Platform == Platform.Linux)
+            {
+                SDL.Bind("./lib/linux/SDL2.dll", "./lib/linux/libz.so");
+                SDL_image.Bind("./lib/linux/SDL2_image.dll", "./lib/linux/libpng16-16.so");
+                SDL_ttf.Bind("./lib/linux/SDL2_ttf.dll", "./lib/linux/libfreetype-6.so");
+            }
+            else if (Platform == Platform.MacOS)
+            {
+                throw new Exception("MacOS support has not yet been implemented.");
+            }
+            else
+            {
+                throw new Exception("No platform could be detected.");
+            }
 
             if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
-                IMG_Init(IMG_InitFlags.IMG_INIT_PNG) != (int) IMG_InitFlags.IMG_INIT_PNG ||
+                IMG_Init(IMG_INIT_PNG) != (int) IMG_INIT_PNG ||
                 TTF_Init() < 0)
             {
                 throw new Exception(SDL_GetError());
@@ -332,7 +341,7 @@ namespace odl
             if (OldMouseY == -1) OldMouseY = e.motion.y;
             if (e.type == SDL_EventType.SDL_WINDOWEVENT)
             {
-                switch (e.window.windowEvent)
+                switch (e.window.windowevent)
                 {
                     case SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
                         BoolEventArgs ClosingArgs = new BoolEventArgs();

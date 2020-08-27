@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using static SDL2.SDL;
-using static SDL2.SDL_ttf;
+using static odl.SDL2.SDL;
+using static odl.SDL2.SDL_ttf;
+using static odl.SDL2.SDL_image;
 
 namespace odl
 {
@@ -168,7 +169,7 @@ namespace odl
             }
             else
             {
-                this.Surface = SDL2.SDL_image.IMG_Load(Filename);
+                this.Surface = IMG_Load(Filename);
                 this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
                 this.Width = SurfaceObject.w;
                 this.Height = SurfaceObject.h;
@@ -1715,8 +1716,7 @@ namespace odl
             {
                 SDL_Rect Src = SrcRect.SDL_Rect;
                 SDL_Rect Dest = DestRect.SDL_Rect;
-                if (Dest.w != Src.w || Dest.h != Src.h)
-                     SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+                if (Dest.w != Src.w || Dest.h != Src.h) SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
                 else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
             }
             if (this.Renderer != null) this.Renderer.Update();
@@ -2099,7 +2099,7 @@ namespace odl
             }
             else
             {
-                SDL2.SDL_image.IMG_SavePNG(Surface, filename);
+                IMG_SavePNG(Surface, filename);
             }
         }
 

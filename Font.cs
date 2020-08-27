@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using static SDL2.SDL_ttf;
+using static odl.SDL2.SDL_ttf;
 
 namespace odl
 {

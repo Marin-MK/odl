@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.NetworkInformation;
-using static SDL2.SDL;
+using static odl.SDL2.SDL;
 
 namespace odl
 {
@@ -180,7 +179,7 @@ namespace odl
             byte Alpha = Convert.ToByte(255d * (s.Opacity / 255d) * (this.Opacity / 255d));
 
             SDL_SetTextureAlphaMod(Texture, Alpha);
-
+            
             List<Point> Points;
             if (s.MultiplePositions.Count == 0) // Normal X,Y positions
             {

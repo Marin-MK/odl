@@ -1,9 +1,5 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Xml;
-using static SDL2.SDL;
+using static odl.SDL2.SDL;
 
 namespace odl
 {
@@ -85,7 +81,7 @@ namespace odl
         {
             get
             {
-                SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(SDL_Window);
+                SDL_WindowFlags flags = SDL_GetWindowFlags(SDL_Window);
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) == SDL_WindowFlags.SDL_WINDOW_MAXIMIZED;
             }
         }
@@ -96,7 +92,7 @@ namespace odl
         {
             get
             {
-                SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(SDL_Window);
+                SDL_WindowFlags flags = SDL_GetWindowFlags(SDL_Window);
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MINIMIZED) == SDL_WindowFlags.SDL_WINDOW_MINIMIZED;
             }
         }
@@ -563,7 +559,7 @@ namespace odl
             rect.y = 0;
             rect.w = bmp.Width;
             rect.h = bmp.Height;
-            SDL_RenderReadPixels(this.Renderer.SDL_Renderer, ref rect, SDL_PIXELFORMAT_RGBA8888, bmp.SurfaceObject.pixels, bmp.SurfaceObject.pitch);
+            SDL_RenderReadPixels(this.Renderer.SDL_Renderer, rect, SDL_PIXELFORMAT_RGBA8888, bmp.SurfaceObject.pixels, bmp.SurfaceObject.pitch);
             return bmp;
         }
     }

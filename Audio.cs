@@ -16,40 +16,41 @@ namespace odl
         public static bool UsingBassFX = true;
         static int FXPlugin;
 
-        #region Linux
-        #if LINUX
-        [DllImport("libdl.so")]
-        static extern IntPtr dlopen(string filename, int flags);
-
-        [DllImport("libdl.so")]
-        static extern string dlerror();
-        #endif
-        #endregion
-
         public static void Start(bool UseBassFX = true)
         {
             Audio.UsingBassFX = UseBassFX;
-            #region Load bass & bass_fx
-            #if LINUX
-            if (dlopen("./libbass.so", 0x101) == IntPtr.Zero)
-                throw new Exception($"Failed to load libbass.so\nError: {dlerror()}");
-            if (UseBassFX)
+            IntPtr bass = IntPtr.Zero;
+            IntPtr bass_fx = IntPtr.Zero;
+            if (Graphics.Platform == Platform.Windows)
             {
-                if (if (dlopen("./libbass_fx.so", 0x101) == IntPtr.Zero)
-                    throw new Exception($"Failed to load libbass_fx.so\nError: {dlerror()}");
-                FXPlugin = BASS_PluginLoad("libbass_fx.so");
+                bass = Graphics.LoadLibrary("./lib/windows/bass.dll");
+                if (bass == IntPtr.Zero) throw new Exception("Failed to load the BASS library.");
+                if (UseBassFX)
+                {
+                    bass_fx = Graphics.LoadLibrary("./lib/windows/bass_fx.dll");
+                    if (bass_fx == IntPtr.Zero) throw new Exception("Failed to load the BASS_FX library.");
+                    FXPlugin = BASS_PluginLoad("./lib/windows/bass_fx.dll");
+                }
             }
-            #else
-            IntPtr bass = Graphics.LoadLibrary("./lib/bass.dll");
-            if (bass == IntPtr.Zero) throw new Exception("Could not find BASS at 'lib/bass.dll'.");
-            if (UseBassFX)
+            else if (Graphics.Platform == Platform.Linux)
             {
-                IntPtr bass_fx = Graphics.LoadLibrary("./lib/bass_fx.dll");
-                if (bass_fx == IntPtr.Zero) throw new Exception("Could not find Zlib at 'lib/zlib1.dll'.");
-                FXPlugin = BASS_PluginLoad("bass_fx.dll");
+                bass = Graphics.dlopen("./lib/linux/libbass.so", 0x102);
+                if (bass == IntPtr.Zero) throw new Exception("Failed to load the BASS library.");
+                if (UseBassFX)
+                {
+                    bass_fx = Graphics.dlopen("./lib/linux/libbass_fx.so", 0x102);
+                    if (bass_fx == IntPtr.Zero) throw new Exception("Failed to load the BASS_FX library.");
+                    FXPlugin = BASS_PluginLoad("./lib/linux/libbass_fx.so");
+                }
             }
-            #endif
-            #endregion
+            else if (Graphics.Platform == Platform.MacOS)
+            {
+                throw new Exception("MacOS support has not yet been implemented.");
+            }
+            else
+            {
+                throw new Exception("No platform could be detected.");
+            }
             BASS_Init(-1, 44100, 0, IntPtr.Zero);
         }
 
