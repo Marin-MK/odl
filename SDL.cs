@@ -131,7 +131,7 @@ namespace odl.SDL2
 		}
 
         #region Utility
-        static unsafe string PtrToStr(IntPtr Pointer)
+        public static unsafe string PtrToStr(IntPtr Pointer)
         {
             if (Pointer == IntPtr.Zero) return null;
             byte* ptr = (byte*) Pointer;
@@ -142,7 +142,7 @@ namespace odl.SDL2
             );
         }
 
-        static unsafe IntPtr StrToPtr(string String)
+        public static unsafe IntPtr StrToPtr(string String)
         {
             byte[] buffer;
             if (String == null)
@@ -675,11 +675,13 @@ namespace odl.SDL2
 			public IntPtr colorScheme;
         }
 
+		[StructLayout(LayoutKind.Sequential)]
+		[Serializable]
 		public struct SDL_MessageBoxButtonData
         {
 			public SDL_MessageBoxButtonFlags flags;
 			public int buttonid;
-			public string text;
+			public IntPtr text;
         }
 
 		public unsafe struct SDL_MessageBoxColorScheme

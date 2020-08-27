@@ -1,7 +1,4 @@
 ﻿using System;
-using Un4seen.Bass;
-using static Un4seen.Bass.Bass;
-using static Un4seen.Bass.AddOn.Fx.BassFx;
 using System.Collections.Generic;
 using System.IO;
 
@@ -11,7 +8,7 @@ namespace odl
     {
         protected SoundCallback LoopCallback;
 
-        protected List<SYNCPROC> SYNCPROC_CACHE = new List<SYNCPROC>();
+        internal List<Audio.BASS_Syncproc> SYNCPROC_CACHE = new List<Audio.BASS_Syncproc>();
 
         protected int Stream;
         protected int LoopEndCallback;
@@ -30,7 +27,7 @@ namespace odl
             set
             {
                 if (value != _Volume && Stream != 0)
-                    BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, value / 100f);
+                    Audio.BASS_ChannelSetAttribute(Stream, Audio.BASS_Attribute.BASS_ATTRIB_VOL, value / 100f);
                 _Volume = value;
                 OriginalVolume = value;
             }
@@ -46,7 +43,7 @@ namespace odl
             {
                 if (value != 0 && !Audio.UsingBassFX) throw new Exception("Cannot change Pitch when odl Audio is initialized with UsingBassFX set to false.");
                 if (value != _Pitch && Stream != 0)
-                    BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_TEMPO_PITCH, (float) value);
+                    Audio.BASS_ChannelSetAttribute(Stream, Audio.BASS_Attribute.BASS_ATTRIB_TEMPO_PITCH, (float) value);
                 _Pitch = value;
             }
         }
@@ -60,7 +57,7 @@ namespace odl
             set
             {
                 if (value != _SampleRate && Stream != 0)
-                    BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_FREQ, value);
+                    Audio.BASS_ChannelSetAttribute(Stream, Audio.BASS_Attribute.BASS_ATTRIB_FREQ, value);
                 _SampleRate = value;
             }
         }
@@ -74,7 +71,7 @@ namespace odl
             set
             {
                 if (value != _Pan && Stream != 0)
-                    BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_PAN, (float) value);
+                    Audio.BASS_ChannelSetAttribute(Stream, Audio.BASS_Attribute.BASS_ATTRIB_PAN, (float) value);
                 _Pan = value;
             }
         }
@@ -82,11 +79,11 @@ namespace odl
         {
             get
             {
-                return BASS_ChannelGetPosition(this.Stream) / 4;
+                return Audio.BASS_ChannelGetPosition(this.Stream) / 4;
             }
             set
             {
-                BASS_ChannelSetPosition(this.Stream, value * 4);
+                Audio.BASS_ChannelSetPosition(this.Stream, value * 4);
             }
         }
 
@@ -172,7 +169,7 @@ namespace odl
         {
             get
             {
-                return BASS_ChannelIsActive(this.Stream) == BASSActive.BASS_ACTIVE_PLAYING;
+                return Audio.BASS_ChannelIsActive(this.Stream) == 1;
             }
         }
 
@@ -180,7 +177,7 @@ namespace odl
 
         public Sound(string Filename, int Volume = 100, double Pitch = 0)
         {
-            if (Pitch != 0 && !Audio.UsingBassFX) throw new Exception("Cannot change Pitch when odl Audio is initialized with UsingBassFX set to false.");
+            if (Pitch != 0 && !Audio.UsingBassFX) throw new Exception("Cannot change Pitch when Audio is initialized with UsingBassFX set to false.");
             string OriginalFilename = Filename;
             if (!File.Exists(Filename))
             {
@@ -190,16 +187,16 @@ namespace odl
             }
             if (Audio.UsingBassFX)
             {
-                int BaseStream = BASS_StreamCreateFile(Filename, 0, 0, BASSFlag.BASS_STREAM_DECODE);
-                this.Stream = BASS_FX_TempoCreate(BaseStream, BASSFlag.BASS_STREAM_AUTOFREE | BASSFlag.BASS_FX_FREESOURCE);
+                int BaseStream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_DECODE);
+                this.Stream = Audio.BASS_FX_TempoCreate(BaseStream, Audio.BASS_Flag.BASS_STREAM_AUTOFREE | Audio.BASS_Flag.BASS_FX_FREESOURCE);
             }
             else
             {
-                this.Stream = BASS_StreamCreateFile(Filename, 0, 0, 0);
+                this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, 0);
             }
             float sr = 0;
-            BASS_ChannelGetAttribute(this.Stream, BASSAttribute.BASS_ATTRIB_FREQ, ref sr);
-            this.Length = BASS_ChannelGetLength(this.Stream) / 4;
+            Audio.BASS_ChannelGetAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_FREQ, ref sr);
+            this.Length = Audio.BASS_ChannelGetLength(this.Stream) / 4;
             _SampleRate = (int) sr;
             this.Filename = OriginalFilename;
             this.Volume = Volume;
@@ -208,26 +205,26 @@ namespace odl
 
         public int AddPositionCallback(long Sample, SoundCallback Callback)
         {
-            SYNCPROC proc = delegate (int Handle, int Channel, int Data, IntPtr User) { Callback(Sample); };
+            Audio.BASS_Syncproc proc = delegate (int Handle, int Channel, int Data, IntPtr User) { Callback(Sample); };
             SYNCPROC_CACHE.Add(proc);
-            return BASS_ChannelSetSync(this.Stream, BASSSync.BASS_SYNC_POS, Math.Max(0, Sample * 4 - 18000), proc, IntPtr.Zero);
+            return Audio.BASS_ChannelSetSync(this.Stream, Audio.BASS_Sync.BASS_SYNC_POS, Math.Max(0, Sample * 4 - 18000), proc, IntPtr.Zero);
         }
 
         public int AddEndCallback(SoundCallback Callback)
         {
-            SYNCPROC proc = delegate (int Handle, int Channel, int Data, IntPtr User) { Callback(this.Length); };
+            Audio.BASS_Syncproc proc = delegate (int Handle, int Channel, int Data, IntPtr User) { Callback(this.Length); };
             SYNCPROC_CACHE.Add(proc);
-            return BASS_ChannelSetSync(this.Stream, BASSSync.BASS_SYNC_END | BASSSync.BASS_SYNC_MIXTIME, 0, proc, IntPtr.Zero);
+            return Audio.BASS_ChannelSetSync(this.Stream, Audio.BASS_Sync.BASS_SYNC_END | Audio.BASS_Sync.BASS_SYNC_MIXTIME, 0, proc, IntPtr.Zero);
         }
 
         public int AddSlideCallback(SlideCallback Callback)
         {
-            SYNCPROC proc = delegate (int Handle, int Channel, int Data, IntPtr User)
+            Audio.BASS_Syncproc proc = delegate (int Handle, int Channel, int Data, IntPtr User)
             {
                 Callback(Data);
             };
             SYNCPROC_CACHE.Add(proc);
-            return BASS_ChannelSetSync(this.Stream, BASSSync.BASS_SYNC_SLIDE | BASSSync.BASS_SYNC_MIXTIME, 0, proc, IntPtr.Zero);
+            return Audio.BASS_ChannelSetSync(this.Stream, Audio.BASS_Sync.BASS_SYNC_SLIDE | Audio.BASS_Sync.BASS_SYNC_MIXTIME, 0, proc, IntPtr.Zero);
         }
 
         public void AddLoopCallback(SoundCallback Callback)
@@ -237,12 +234,12 @@ namespace odl
 
         public void RemoveCallback(int Handle)
         {
-            BASS_ChannelRemoveSync(this.Stream, Handle);
+            Audio.BASS_ChannelRemoveSync(this.Stream, Handle);
         }
 
         protected void ReconfigureLooping()
         {
-            BASS_ChannelFlags(this.Stream, 0, BASSFlag.BASS_SAMPLE_LOOP);
+            Audio.BASS_ChannelFlags(this.Stream, 0, Audio.BASS_Flag.BASS_SAMPLE_LOOP);
             if (LoopEndCallback != 0) RemoveCallback(LoopEndCallback);
             if (LoopStart != 0 && LoopEnd == 0)
             {
@@ -255,32 +252,32 @@ namespace odl
             else if (Looping)
             {
                 LoopEndCallback = AddEndCallback(delegate (long Position) { LoopCallback?.Invoke(Position); });
-                BASS_ChannelFlags(this.Stream, BASSFlag.BASS_SAMPLE_LOOP, BASSFlag.BASS_SAMPLE_LOOP);
+                Audio.BASS_ChannelFlags(this.Stream, Audio.BASS_Flag.BASS_SAMPLE_LOOP, Audio.BASS_Flag.BASS_SAMPLE_LOOP);
             }
         }
 
         public void SlideVolume(int Volume, long Time)
         {
             _Volume = Volume;
-            BASS_ChannelSlideAttribute(this.Stream, BASSAttribute.BASS_ATTRIB_VOL, Volume / 100f, (int) Math.Round((double) Time / SampleRate * 1000));
+            Audio.BASS_ChannelSlideAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_VOL, Volume / 100f, (int) Math.Round((double) Time / SampleRate * 1000));
         }
 
         public void SlidePan(double Pan, long Time)
         {
             _Pan = Pan;
-            BASS_ChannelSlideAttribute(this.Stream, BASSAttribute.BASS_ATTRIB_PAN, (float) Pan, (int) Math.Round((double) Time / SampleRate * 1000));
+            Audio.BASS_ChannelSlideAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_PAN, (float) Pan, (int) Math.Round((double) Time / SampleRate * 1000));
         }
 
         public void SlidePitch(double Pitch, long Time)
         {
             _Pitch = Pitch;
-            BASS_ChannelSlideAttribute(this.Stream, BASSAttribute.BASS_ATTRIB_TEMPO_PITCH, (float) Pitch, (int) Math.Round((double) Time / SampleRate * 1000));
+            Audio.BASS_ChannelSlideAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_TEMPO_PITCH, (float) Pitch, (int) Math.Round((double) Time / SampleRate * 1000));
         }
 
         public void SlideSampleRate(int SampleRate, long Time)
         {
             _Pitch = Pitch;
-            BASS_ChannelSlideAttribute(this.Stream, BASSAttribute.BASS_ATTRIB_FREQ, SampleRate, (int) Math.Round((double) Time / SampleRate * 1000));
+            Audio.BASS_ChannelSlideAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_FREQ, SampleRate, (int) Math.Round((double) Time / SampleRate * 1000));
         }
 
         public void FadeOut(long Time)
@@ -315,34 +312,34 @@ namespace odl
 
         public void Pause()
         {
-            BASS_ChannelPause(this.Stream);
+            Audio.BASS_ChannelPause(this.Stream);
         }
 
         public void Resume()
         {
-            BASS_ChannelPlay(this.Stream, false);
+            Audio.BASS_ChannelPlay(this.Stream, false);
         }
 
         public void Play()
         {
-            if (BASS_ChannelIsActive(this.Stream) == BASSActive.BASS_ACTIVE_PAUSED)
+            if (Audio.BASS_ChannelIsActive(this.Stream) == 3)
             {
-                BASS_ChannelPlay(this.Stream, false);
+                Audio.BASS_ChannelPlay(this.Stream, false);
             }
             else
             {
-                BASS_ChannelPlay(this.Stream, true);
+                Audio.BASS_ChannelPlay(this.Stream, true);
             }
         }
 
         public void Start()
         {
-            BASS_ChannelPlay(this.Stream, true);
+            Audio.BASS_ChannelPlay(this.Stream, true);
         }
 
         public void Stop()
         {
-            BASS_ChannelStop(this.Stream);
+            Audio.BASS_ChannelStop(this.Stream);
         }
     }
 }

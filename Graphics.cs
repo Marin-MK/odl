@@ -74,26 +74,10 @@ namespace odl
             if (CurrentObjects == null) return;
             CurrentObjects.CompareWith(new ObjectCollection(Renderers[0]));
         }
-
-        // Windows
-        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
         
-        // Linux
-        [DllImport("libdl.so")]
-        public static extern IntPtr dlopen(string filename, int flags);
-        
-        [DllImport("libdl.so")]
-        public static extern IntPtr dlsym(IntPtr Handle, string FunctionName);
-        
-        [DllImport("libdl.so")]
-        public static extern string dlerror();
-        
+        // Windows DPI awareness
         [DllImport("user32")]
         public static extern bool SetProcessDPIAware();
-        
-        [DllImport("lib/linux/SDL2.dll")]
-        public static extern IntPtr SDL_LoadObject(string Filename);
 
         /// <summary>
         /// Initializes SDL and its components.
@@ -110,9 +94,9 @@ namespace odl
             }
             else if (Platform == Platform.Linux)
             {
-                SDL.Bind("./lib/linux/SDL2.dll", "./lib/linux/libz.so");
-                SDL_image.Bind("./lib/linux/SDL2_image.dll", "./lib/linux/libpng16-16.so");
-                SDL_ttf.Bind("./lib/linux/SDL2_ttf.dll", "./lib/linux/libfreetype-6.so");
+                SDL.Bind("./lib/linux/SDL2.so", "./lib/linux/libz.so");
+                SDL_image.Bind("./lib/linux/SDL2_image.so", "./lib/linux/libpng16-16.so");
+                SDL_ttf.Bind("./lib/linux/SDL2_ttf.so", "./lib/linux/libfreetype-6.so");
             }
             else if (Platform == Platform.MacOS)
             {

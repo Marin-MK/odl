@@ -38,7 +38,7 @@ namespace odl
             else if (Graphics.Platform == Platform.Linux) Handle = dlopen(Library, 0x102);
             else if (Graphics.Platform == Platform.MacOS) throw new Exception("MacOS is not currently supported.");
             else throw new Exception("Platform could not be determined.");
-            if (Handle == IntPtr.Zero) throw new Exception($"Failed to load libarary '{Library}'.");
+            if (Handle == IntPtr.Zero) throw new Exception($"Failed to load library '{Library}'.");
         }
 
         public TDelegate GetFunction<TDelegate>(string FunctionName)
