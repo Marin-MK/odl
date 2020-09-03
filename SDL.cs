@@ -14,48 +14,48 @@ namespace odl.SDL2
         static SDL Main;
 
         #region Function Delegates
-        delegate int SDL_IntUInt(uint UInt);
-        delegate IntPtr SDL_Ptr();
-        delegate int SDL_IntPtr(IntPtr IntPtr);
-        delegate int SDL_VoidPtrOutRect(IntPtr IntPtr, out SDL_Rect Rect);
-        delegate IntPtr SDL_PtrStrIntIntIntIntWindowFlags(IntPtr String, int Int1, int Int2, int Int3, int Int4, SDL_WindowFlags WindowFlags);
-        delegate IntPtr SDL_PtrPtrIntRendererFlags(IntPtr IntPtr, int Int, SDL_RendererFlags UInt);
-        delegate IntPtr SDL_UIntPtr(IntPtr IntPtr);
-        delegate SDL_bool SDL_SDLBoolPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
-        delegate void SDL_VoidPtrOutIntOutInt(IntPtr IntPtr, out int Int1, out int Int2);
-        delegate void SDL_VoidPtrSDLBool(IntPtr IntPtr, SDL_bool Bool);
-        delegate void SDL_VoidPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
-        delegate int SDL_IntPtrOutRendererInfo(IntPtr IntPtr, out SDL_RendererInfo RendererInfo);
-        delegate void SDL_VoidPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
-        delegate int SDL_Int();
-        delegate void SDL_VoidPtr(IntPtr IntPtr);
-        delegate IntPtr SDL_PtrUIntIntIntIntUInt(uint UInt1, int Int1, int Int2, int Int3, uint UInt2);
-        delegate int SDL_IntPtrRectUIntPtrInt(IntPtr IntPtr1, SDL_Rect Rect, uint UInt, IntPtr IntPtr2, int Int);
-        delegate int SDL_IntPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
-        delegate int SDL_IntPtrFltFlt(IntPtr IntPtr, float Flt1, float Flt2);
-        delegate int SDL_IntPtrRefRect(IntPtr IntPtr, ref SDL_Rect Rect);
-        delegate int SDL_IntPtrByte(IntPtr IntPtr, byte Byte);
-        delegate int SDL_IntPtrPtrRefRectRefRect(IntPtr IntPtr1, IntPtr IntPtr2, ref SDL_Rect Rect1, ref SDL_Rect Rect2);
-        delegate int SDL_IntPtrPtrRefRectRefRectDblRefPointRendererFlip(IntPtr IntPtr1, IntPtr IntPtr2, ref SDL_Rect Rect1, ref SDL_Rect Rect2, double Dbl, ref SDL_Point Point, SDL_RendererFlip RendererFlip);
-        delegate SDL_bool SDL_Bool();
-        delegate IntPtr SDL_PtrSystemCursor(SDL_SystemCursor SystemCursor);
-        delegate IntPtr SDL_CursorPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
-        delegate int SDL_IntSDLBool(SDL_bool Bool);
-        delegate IntPtr SDL_PtrUIntIntIntIntUIntUIntUIntUInt(uint UInt1, int Int1, int Int2, int Int3, uint UInt2, uint UInt3, uint UInt4, uint UInt5);
-        delegate IntPtr SDL_PtrPtrIntIntIntIntUInt(IntPtr IntPtr, int Int1, int Int2, int Int3, int Int4, uint UInt);
-        delegate int SDL_IntPtrRefRectUInt(IntPtr IntPtr, ref SDL_Rect Rect, uint UInt);
-        delegate uint SDL_UIntPtrByteByteByteByte(IntPtr IntPtr, byte Byte1, byte Byte2, byte Byte3, byte Byte4);
-        delegate int SDL_IntPtrRefRectPtrRefRect(IntPtr IntPtr1, ref SDL_Rect Rect1, IntPtr IntPtr2, ref SDL_Rect Rect2);
-        delegate int SDL_IntPtrBlendMode(IntPtr IntPtr, SDL_BlendMode BlendMode);
-        delegate int SDL_IntPtrOutBlendMode(IntPtr IntPtr, out SDL_BlendMode BlendMode);
-        delegate IntPtr SDL_PtrPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
-        delegate int SDL_IntIntOutRect(int Int, out SDL_Rect Rect);
-        delegate void SDL_VoidUInt(uint UInt);
-		delegate int SDL_IntOutEvent(out SDL_Event Event);
-		delegate IntPtr SDL_PtrUInt(uint UInt);
-		delegate IntPtr SDL_PtrPtr(IntPtr IntPtr);
-		delegate int SDL_IntPtrOutDisplayMode(IntPtr IntPtr, out SDL_DisplayMode DisplayMode);
-		delegate int SDL_IntRefMessageBoxDataOutInt(ref SDL_MessageBoxData MessageBoxData, out int Int);
+        public delegate int SDL_IntUInt(uint UInt);
+        public delegate IntPtr SDL_Ptr();
+        public delegate int SDL_IntPtr(IntPtr IntPtr);
+        public delegate int SDL_VoidPtrOutRect(IntPtr IntPtr, out SDL_Rect Rect);
+        public delegate IntPtr SDL_PtrStrIntIntIntIntWindowFlags(IntPtr String, int Int1, int Int2, int Int3, int Int4, SDL_WindowFlags WindowFlags);
+        public delegate IntPtr SDL_PtrPtrIntRendererFlags(IntPtr IntPtr, int Int, SDL_RendererFlags UInt);
+        public delegate IntPtr SDL_UIntPtr(IntPtr IntPtr);
+        public delegate SDL_bool SDL_SDLBoolPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
+        public delegate void SDL_VoidPtrOutIntOutInt(IntPtr IntPtr, out int Int1, out int Int2);
+        public delegate void SDL_VoidPtrSDLBool(IntPtr IntPtr, SDL_bool Bool);
+        public delegate void SDL_VoidPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
+        public delegate int SDL_IntPtrOutRendererInfo(IntPtr IntPtr, out SDL_RendererInfo RendererInfo);
+        public delegate void SDL_VoidPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
+        public delegate int SDL_Int();
+        public delegate void SDL_VoidPtr(IntPtr IntPtr);
+        public delegate IntPtr SDL_PtrUIntIntIntIntUInt(uint UInt1, int Int1, int Int2, int Int3, uint UInt2);
+        public delegate int SDL_IntPtrRectUIntPtrInt(IntPtr IntPtr1, SDL_Rect Rect, uint UInt, IntPtr IntPtr2, int Int);
+        public delegate int SDL_IntPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
+        public delegate int SDL_IntPtrFltFlt(IntPtr IntPtr, float Flt1, float Flt2);
+        public delegate int SDL_IntPtrRefRect(IntPtr IntPtr, ref SDL_Rect Rect);
+        public delegate int SDL_IntPtrByte(IntPtr IntPtr, byte Byte);
+        public delegate int SDL_IntPtrPtrRefRectRefRect(IntPtr IntPtr1, IntPtr IntPtr2, ref SDL_Rect Rect1, ref SDL_Rect Rect2);
+        public delegate int SDL_IntPtrPtrRefRectRefRectDblRefPointRendererFlip(IntPtr IntPtr1, IntPtr IntPtr2, ref SDL_Rect Rect1, ref SDL_Rect Rect2, double Dbl, ref SDL_Point Point, SDL_RendererFlip RendererFlip);
+        public delegate SDL_bool SDL_Bool();
+        public delegate IntPtr SDL_PtrSystemCursor(SDL_SystemCursor SystemCursor);
+        public delegate IntPtr SDL_CursorPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
+        public delegate int SDL_IntSDLBool(SDL_bool Bool);
+        public delegate IntPtr SDL_PtrUIntIntIntIntUIntUIntUIntUInt(uint UInt1, int Int1, int Int2, int Int3, uint UInt2, uint UInt3, uint UInt4, uint UInt5);
+        public delegate IntPtr SDL_PtrPtrIntIntIntIntUInt(IntPtr IntPtr, int Int1, int Int2, int Int3, int Int4, uint UInt);
+        public delegate int SDL_IntPtrRefRectUInt(IntPtr IntPtr, ref SDL_Rect Rect, uint UInt);
+        public delegate uint SDL_UIntPtrByteByteByteByte(IntPtr IntPtr, byte Byte1, byte Byte2, byte Byte3, byte Byte4);
+        public delegate int SDL_IntPtrRefRectPtrRefRect(IntPtr IntPtr1, ref SDL_Rect Rect1, IntPtr IntPtr2, ref SDL_Rect Rect2);
+        public delegate int SDL_IntPtrBlendMode(IntPtr IntPtr, SDL_BlendMode BlendMode);
+        public delegate int SDL_IntPtrOutBlendMode(IntPtr IntPtr, out SDL_BlendMode BlendMode);
+        public delegate IntPtr SDL_PtrPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
+        public delegate int SDL_IntIntOutRect(int Int, out SDL_Rect Rect);
+        public delegate void SDL_VoidUInt(uint UInt);
+		public delegate int SDL_IntOutEvent(out SDL_Event Event);
+		public delegate IntPtr SDL_PtrUInt(uint UInt);
+		public delegate IntPtr SDL_PtrPtr(IntPtr IntPtr);
+		public delegate int SDL_IntPtrOutDisplayMode(IntPtr IntPtr, out SDL_DisplayMode DisplayMode);
+		public delegate int SDL_IntRefMessageBoxDataOutInt(ref SDL_MessageBoxData MessageBoxData, out int Int);
 		#endregion
 
 		public static void Bind(string Library, params string[] PreloadLibraries)
@@ -65,546 +65,180 @@ namespace odl.SDL2
 
 		SDL(string Library, params string[] PreloadLibraries) : base(Library, PreloadLibraries)
         {
-            FUNC_SDL_Init = GetFunction<SDL_IntUInt>("SDL_Init");
+            SDL_Init = GetFunction<SDL_IntUInt>("SDL_Init");
             FUNC_SDL_GetError = GetFunction<SDL_Ptr>("SDL_GetError");
-            FUNC_SDL_Quit = GetFunction<Action>("SDL_Quit");
-            FUNC_SDL_RenderClear = GetFunction<SDL_IntPtr>("SDL_RenderClear");
-            FUNC_SDL_RenderGetViewport = GetFunction<SDL_VoidPtrOutRect>("SDL_RenderGetViewport");
+            SDL_Quit = GetFunction<Action>("SDL_Quit");
+            SDL_RenderClear = GetFunction<SDL_IntPtr>("SDL_RenderClear");
+            SDL_RenderGetViewport = GetFunction<SDL_VoidPtrOutRect>("SDL_RenderGetViewport");
             FUNC_SDL_CreateWindow = GetFunction<SDL_PtrStrIntIntIntIntWindowFlags>("SDL_CreateWindow");
-            FUNC_SDL_CreateRenderer = GetFunction<SDL_PtrPtrIntRendererFlags>("SDL_CreateRenderer");
-            FUNC_SDL_GetWindowFlags = GetFunction<SDL_UIntPtr>("SDL_GetWindowFlags");
+            SDL_CreateRenderer = GetFunction<SDL_PtrPtrIntRendererFlags>("SDL_CreateRenderer");
+            SDL_GetWindowFlags = GetFunction<SDL_UIntPtr>("SDL_GetWindowFlags");
             FUNC_SDL_SetHint = GetFunction<SDL_SDLBoolPtrPtr>("SDL_SetHint");
-            FUNC_SDL_GetWindowPosition = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowPosition");
-            FUNC_SDL_SetWindowPosition = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowPosition");
-            FUNC_SDL_SetWindowResizable = GetFunction<SDL_VoidPtrSDLBool>("SDL_SetWindowResizable");
-            FUNC_SDL_SetWindowIcon = GetFunction<SDL_VoidPtrPtr>("SDL_SetWindowIcon");
-            FUNC_SDL_GetRendererInfo = GetFunction<SDL_IntPtrOutRendererInfo>("SDL_GetRendererInfo");
-            FUNC_SDL_SetWindowMinimumSize = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowMinimumSize");
-            FUNC_SDL_SetWindowSize = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowSize");
-            FUNC_SDL_GetWindowSize = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowSize");
+            SDL_GetWindowPosition = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowPosition");
+            SDL_SetWindowPosition = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowPosition");
+            SDL_SetWindowResizable = GetFunction<SDL_VoidPtrSDLBool>("SDL_SetWindowResizable");
+            SDL_SetWindowIcon = GetFunction<SDL_VoidPtrPtr>("SDL_SetWindowIcon");
+            SDL_GetRendererInfo = GetFunction<SDL_IntPtrOutRendererInfo>("SDL_GetRendererInfo");
+            SDL_SetWindowMinimumSize = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowMinimumSize");
+            SDL_SetWindowSize = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowSize");
+            SDL_GetWindowSize = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowSize");
             FUNC_SDL_SetWindowTitle = GetFunction<SDL_VoidPtrPtr>("SDL_SetWindowTitle");
-            FUNC_SDL_GetWindowDisplayIndex = GetFunction<SDL_IntPtr>("SDL_GetWindowDisplayIndex");
-            FUNC_SDL_GetNumVideoDisplays = GetFunction<SDL_Int>("SDL_GetNumVideoDisplays");
-            FUNC_SDL_ShowWindow = GetFunction<SDL_VoidPtr>("SDL_ShowWindow");
-            FUNC_SDL_MinimizeWindow = GetFunction<SDL_VoidPtr>("SDL_MinimizeWindow");
-            FUNC_SDL_MaximizeWindow = GetFunction<SDL_VoidPtr>("SDL_MaximizeWindow");
-            FUNC_SDL_RaiseWindow = GetFunction<SDL_VoidPtr>("SDL_RaiseWindow");
-            FUNC_SDL_DestroyRenderer = GetFunction<SDL_VoidPtr>("SDL_DestroyRenderer");
-            FUNC_SDL_DestroyWindow = GetFunction<SDL_VoidPtr>("SDL_DestroyWindow");
-            FUNC_SDL_CreateRGBSurfaceWithFormat = GetFunction<SDL_PtrUIntIntIntIntUInt>("SDL_CreateRGBSurfaceWithFormat");
-            FUNC_SDL_RenderReadPixels = GetFunction<SDL_IntPtrRectUIntPtrInt>("SDL_RenderReadPixels");
-            FUNC_SDL_RenderSetLogicalSize = GetFunction<SDL_IntPtrIntInt>("SDL_RenderSetLogicalSize");
-            FUNC_SDL_RenderSetScale = GetFunction<SDL_IntPtrFltFlt>("SDL_RenderSetScale");
-            FUNC_SDL_RenderSetViewport = GetFunction<SDL_IntPtrRefRect>("SDL_RenderSetViewport");
-            FUNC_SDL_RenderPresent = GetFunction<SDL_VoidPtr>("SDL_RenderPresent");
-            FUNC_SDL_SetTextureAlphaMod = GetFunction<SDL_IntPtrByte>("SDL_SetTextureAlphaMod");
-            FUNC_SDL_RenderCopy = GetFunction<SDL_IntPtrPtrRefRectRefRect>("SDL_RenderCopy");
-            FUNC_SDL_RenderCopyEx = GetFunction<SDL_IntPtrPtrRefRectRefRectDblRefPointRendererFlip>("SDL_RenderCopyEx");
-            FUNC_SDL_StartTextInput = GetFunction<Action>("SDL_StartTextInput");
-            FUNC_SDL_StopTextInput = GetFunction<Action>("SDL_StopTextInput");
-            FUNC_SDL_IsTextInputActive = GetFunction<SDL_Bool>("SDL_IsTextInputActive");
-            FUNC_SDL_CreateSystemCursor = GetFunction<SDL_PtrSystemCursor>("SDL_CreateSystemCursor");
-            FUNC_SDL_SetCursor = GetFunction<SDL_VoidPtr>("SDL_SetCursor");
-            FUNC_SDL_CreateColorCursor = GetFunction<SDL_CursorPtrIntInt>("SDL_CreateColorCursor");
-            FUNC_SDL_CaptureMouse = GetFunction<SDL_IntSDLBool>("SDL_CaptureMouse");
-            FUNC_SDL_FreeSurface = GetFunction<SDL_VoidPtr>("SDL_FreeSurface");
-            FUNC_SDL_DestroyTexture = GetFunction<SDL_VoidPtr>("SDL_DestroyTexture");
-            FUNC_SDL_CreateRGBSurface = GetFunction<SDL_PtrUIntIntIntIntUIntUIntUIntUInt>("SDL_CreateRGBSurface");
-            FUNC_SDL_CreateRGBSurfaceWithFormatFrom = GetFunction<SDL_PtrPtrIntIntIntIntUInt>("SDL_CreateRGBSurfaceWithFormatFrom");
-            FUNC_SDL_FillRect = GetFunction<SDL_IntPtrRefRectUInt>("SDL_FillRect");
-            FUNC_SDL_MapRGBA = GetFunction<SDL_UIntPtrByteByteByteByte>("SDL_MapRGBA");
-            FUNC_SDL_BlitScaled = GetFunction<SDL_IntPtrRefRectPtrRefRect>("SDL_UpperBlitScaled");
-            FUNC_SDL_BlitSurface = GetFunction<SDL_IntPtrRefRectPtrRefRect>("SDL_UpperBlit");
-            FUNC_SDL_SetTextureBlendMode = GetFunction<SDL_IntPtrBlendMode>("SDL_SetTextureBlendMode");
-            FUNC_SDL_GetTextureBlendMode = GetFunction<SDL_IntPtrOutBlendMode>("SDL_GetTextureBlendMode");
-            FUNC_SDL_CreateTextureFromSurface = GetFunction<SDL_PtrPtrPtr>("SDL_CreateTextureFromSurface");
-            FUNC_SDL_GetDisplayBounds = GetFunction<SDL_IntIntOutRect>("SDL_GetDisplayBounds");
-			FUNC_SDL_GetDisplayUsableBounds = GetFunction<SDL_IntIntOutRect>("SDL_GetDisplayUsableBounds");
-            FUNC_SDL_Delay = GetFunction<SDL_VoidUInt>("SDL_Delay");
-			FUNC_SDL_PollEvent = GetFunction<SDL_IntOutEvent>("SDL_PollEvent");
-			FUNC_SDL_GetWindowFromID = GetFunction<SDL_PtrUInt>("SDL_GetWindowFromID");
+            SDL_GetWindowDisplayIndex = GetFunction<SDL_IntPtr>("SDL_GetWindowDisplayIndex");
+            SDL_GetNumVideoDisplays = GetFunction<SDL_Int>("SDL_GetNumVideoDisplays");
+            SDL_ShowWindow = GetFunction<SDL_VoidPtr>("SDL_ShowWindow");
+            SDL_MinimizeWindow = GetFunction<SDL_VoidPtr>("SDL_MinimizeWindow");
+            SDL_MaximizeWindow = GetFunction<SDL_VoidPtr>("SDL_MaximizeWindow");
+            SDL_RaiseWindow = GetFunction<SDL_VoidPtr>("SDL_RaiseWindow");
+            SDL_DestroyRenderer = GetFunction<SDL_VoidPtr>("SDL_DestroyRenderer");
+            SDL_DestroyWindow = GetFunction<SDL_VoidPtr>("SDL_DestroyWindow");
+            SDL_CreateRGBSurfaceWithFormat = GetFunction<SDL_PtrUIntIntIntIntUInt>("SDL_CreateRGBSurfaceWithFormat");
+            SDL_RenderReadPixels = GetFunction<SDL_IntPtrRectUIntPtrInt>("SDL_RenderReadPixels");
+            SDL_RenderSetLogicalSize = GetFunction<SDL_IntPtrIntInt>("SDL_RenderSetLogicalSize");
+            SDL_RenderSetScale = GetFunction<SDL_IntPtrFltFlt>("SDL_RenderSetScale");
+            SDL_RenderSetViewport = GetFunction<SDL_IntPtrRefRect>("SDL_RenderSetViewport");
+            SDL_RenderPresent = GetFunction<SDL_VoidPtr>("SDL_RenderPresent");
+            SDL_SetTextureAlphaMod = GetFunction<SDL_IntPtrByte>("SDL_SetTextureAlphaMod");
+            SDL_RenderCopy = GetFunction<SDL_IntPtrPtrRefRectRefRect>("SDL_RenderCopy");
+            SDL_RenderCopyEx = GetFunction<SDL_IntPtrPtrRefRectRefRectDblRefPointRendererFlip>("SDL_RenderCopyEx");
+            SDL_StartTextInput = GetFunction<Action>("SDL_StartTextInput");
+            SDL_StopTextInput = GetFunction<Action>("SDL_StopTextInput");
+            SDL_IsTextInputActive = GetFunction<SDL_Bool>("SDL_IsTextInputActive");
+            SDL_CreateSystemCursor = GetFunction<SDL_PtrSystemCursor>("SDL_CreateSystemCursor");
+            SDL_SetCursor = GetFunction<SDL_VoidPtr>("SDL_SetCursor");
+            SDL_CreateColorCursor = GetFunction<SDL_CursorPtrIntInt>("SDL_CreateColorCursor");
+            SDL_CaptureMouse = GetFunction<SDL_IntSDLBool>("SDL_CaptureMouse");
+            SDL_FreeSurface = GetFunction<SDL_VoidPtr>("SDL_FreeSurface");
+            SDL_DestroyTexture = GetFunction<SDL_VoidPtr>("SDL_DestroyTexture");
+            SDL_CreateRGBSurface = GetFunction<SDL_PtrUIntIntIntIntUIntUIntUIntUInt>("SDL_CreateRGBSurface");
+            SDL_CreateRGBSurfaceWithFormatFrom = GetFunction<SDL_PtrPtrIntIntIntIntUInt>("SDL_CreateRGBSurfaceWithFormatFrom");
+            SDL_FillRect = GetFunction<SDL_IntPtrRefRectUInt>("SDL_FillRect");
+            SDL_MapRGBA = GetFunction<SDL_UIntPtrByteByteByteByte>("SDL_MapRGBA");
+            SDL_BlitScaled = GetFunction<SDL_IntPtrRefRectPtrRefRect>("SDL_UpperBlitScaled");
+            SDL_BlitSurface = GetFunction<SDL_IntPtrRefRectPtrRefRect>("SDL_UpperBlit");
+            SDL_SetTextureBlendMode = GetFunction<SDL_IntPtrBlendMode>("SDL_SetTextureBlendMode");
+            SDL_GetTextureBlendMode = GetFunction<SDL_IntPtrOutBlendMode>("SDL_GetTextureBlendMode");
+            SDL_CreateTextureFromSurface = GetFunction<SDL_PtrPtrPtr>("SDL_CreateTextureFromSurface");
+            SDL_GetDisplayBounds = GetFunction<SDL_IntIntOutRect>("SDL_GetDisplayBounds");
+			SDL_GetDisplayUsableBounds = GetFunction<SDL_IntIntOutRect>("SDL_GetDisplayUsableBounds");
+            SDL_Delay = GetFunction<SDL_VoidUInt>("SDL_Delay");
+			SDL_PollEvent = GetFunction<SDL_IntOutEvent>("SDL_PollEvent");
+			SDL_GetWindowFromID = GetFunction<SDL_PtrUInt>("SDL_GetWindowFromID");
 			FUNC_SDL_GetClipboardText = GetFunction<SDL_Ptr>("SDL_GetClipboardText");
 			FUNC_SDL_SetClipboardText = GetFunction<SDL_IntPtr>("SDL_SetClipboardText");
-			FUNC_SDL_LoadObject = GetFunction<SDL_PtrPtr>("SDL_LoadObject");
-			FUNC_SDL_GetWindowDisplayMode = GetFunction<SDL_IntPtrOutDisplayMode>("SDL_GetWindowDisplayMode");
-			FUNC_SDL_ShowMessageBox = GetFunction<SDL_IntRefMessageBoxDataOutInt>("SDL_ShowMessageBox");
+			SDL_GetWindowDisplayMode = GetFunction<SDL_IntPtrOutDisplayMode>("SDL_GetWindowDisplayMode");
+			SDL_ShowMessageBox = GetFunction<SDL_IntRefMessageBoxDataOutInt>("SDL_ShowMessageBox");
 		}
 
-        #region Utility
-        public static unsafe string PtrToStr(IntPtr Pointer)
-        {
-            if (Pointer == IntPtr.Zero) return null;
-            byte* ptr = (byte*) Pointer;
-            while (*ptr != 0) ptr++;
-            return Encoding.UTF8.GetString(
-                (byte*) Pointer,
-                (int) (ptr - (byte*) Pointer)
-            );
-        }
+		#region Utility
+		static unsafe string PtrToStr(IntPtr Pointer)
+		{
+			return Marshal.PtrToStringAnsi(Pointer);
+		}
 
-        public static unsafe IntPtr StrToPtr(string String)
-        {
-            byte[] buffer;
-            if (String == null)
-            {
-                return IntPtr.Zero;
-            }
-            else
-            {
-                int bufferSize = (String != null ? (String.Length * 4) + 1 : 0);
-                buffer = new byte[bufferSize];
-                byte[] bytes = Encoding.UTF8.GetBytes(String);
-                return Marshal.UnsafeAddrOfPinnedArrayElement(bytes, 0);
-            }
-        }
+		public static unsafe IntPtr StrToPtr(string String)
+		{
+			return Marshal.StringToCoTaskMemAnsi(String);
+		}
 
-        static void IEP(string FunctionName)
-        {
-            IEP(Main, FunctionName);
-        }
-        #endregion
+		static unsafe string PtrToStrUTF8(IntPtr Pointer)
+		{
+			return Marshal.PtrToStringUTF8(Pointer);
+		}
 
-        #region SDL Functions
-        static SDL_IntUInt FUNC_SDL_Init;
-        public static int SDL_Init(uint Flags)
-        {
-            if (FUNC_SDL_Init == null) IEP("SDL_Init");
-            return FUNC_SDL_Init(Flags);
-        }
+		public static unsafe IntPtr StrUTF8ToPtr(string String)
+		{
+			return Marshal.StringToCoTaskMemUTF8(String);
+		}
+		#endregion
 
-        static SDL_Ptr FUNC_SDL_GetError;
-        public static string SDL_GetError()
+		#region SDL Functions
+		static SDL_Ptr FUNC_SDL_GetError;
+		static SDL_PtrStrIntIntIntIntWindowFlags FUNC_SDL_CreateWindow;
+		static SDL_SDLBoolPtrPtr FUNC_SDL_SetHint;
+		static SDL_VoidPtrPtr FUNC_SDL_SetWindowTitle;
+		static SDL_Ptr FUNC_SDL_GetClipboardText;
+		static SDL_IntPtr FUNC_SDL_SetClipboardText;
+
+		public static SDL_IntUInt SDL_Init;
+		public static string SDL_GetError()
         {
-            if (FUNC_SDL_GetError == null) IEP("SDL_GetError");
             return PtrToStr(FUNC_SDL_GetError());
         }
-
-        static Action FUNC_SDL_Quit;
-        public static void SDL_Quit()
-        {
-            if (FUNC_SDL_Quit == null) IEP("SDL_Quit");
-            FUNC_SDL_Quit();
-        }
-
-        static SDL_IntPtr FUNC_SDL_RenderClear;
-        public static int SDL_RenderClear(IntPtr SDL_Renderer)
-        {
-            if (FUNC_SDL_RenderClear == null) IEP("SDL_RenderClear");
-            return FUNC_SDL_RenderClear(SDL_Renderer);
-        }
-
-        static SDL_VoidPtrOutRect FUNC_SDL_RenderGetViewport;
-        public unsafe static void SDL_RenderGetViewport(IntPtr SDL_Render, out SDL_Rect SDL_Rect)
-        {
-            if (FUNC_SDL_RenderGetViewport == null) IEP("SDL_RenderGetViewport");
-            FUNC_SDL_RenderGetViewport(SDL_Render, out SDL_Rect);
-        }
-
-        static SDL_PtrStrIntIntIntIntWindowFlags FUNC_SDL_CreateWindow;
+        public static Action SDL_Quit;
+        public static SDL_IntPtr SDL_RenderClear;
+        public static SDL_VoidPtrOutRect SDL_RenderGetViewport;
         public unsafe static IntPtr SDL_CreateWindow(string Title, int X, int Y, int Width, int Height, SDL_WindowFlags Flags)
         {
-            if (FUNC_SDL_CreateWindow == null) IEP("SDL_CreateWindow");
-            return FUNC_SDL_CreateWindow(StrToPtr(Title), X, Y, Width, Height, Flags);
+            return FUNC_SDL_CreateWindow(StrUTF8ToPtr(Title), X, Y, Width, Height, Flags);
         }
-
-        static SDL_PtrPtrIntRendererFlags FUNC_SDL_CreateRenderer;
-        public static IntPtr SDL_CreateRenderer(IntPtr SDL_Window, int Index, SDL_RendererFlags Flags)
-        {
-            if (FUNC_SDL_CreateRenderer == null) IEP("SDL_CreateRenderer");
-            return FUNC_SDL_CreateRenderer(SDL_Window, Index, Flags);
-        }
-
-        static SDL_UIntPtr FUNC_SDL_GetWindowFlags;
-        public static SDL_WindowFlags SDL_GetWindowFlags(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_GetWindowFlags == null) IEP("SDL_GetWindowFlags");
-            return (SDL_WindowFlags) FUNC_SDL_GetWindowFlags(SDL_Window);
-        }
-
-        static SDL_SDLBoolPtrPtr FUNC_SDL_SetHint;
+        public static SDL_PtrPtrIntRendererFlags SDL_CreateRenderer;
+        public static SDL_UIntPtr SDL_GetWindowFlags;
         public static SDL_bool SDL_SetHint(string Name, string Value)
         {
-            if (FUNC_SDL_SetHint == null) IEP("SDL_SetHint");
             return FUNC_SDL_SetHint(StrToPtr(Name), StrToPtr(Value));
         }
-
-        static SDL_VoidPtrOutIntOutInt FUNC_SDL_GetWindowPosition;
-        public static void SDL_GetWindowPosition(IntPtr SDL_Window, out int X, out int Y)
-        {
-            if (FUNC_SDL_GetWindowPosition == null) IEP("SDL_GetWindowPosition");
-            FUNC_SDL_GetWindowPosition(SDL_Window, out X, out Y);
-        }
-
-        static SDL_VoidPtrIntInt FUNC_SDL_SetWindowPosition;
-        public static void SDL_SetWindowPosition(IntPtr SDL_Window, int X, int Y)
-        {
-            if (FUNC_SDL_SetWindowPosition == null) IEP("SDL_SetWindowPosition");
-            FUNC_SDL_SetWindowPosition(SDL_Window, X, Y);
-        }
-
-        static SDL_VoidPtrSDLBool FUNC_SDL_SetWindowResizable;
-        public static void SDL_SetWindowResizable(IntPtr SDL_Window, SDL_bool Resizable)
-        {
-            if (FUNC_SDL_SetWindowResizable == null) IEP("SDL_SetWindowResizable");
-            FUNC_SDL_SetWindowResizable(SDL_Window, Resizable);
-        }
-
-        static SDL_VoidPtrPtr FUNC_SDL_SetWindowIcon;
-        public static void SDL_SetWindowIcon(IntPtr SDL_Window, IntPtr SDL_Surface)
-        {
-            if (FUNC_SDL_SetWindowIcon == null) IEP("SDL_SetWindowIcon");
-            FUNC_SDL_SetWindowIcon(SDL_Window, SDL_Surface);
-        }
-
-        static SDL_IntPtrOutRendererInfo FUNC_SDL_GetRendererInfo;
-        public static int SDL_GetRendererInfo(IntPtr SDL_Renderer, out SDL_RendererInfo SDL_RendererInfo)
-        {
-            if (FUNC_SDL_GetRendererInfo == null) IEP("SDL_GetRendererInfo");
-            return FUNC_SDL_GetRendererInfo(SDL_Renderer, out SDL_RendererInfo);
-        }
-
-        static SDL_VoidPtrIntInt FUNC_SDL_SetWindowMinimumSize;
-        public static void SDL_SetWindowMinimumSize(IntPtr SDL_Window, int MinW, int MinH)
-        {
-            if (FUNC_SDL_SetWindowMinimumSize == null) IEP("SDL_SetWindowMinimumSize");
-            FUNC_SDL_SetWindowMinimumSize(SDL_Window, MinW, MinH);
-        }
-
-        static SDL_VoidPtrIntInt FUNC_SDL_SetWindowSize;
-        public static void SDL_SetWindowSize(IntPtr SDL_Window, int Width, int Height)
-        {
-            if (FUNC_SDL_SetWindowSize == null) IEP("SDL_SetWindowSize");
-            FUNC_SDL_SetWindowSize(SDL_Window, Width, Height);
-        }
-
-        static SDL_VoidPtrOutIntOutInt FUNC_SDL_GetWindowSize;
-        public static void SDL_GetWindowSize(IntPtr SDL_Window, out int Width, out int Height)
-        {
-            if (FUNC_SDL_GetWindowSize == null) IEP("SDL_GetWindowSize");
-            FUNC_SDL_GetWindowSize(SDL_Window, out Width, out Height);
-        }
-
-        static SDL_VoidPtrPtr FUNC_SDL_SetWindowTitle;
+        public static SDL_VoidPtrOutIntOutInt SDL_GetWindowPosition;
+        public static SDL_VoidPtrIntInt SDL_SetWindowPosition;
+        public static SDL_VoidPtrSDLBool SDL_SetWindowResizable;
+        public static SDL_VoidPtrPtr SDL_SetWindowIcon;
+        public static SDL_IntPtrOutRendererInfo SDL_GetRendererInfo;
+        public static SDL_VoidPtrIntInt SDL_SetWindowMinimumSize;
+        public static SDL_VoidPtrIntInt SDL_SetWindowSize;
+        public static SDL_VoidPtrOutIntOutInt SDL_GetWindowSize;
         public static void SDL_SetWindowTitle(IntPtr SDL_Window, string Title)
         {
-            if (FUNC_SDL_SetWindowTitle == null) IEP("SDL_SetWindowTitle");
-            FUNC_SDL_SetWindowTitle(SDL_Window, StrToPtr(Title));
+            FUNC_SDL_SetWindowTitle(SDL_Window, StrUTF8ToPtr(Title));
         }
-
-        static SDL_IntPtr FUNC_SDL_GetWindowDisplayIndex;
-        public static int SDL_GetWindowDisplayIndex(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_GetWindowDisplayIndex == null) IEP("SDL_GetWindowDisplayIndex");
-            return FUNC_SDL_GetWindowDisplayIndex(SDL_Window);
-        }
-
-        static SDL_Int FUNC_SDL_GetNumVideoDisplays;
-        public static int SDL_GetNumVideoDisplays()
-        {
-            if (FUNC_SDL_GetNumVideoDisplays == null) IEP("SDL_GetNumVideoDisplays");
-            return FUNC_SDL_GetNumVideoDisplays();
-        }
-
-        static SDL_VoidPtr FUNC_SDL_ShowWindow;
-        public static void SDL_ShowWindow(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_ShowWindow == null) IEP("SDL_ShowWindow");
-            FUNC_SDL_ShowWindow(SDL_Window);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_MinimizeWindow;
-        public static void SDL_MinimizeWindow(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_MinimizeWindow == null) IEP("SDL_MinimizeWindow");
-            FUNC_SDL_MinimizeWindow(SDL_Window);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_MaximizeWindow;
-        public static void SDL_MaximizeWindow(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_MaximizeWindow == null) IEP("SDL_MaximizeWindow");
-            FUNC_SDL_MaximizeWindow(SDL_Window);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_RaiseWindow;
-        public static void SDL_RaiseWindow(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_RaiseWindow == null) IEP("SDL_RaiseWindow");
-            FUNC_SDL_RaiseWindow(SDL_Window);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_DestroyRenderer;
-        public static void SDL_DestroyRenderer(IntPtr SDL_Renderer)
-        {
-            if (FUNC_SDL_DestroyRenderer == null) IEP("SDL_DestroyRenderer");
-            FUNC_SDL_DestroyRenderer(SDL_Renderer);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_DestroyWindow;
-        public static void SDL_DestroyWindow(IntPtr SDL_Window)
-        {
-            if (FUNC_SDL_DestroyWindow == null) IEP("SDL_DestroyWindow");
-            FUNC_SDL_DestroyWindow(SDL_Window);
-        }
-
-        static SDL_PtrUIntIntIntIntUInt FUNC_SDL_CreateRGBSurfaceWithFormat;
-        public static IntPtr SDL_CreateRGBSurfaceWithFormat(uint Flags, int Width, int Height, int Depth, uint Format)
-        {
-            if (FUNC_SDL_CreateRGBSurfaceWithFormat == null) IEP("SDL_CreateRGBSurfaceWithFormat");
-            return FUNC_SDL_CreateRGBSurfaceWithFormat(Flags, Width, Height, Depth, Format);
-        }
-
-        static SDL_IntPtrRectUIntPtrInt FUNC_SDL_RenderReadPixels;
-        public static int SDL_RenderReadPixels(IntPtr SDL_Renderer, SDL_Rect SDL_Rect, uint Format, IntPtr Pixels, int Pitch)
-        {
-            if (FUNC_SDL_RenderReadPixels == null) IEP("SDL_RenderReadPixels");
-            return FUNC_SDL_RenderReadPixels(SDL_Renderer, SDL_Rect, Format, Pixels, Pitch);
-        }
-
-        static SDL_IntPtrIntInt FUNC_SDL_RenderSetLogicalSize;
-        public static int SDL_RenderSetLogicalSize(IntPtr SDL_Renderer, int Width, int Height)
-        {
-            if (FUNC_SDL_RenderSetLogicalSize == null) IEP("SDL_RenderSetLogicalSize");
-            return FUNC_SDL_RenderSetLogicalSize(SDL_Renderer, Width, Height);
-        }
-
-        static SDL_IntPtrFltFlt FUNC_SDL_RenderSetScale;
-        public static int SDL_RenderSetScale(IntPtr SDL_Renderer, float ScaleX, float ScaleY)
-        {
-            if (FUNC_SDL_RenderSetScale == null) IEP("SDL_RenderSetScale");
-            return FUNC_SDL_RenderSetScale(SDL_Renderer, ScaleX, ScaleY);
-        }
-
-        static SDL_IntPtrRefRect FUNC_SDL_RenderSetViewport;
-        public static int SDL_RenderSetViewport(IntPtr SDL_Renderer, ref SDL_Rect SDL_Rect)
-        {
-            if (FUNC_SDL_RenderSetViewport == null) IEP("SDL_RenderSetViewport");
-            return FUNC_SDL_RenderSetViewport(SDL_Renderer, ref SDL_Rect);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_RenderPresent;
-        public static void SDL_RenderPresent(IntPtr SDL_Renderer)
-        {
-            if (FUNC_SDL_RenderPresent == null) IEP("SDL_RenderPresent");
-            FUNC_SDL_RenderPresent(SDL_Renderer);
-        }
-
-        static SDL_IntPtrByte FUNC_SDL_SetTextureAlphaMod;
-        public static int SDL_SetTextureAlphaMod(IntPtr SDL_Texture, byte Alpha)
-        {
-            if (FUNC_SDL_SetTextureAlphaMod == null) IEP("SDL_SetTextureAlphaMod");
-            return FUNC_SDL_SetTextureAlphaMod(SDL_Texture, Alpha);
-        }
-
-        static SDL_IntPtrPtrRefRectRefRect FUNC_SDL_RenderCopy;
-        public static int SDL_RenderCopy(IntPtr SDL_Renderer, IntPtr SDL_Texture, ref SDL_Rect SourceRect, ref SDL_Rect DestRect)
-        {
-            if (FUNC_SDL_RenderCopy == null) IEP("SDL_RenderCopy");
-            return FUNC_SDL_RenderCopy(SDL_Renderer, SDL_Texture, ref SourceRect, ref DestRect);
-        }
-
-        static SDL_IntPtrPtrRefRectRefRectDblRefPointRendererFlip FUNC_SDL_RenderCopyEx;
-        public static int SDL_RenderCopyEx(IntPtr SDL_Renderer, IntPtr SDL_Texture, ref SDL_Rect SourceRect, ref SDL_Rect DestRect, double Angle, ref SDL_Point Center, SDL_RendererFlip Flip)
-        {
-            if (FUNC_SDL_RenderCopyEx == null) IEP("SDL_RenderCopyEx");
-            return FUNC_SDL_RenderCopyEx(SDL_Renderer, SDL_Texture, ref SourceRect, ref DestRect, Angle, ref Center, Flip);
-        }
-
-        static Action FUNC_SDL_StartTextInput;
-        public static void SDL_StartTextInput()
-        {
-            if (FUNC_SDL_StartTextInput == null) IEP("SDL_StartTextInput");
-            FUNC_SDL_StartTextInput();
-        }
-
-        static Action FUNC_SDL_StopTextInput;
-        public static void SDL_StopTextInput()
-        {
-            if (FUNC_SDL_StopTextInput == null) IEP("SDL_StopTextInput");
-            FUNC_SDL_StopTextInput();
-        }
-
-        static SDL_Bool FUNC_SDL_IsTextInputActive;
-        public static SDL_bool SDL_IsTextInputActive()
-        {
-            if (FUNC_SDL_IsTextInputActive == null) IEP("SDL_IsTextInputActive");
-            return FUNC_SDL_IsTextInputActive();
-        }
-
-        static SDL_PtrSystemCursor FUNC_SDL_CreateSystemCursor;
-        public static IntPtr SDL_CreateSystemCursor(SDL_SystemCursor SystemCursor)
-        {
-            if (FUNC_SDL_CreateSystemCursor == null) IEP("SDL_CreateSystemCursor");
-            return FUNC_SDL_CreateSystemCursor(SystemCursor);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_SetCursor;
-        public static void SDL_SetCursor(IntPtr SDL_Cursor)
-        {
-            if (FUNC_SDL_SetCursor == null) IEP("SDL_SetCursor");
-            FUNC_SDL_SetCursor(SDL_Cursor);
-        }
-
-        static SDL_CursorPtrIntInt FUNC_SDL_CreateColorCursor;
-        public static IntPtr SDL_CreateColorCursor(IntPtr SDL_Surface, int HotX, int HotY)
-        {
-            if (FUNC_SDL_CreateColorCursor == null) IEP("SDL_CreateColorCursor");
-            return FUNC_SDL_CreateColorCursor(SDL_Surface, HotX, HotY);
-        }
-
-        static SDL_IntSDLBool FUNC_SDL_CaptureMouse;
-        public static int SDL_CaptureMouse(SDL_bool Enabled)
-        {
-            if (FUNC_SDL_CaptureMouse == null) IEP("SDL_CaptureMouse");
-            return FUNC_SDL_CaptureMouse(Enabled);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_FreeSurface;
-        public static void SDL_FreeSurface(IntPtr SDL_Surface)
-        {
-            if (FUNC_SDL_FreeSurface == null) IEP("SDL_FreeSurface");
-            FUNC_SDL_FreeSurface(SDL_Surface);
-        }
-
-        static SDL_VoidPtr FUNC_SDL_DestroyTexture;
-        public static void SDL_DestroyTexture(IntPtr SDL_Texture)
-        {
-            if (FUNC_SDL_DestroyTexture == null) IEP("SDL_DestroyTexture");
-            FUNC_SDL_DestroyTexture(SDL_Texture);
-        }
-
-        static SDL_PtrUIntIntIntIntUIntUIntUIntUInt FUNC_SDL_CreateRGBSurface;
-        public static IntPtr SDL_CreateRGBSurface(uint Flags, int Width, int Height, int Depth, uint RMask, uint GMask, uint BMask, uint AMask)
-        {
-            if (FUNC_SDL_CreateRGBSurface == null) IEP("SDL_CreateRGBSurface");
-            return FUNC_SDL_CreateRGBSurface(Flags, Width, Height, Depth, RMask, GMask, BMask, AMask);
-        }
-
-        static SDL_PtrPtrIntIntIntIntUInt FUNC_SDL_CreateRGBSurfaceWithFormatFrom;
-        public static IntPtr SDL_CreateRGBSurfaceWithFormatFrom(IntPtr Pixels, int Width, int Height, int Depth, int Pitch, uint Format)
-        {
-            if (FUNC_SDL_CreateRGBSurfaceWithFormatFrom == null) IEP("SDL_CreateRGBSurfaceWithFormatFrom");
-            return FUNC_SDL_CreateRGBSurfaceWithFormatFrom(Pixels, Width, Height, Depth, Pitch, Format);
-        }
-
-        static SDL_IntPtrRefRectUInt FUNC_SDL_FillRect;
-        public static int SDL_FillRect(IntPtr SDL_Surface, ref SDL_Rect SDL_Rect, uint Color)
-        {
-            if (FUNC_SDL_FillRect == null) IEP("SDL_FillRect");
-            return FUNC_SDL_FillRect(SDL_Surface, ref SDL_Rect, Color);
-        }
-
-        static SDL_UIntPtrByteByteByteByte FUNC_SDL_MapRGBA;
-        public static uint SDL_MapRGBA(IntPtr Format, byte R, byte G, byte B, byte A)
-        {
-            if (FUNC_SDL_MapRGBA == null) IEP("SDL_MapRGBA");
-            return FUNC_SDL_MapRGBA(Format, R, G, B, A);
-        }
-
-        static SDL_IntPtrRefRectPtrRefRect FUNC_SDL_BlitScaled;
-        public static int SDL_BlitScaled(IntPtr SDL_Surface_Source, ref SDL_Rect SDL_Rect_Source, IntPtr SDL_Surface_Dest, ref SDL_Rect SDL_Rect_Dest)
-        {
-            if (FUNC_SDL_BlitScaled == null) IEP("SDL_BlitScaled");
-            return FUNC_SDL_BlitScaled(SDL_Surface_Source, ref SDL_Rect_Source, SDL_Surface_Dest, ref SDL_Rect_Dest);
-        }
-
-        static SDL_IntPtrRefRectPtrRefRect FUNC_SDL_BlitSurface;
-        public static int SDL_BlitSurface(IntPtr SDL_Surface_Source, ref SDL_Rect SDL_Rect_Source, IntPtr SDL_Surface_Dest, ref SDL_Rect SDL_Rect_Dest)
-        {
-            if (FUNC_SDL_BlitSurface == null) IEP("SDL_BlitSurface");
-            return FUNC_SDL_BlitSurface(SDL_Surface_Source, ref SDL_Rect_Source, SDL_Surface_Dest, ref SDL_Rect_Dest);
-        }
-
-        static SDL_IntPtrBlendMode FUNC_SDL_SetTextureBlendMode;
-        public static int SDL_SetTextureBlendMode(IntPtr SDL_Texture, SDL_BlendMode SDL_BlendMode)
-        {
-            if (FUNC_SDL_SetTextureBlendMode == null) IEP("SDL_SetTextureBlendMode");
-            return FUNC_SDL_SetTextureBlendMode(SDL_Texture, SDL_BlendMode);
-        }
-
-        static SDL_IntPtrOutBlendMode FUNC_SDL_GetTextureBlendMode;
-        public static int SDL_GetTextureBlendMode(IntPtr SDL_Texture, out SDL_BlendMode SDL_BlendMode)
-        {
-            if (FUNC_SDL_GetTextureBlendMode == null) IEP("SDL_GetTextureBlendMode");
-            return FUNC_SDL_GetTextureBlendMode(SDL_Texture, out SDL_BlendMode);
-        }
-
-        static SDL_PtrPtrPtr FUNC_SDL_CreateTextureFromSurface;
-        public static IntPtr SDL_CreateTextureFromSurface(IntPtr SDL_Renderer, IntPtr SDL_Surface)
-        {
-            if (FUNC_SDL_CreateTextureFromSurface == null) IEP("SDL_CreateTextureFromSurface");
-            return FUNC_SDL_CreateTextureFromSurface(SDL_Renderer, SDL_Surface);
-        }
-
-        static SDL_IntIntOutRect FUNC_SDL_GetDisplayBounds;
-        public static int SDL_GetDisplayBounds(int DisplayIndex, out SDL_Rect SDL_Rect)
-        {
-            if (FUNC_SDL_GetDisplayBounds == null) IEP("SDL_GetDisplayBounds");
-            return FUNC_SDL_GetDisplayBounds(DisplayIndex, out SDL_Rect);
-        }
-
-		static SDL_IntIntOutRect FUNC_SDL_GetDisplayUsableBounds;
-		public static int SDL_GetDisplayUsableBounds(int DisplayIndex, out SDL_Rect SDL_Rect)
-        {
-			if (FUNC_SDL_GetDisplayUsableBounds == null) IEP("SDL_GetDisplayUsableBounds");
-			return FUNC_SDL_GetDisplayUsableBounds(DisplayIndex, out SDL_Rect);
-        }
-
-		static SDL_VoidUInt FUNC_SDL_Delay;
-        public static void SDL_Delay(uint Milliseconds)
-        {
-            if (FUNC_SDL_Delay == null) IEP("SDL_Delay");
-            FUNC_SDL_Delay(Milliseconds);
-        }
-
-		static SDL_IntOutEvent FUNC_SDL_PollEvent;
-		public static int SDL_PollEvent(out SDL_Event SDL_Event)
-        {
-			if (FUNC_SDL_PollEvent == null) IEP("SDL_PollEvent");
-			return FUNC_SDL_PollEvent(out SDL_Event);
-        }
-
-		static SDL_PtrUInt FUNC_SDL_GetWindowFromID;
-		public static IntPtr SDL_GetWindowFromID(uint ID)
-        {
-			if (FUNC_SDL_GetWindowFromID == null) IEP("SDL_GetWindowFromID");
-			return FUNC_SDL_GetWindowFromID(ID);
-        }
-
-		static SDL_Ptr FUNC_SDL_GetClipboardText;
+		public static SDL_IntPtr SDL_GetWindowDisplayIndex;
+        public static SDL_Int SDL_GetNumVideoDisplays;
+        public static SDL_VoidPtr SDL_ShowWindow;
+        public static SDL_VoidPtr SDL_MinimizeWindow;
+        public static SDL_VoidPtr SDL_MaximizeWindow;
+        public static SDL_VoidPtr SDL_RaiseWindow;
+        public static SDL_VoidPtr SDL_DestroyRenderer;
+        public static SDL_VoidPtr SDL_DestroyWindow;
+        public static SDL_PtrUIntIntIntIntUInt SDL_CreateRGBSurfaceWithFormat;
+		public static SDL_IntPtrRectUIntPtrInt SDL_RenderReadPixels;
+        public static SDL_IntPtrIntInt SDL_RenderSetLogicalSize;
+        public static SDL_IntPtrFltFlt SDL_RenderSetScale;
+        public static SDL_IntPtrRefRect SDL_RenderSetViewport;
+        public static SDL_VoidPtr SDL_RenderPresent;
+        public static SDL_IntPtrByte SDL_SetTextureAlphaMod;
+        public static SDL_IntPtrPtrRefRectRefRect SDL_RenderCopy;
+        public static SDL_IntPtrPtrRefRectRefRectDblRefPointRendererFlip SDL_RenderCopyEx;
+        public static Action SDL_StartTextInput;
+        public static Action SDL_StopTextInput;
+        public static SDL_Bool SDL_IsTextInputActive;
+        public static SDL_PtrSystemCursor SDL_CreateSystemCursor;
+        public static SDL_VoidPtr SDL_SetCursor;
+        public static SDL_CursorPtrIntInt SDL_CreateColorCursor;
+        public static SDL_IntSDLBool SDL_CaptureMouse;
+        public static SDL_VoidPtr SDL_FreeSurface;
+        public static SDL_VoidPtr SDL_DestroyTexture;
+        public static SDL_PtrUIntIntIntIntUIntUIntUIntUInt SDL_CreateRGBSurface;
+        public static SDL_PtrPtrIntIntIntIntUInt SDL_CreateRGBSurfaceWithFormatFrom;
+        public static SDL_IntPtrRefRectUInt SDL_FillRect;
+        public static SDL_UIntPtrByteByteByteByte SDL_MapRGBA;
+        public static SDL_IntPtrRefRectPtrRefRect SDL_BlitScaled;
+        public static SDL_IntPtrRefRectPtrRefRect SDL_BlitSurface;
+        public static SDL_IntPtrBlendMode SDL_SetTextureBlendMode;
+        public static SDL_IntPtrOutBlendMode SDL_GetTextureBlendMode;
+        public static SDL_PtrPtrPtr SDL_CreateTextureFromSurface;
+        public static SDL_IntIntOutRect SDL_GetDisplayBounds;
+		public static SDL_IntIntOutRect SDL_GetDisplayUsableBounds;
+		public static SDL_VoidUInt SDL_Delay;
+		public static SDL_IntOutEvent SDL_PollEvent;
+		public static SDL_PtrUInt SDL_GetWindowFromID;
 		public static string SDL_GetClipboardText()
 		{
-			if (FUNC_SDL_GetClipboardText == null) IEP("SDL_GetClipboardText");
 			return PtrToStr(FUNC_SDL_GetClipboardText());
 		}
-
-		static SDL_IntPtr FUNC_SDL_SetClipboardText;
 		public static int SDL_SetClipboardText(string Text)
         {
-			if (FUNC_SDL_SetClipboardText == null) IEP("SDL_SetClipboardText");
 			return FUNC_SDL_SetClipboardText(StrToPtr(Text));
         }
-
-		static SDL_PtrPtr FUNC_SDL_LoadObject;
-		public static IntPtr SDL_LoadObject(string Filename)
-        {
-			if (FUNC_SDL_LoadObject == null) IEP("SDL_LoadObject");
-			return FUNC_SDL_LoadObject(StrToPtr(Filename));
-        }
-
-		static SDL_IntPtrOutDisplayMode FUNC_SDL_GetWindowDisplayMode;
-		public static int SDL_GetWindowDisplayMode(IntPtr SDL_Window, out SDL_DisplayMode SDL_DisplayMode)
-        {
-			if (FUNC_SDL_GetWindowDisplayMode == null) IEP("SDL_GetWindowDisplayMode");
-			return FUNC_SDL_GetWindowDisplayMode(SDL_Window, out SDL_DisplayMode);
-        }
-
-		static SDL_IntRefMessageBoxDataOutInt FUNC_SDL_ShowMessageBox;
-		public static int SDL_ShowMessageBox(ref SDL_MessageBoxData MessageBoxData, out int ButtonID)
-        {
-			if (FUNC_SDL_ShowMessageBox == null) IEP("SDL_ShowMessageBox");
-			return FUNC_SDL_ShowMessageBox(ref MessageBoxData, out ButtonID);
-        }
+		public static SDL_IntPtrOutDisplayMode SDL_GetWindowDisplayMode;
+		public static SDL_IntRefMessageBoxDataOutInt SDL_ShowMessageBox;
 		#endregion
 
 		#region Structs
@@ -675,8 +309,6 @@ namespace odl.SDL2
 			public IntPtr colorScheme;
         }
 
-		[StructLayout(LayoutKind.Sequential)]
-		[Serializable]
 		public struct SDL_MessageBoxButtonData
         {
 			public SDL_MessageBoxButtonFlags flags;
@@ -793,9 +425,9 @@ namespace odl.SDL2
 			public uint timestamp;
 			public uint display;
 			public SDL_DisplayEventID displayevent;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+            public byte padding1;
+            public byte padding2;
+			public byte padding3;
 			public Int32 data1;
 		}
 
@@ -805,9 +437,9 @@ namespace odl.SDL2
 			public uint timestamp;
 			public uint windowID;
 			public SDL_WindowEventID windowevent;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+			public byte padding1;
+			public byte padding2;
+			public byte padding3;
 			public int data1;
 			public int data2;
 		}
@@ -819,8 +451,8 @@ namespace odl.SDL2
 			public uint windowID;
 			public byte state;
 			public byte repeat;
-			byte padding2;
-			byte padding3;
+			public byte padding2;
+			public byte padding3;
 			public SDL_Keysym keysym;
 		}
 
@@ -849,9 +481,9 @@ namespace odl.SDL2
 			public uint windowID;
 			public uint which;
 			public byte state;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+			public byte padding1;
+			public byte padding2;
+			public byte padding3;
 			public int x;
 			public int y;
 			public int xrel;
@@ -867,7 +499,7 @@ namespace odl.SDL2
 			public byte button;
 			public byte state;
 			public byte clicks;
-			byte padding1;
+			public byte padding1;
 			public int x;
 			public int y;
 		}
@@ -889,9 +521,9 @@ namespace odl.SDL2
 			public uint timestamp;
 			public int which;
 			public byte axis;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+			public byte padding1;
+			public byte padding2;
+			public byte padding3;
 			public short axisValue;
 			public ushort padding4;
 		}
@@ -902,9 +534,9 @@ namespace odl.SDL2
 			public uint timestamp;
 			public int which;
 			public byte ball;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+			public byte padding1;
+			public byte padding2;
+			public byte padding3;
 			public short xrel;
 			public short yrel;
 		}
@@ -916,8 +548,8 @@ namespace odl.SDL2
 			public int which;
 			public byte hat;
 			public byte hatValue;
-			byte padding1;
-			byte padding2;
+			public byte padding1;
+			public byte padding2;
 		}
 
 		public struct SDL_JoyButtonEvent
@@ -927,8 +559,8 @@ namespace odl.SDL2
 			public int which;
 			public byte button;
 			public byte state;
-			byte padding1;
-			byte padding2;
+			public byte padding1;
+			public byte padding2;
 		}
 
 		public struct SDL_JoyDeviceEvent
@@ -944,11 +576,11 @@ namespace odl.SDL2
 			public uint timestamp;
 			public int which;
 			public byte axis;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+			public byte padding1;
+			public byte padding2;
+			public byte padding3;
 			public short axisValue;
-			private ushort padding4;
+			public ushort padding4;
 		}
 
 		public struct SDL_ControllerButtonEvent
@@ -958,8 +590,8 @@ namespace odl.SDL2
 			public int which;
 			public byte button;
 			public byte state;
-			byte padding1;
-			byte padding2;
+			public byte padding1;
+			public byte padding2;
 		}
 
 		public struct SDL_ControllerDeviceEvent
@@ -975,9 +607,9 @@ namespace odl.SDL2
 			public uint timestamp;
 			public uint which;
 			public byte iscapture;
-			byte padding1;
-			byte padding2;
-			byte padding3;
+			public byte padding1;
+			public byte padding2;
+			public byte padding3;
 		}
 
 		public struct SDL_TouchFingerEvent

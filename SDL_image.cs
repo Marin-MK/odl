@@ -10,9 +10,9 @@ namespace odl.SDL2
         static SDL_image Main;
 
         #region Function Delegates
-        delegate int IMG_IntUInt(uint UInt);
-        delegate IntPtr IMG_PtrPtr(IntPtr IntPtr);
-        delegate int IMG_IntPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
+        public delegate int IMG_IntUInt(uint UInt);
+        public delegate IntPtr IMG_PtrPtr(IntPtr IntPtr);
+        public delegate int IMG_IntPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
         #endregion
 
         public static void Bind(string Library, params string[] PreloadLibraries)
@@ -22,73 +22,25 @@ namespace odl.SDL2
 
         SDL_image(string Library, params string[] PreloadLibraries) : base(Library, PreloadLibraries)
         {
-            FUNC_IMG_Init = GetFunction<IMG_IntUInt>("IMG_Init");
-            FUNC_IMG_Quit = GetFunction<Action>("IMG_Quit");
+            IMG_Init = GetFunction<IMG_IntUInt>("IMG_Init");
+            IMG_Quit = GetFunction<Action>("IMG_Quit");
             FUNC_IMG_Load = GetFunction<IMG_PtrPtr>("IMG_Load");
             FUNC_IMG_SavePNG = GetFunction<IMG_IntPtrPtr>("IMG_SavePNG");
         }
 
-        #region Utility
-        static unsafe string PtrToStr(IntPtr Pointer)
-        {
-            if (Pointer == IntPtr.Zero) return null;
-            byte* ptr = (byte*) Pointer;
-            while (*ptr != 0) ptr++;
-            return Encoding.UTF8.GetString(
-                (byte*) Pointer,
-                (int) (ptr - (byte*) Pointer)
-            );
-        }
-
-        static unsafe IntPtr StrToPtr(string String)
-        {
-            byte[] buffer;
-            if (String == null)
-            {
-                return IntPtr.Zero;
-            }
-            else
-            {
-                int bufferSize = (String != null ? (String.Length * 4) + 1 : 0);
-                buffer = new byte[bufferSize];
-                byte[] bytes = Encoding.UTF8.GetBytes(String);
-                return Marshal.UnsafeAddrOfPinnedArrayElement(bytes, 0);
-            }
-        }
-
-        static void IEP(string FunctionName)
-        {
-            IEP(Main, FunctionName);
-        }
-        #endregion
-
         #region SDL_image Functions
-        static IMG_IntUInt FUNC_IMG_Init;
-        public static int IMG_Init(uint Flags)
-        {
-            if (FUNC_IMG_Init == null) IEP("IMG_Init");
-            return FUNC_IMG_Init(Flags);
-        }
-
-        static Action FUNC_IMG_Quit;
-        public static void IMG_Quit()
-        {
-            if (FUNC_IMG_Quit == null) IEP("IMG_Quit");
-            FUNC_IMG_Quit();
-        }
-
         static IMG_PtrPtr FUNC_IMG_Load;
+        static IMG_IntPtrPtr FUNC_IMG_SavePNG;
+
+        public static IMG_IntUInt IMG_Init;
+        public static Action IMG_Quit;
         public static IntPtr IMG_Load(string Filename)
         {
-            if (FUNC_IMG_Load == null) IEP("IMG_Load");
-            return FUNC_IMG_Load(StrToPtr(Filename));
+            return FUNC_IMG_Load(SDL.StrToPtr(Filename));
         }
-
-        static IMG_IntPtrPtr FUNC_IMG_SavePNG;
         public static int IMG_SavePNG(IntPtr SDL_Surface, string Filename)
         {
-            if (FUNC_IMG_SavePNG == null) IEP("IMG_SavePNG");
-            return FUNC_IMG_SavePNG(SDL_Surface, StrToPtr(Filename));
+            return FUNC_IMG_SavePNG(SDL_Surface, SDL.StrToPtr(Filename));
         }
         #endregion
 

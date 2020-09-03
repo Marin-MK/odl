@@ -81,7 +81,7 @@ namespace odl
         {
             get
             {
-                SDL_WindowFlags flags = SDL_GetWindowFlags(SDL_Window);
+                SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(SDL_Window);
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) == SDL_WindowFlags.SDL_WINDOW_MAXIMIZED;
             }
         }
@@ -92,7 +92,7 @@ namespace odl
         {
             get
             {
-                SDL_WindowFlags flags = SDL_GetWindowFlags(SDL_Window);
+                SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(SDL_Window);
                 return (flags & SDL_WindowFlags.SDL_WINDOW_MINIMIZED) == SDL_WindowFlags.SDL_WINDOW_MINIMIZED;
             }
         }
