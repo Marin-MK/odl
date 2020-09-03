@@ -1,6 +1,7 @@
 ﻿using odl.SDL2;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -44,6 +45,10 @@ namespace odl
         /// Whether SDL and its componenents have been initialized.
         /// </summary>
         public static bool Initialized = false;
+        /// <summary>
+        /// Whether or not the JPEG libary was loaded.
+        /// </summary>
+        public static bool LoadedJPEG = false;
 
         private static Platform? _platform;
         /// <summary>
@@ -89,13 +94,23 @@ namespace odl
             {
                 SetProcessDPIAware();
                 SDL.Bind("./lib/windows/SDL2.dll", "./lib/windows/zlib1.dll");
-                SDL_image.Bind("./lib/windows/SDL2_image.dll", "./lib/windows/libpng16-16.dll");
+                if (File.Exists("./lib/windows/libjpeg-9.dll"))
+                {
+                    LoadedJPEG = true;
+                    SDL_image.Bind("./lib/windows/SDL2_image.dll", "./lib/windows/libpng16-16.dll", "./lib/windows/libjpeg-9.dll");
+                }
+                else SDL_image.Bind("./lib/windows/SDL2_image.dll", "./lib/windows/libpng16-16.dll");
                 SDL_ttf.Bind("./lib/windows/SDL2_ttf.dll", "./lib/windows/libfreetype-6.dll");
             }
             else if (Platform == Platform.Linux)
             {
                 SDL.Bind("./lib/linux/SDL2.so", "./lib/linux/libz.so");
-                SDL_image.Bind("./lib/linux/SDL2_image.so", "./lib/linux/libpng16-16.so");
+                if (File.Exists("./lib/linux/libjpeg-9.so"))
+                {
+                    LoadedJPEG = true;
+                    SDL_image.Bind("./lib/linux/SDL2_image.so", "./lib/linux/libpng16-16.so", "./lib/linux/libjpeg-9.so");
+                }
+                else SDL_image.Bind("./lib/linux/SDL2_image.so", "./lib/linux/libpng16-16.so");
                 SDL_ttf.Bind("./lib/linux/SDL2_ttf.so", "./lib/linux/libfreetype-6.so");
             }
             else if (Platform == Platform.MacOS)
@@ -107,8 +122,10 @@ namespace odl
                 throw new Exception("No platform could be detected.");
             }
 
+            uint IMG_Flags = IMG_INIT_PNG;
+            if (LoadedJPEG) IMG_Flags |= IMG_INIT_JPG;
             if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
-                IMG_Init(IMG_INIT_PNG) != (int) IMG_INIT_PNG ||
+                IMG_Init(IMG_Flags) != (int) IMG_Flags ||
                 TTF_Init() < 0)
             {
                 throw new Exception(SDL_GetError());

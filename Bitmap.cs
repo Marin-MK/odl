@@ -114,8 +114,8 @@ namespace odl
                 else throw new FileNotFoundException($"File could not be found -- {Filename}");
             }
 
-            Size ImageSize = ValidatePNG(Filename);
-            if (ImageSize.Width > Graphics.MaxTextureSize.Width && ImageSize.Height > Graphics.MaxTextureSize.Height)
+            (Size ImageSize, bool IsPNG) = ValidateIMG(Filename);
+            if (IsPNG && ImageSize.Width > Graphics.MaxTextureSize.Width && ImageSize.Height > Graphics.MaxTextureSize.Height)
             {
                 (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(Filename);
                 byte[] bytes = data.Bytes;
@@ -144,7 +144,7 @@ namespace odl
                 this.Width = width;
                 this.Height = height;
             }
-            else if (ImageSize.Height > Graphics.MaxTextureSize.Height)
+            else if (IsPNG && ImageSize.Height > Graphics.MaxTextureSize.Height)
             {
                 (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(Filename);
                 byte[] bytes = data.Bytes;
@@ -296,24 +296,80 @@ namespace odl
             this.Lock();
         }
 
-        public Size ValidatePNG(string Filename)
+        protected (Size Size, bool IsPNG) ValidateIMG(string Filename)
         {
             BinaryReader br = new BinaryReader(File.OpenRead(Filename));
             byte[] pngsignature = new byte[8] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+            bool validpng = true;
             for (int i = 0; i < 8; i++)
             {
                 if (br.ReadByte() != pngsignature[i])
-                    throw new Exception($"The given file is not a valid PNG file: '{Filename}'");
+                {
+                    validpng = false;
+                    break;
+                }
             }
-
-            br.BaseStream.Position = 16;
-            byte[] widthbytes = new byte[sizeof(int)];
-            for (int i = 0; i < sizeof(int); i++) widthbytes[sizeof(int) - 1 - i] = br.ReadByte();
-            int width = BitConverter.ToInt32(widthbytes, 0);
-            byte[] heightbytes = new byte[sizeof(int)];
-            for (int i = 0; i < sizeof(int); i++) heightbytes[sizeof(int) - 1 - i] = br.ReadByte();
-            int height = BitConverter.ToInt32(heightbytes, 0);
-            return new Size(width, height);
+            if (validpng)
+            {
+                br.BaseStream.Position = 16;
+                byte[] widthbytes = new byte[sizeof(int)];
+                for (int i = 0; i < sizeof(int); i++) widthbytes[sizeof(int) - 1 - i] = br.ReadByte();
+                int width = BitConverter.ToInt32(widthbytes, 0);
+                byte[] heightbytes = new byte[sizeof(int)];
+                for (int i = 0; i < sizeof(int); i++) heightbytes[sizeof(int) - 1 - i] = br.ReadByte();
+                int height = BitConverter.ToInt32(heightbytes, 0);
+                return (new Size(width, height), true);
+            }
+            else if (Graphics.LoadedJPEG)
+            {
+                byte[] jpegsignature = new byte[4] { 0xFF, 0xD8, 0xFF, 0xDB };
+                bool validjpeg = true;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (br.ReadByte() != jpegsignature[i])
+                    {
+                        validjpeg = false;
+                        break;
+                    }
+                }
+                if (!validjpeg)
+                {
+                    br.BaseStream.Position = 0;
+                    validjpeg = true;
+                    jpegsignature = new byte[12] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01 };
+                    for (int i = 0; i < 12; i++)
+                    {
+                        if (br.ReadByte() != jpegsignature[i])
+                        {
+                            validjpeg = false;
+                            break;
+                        }
+                    }
+                }
+                if (!validjpeg)
+                {
+                    br.BaseStream.Position = 0;
+                    validjpeg = true;
+                    jpegsignature = new byte[4] { 0xFF, 0xD8, 0xFF, 0xEE };
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (br.ReadByte() != jpegsignature[i])
+                        {
+                            validjpeg = false;
+                            break;
+                        }
+                    }
+                }
+                if (!validjpeg)
+                {
+                    throw new Exception($"The given file is not a valid PNG or JPG/JPEG file: '{Filename}'");
+                }
+                return (null, false);
+            }
+            else
+            {
+                throw new Exception($"The given file is not a valid PNG file: '{Filename}'");
+            }
         }
 
         ~Bitmap()
