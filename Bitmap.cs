@@ -13,6 +13,8 @@ namespace odl
     {
         public static BlendMode DefaultBlendMode = BlendMode.Blend;
 
+        public static List<Bitmap> BitmapList = new List<Bitmap>();
+
         /// <summary>
         /// The pointer to the SDL_Surface.
         /// </summary>
@@ -24,7 +26,7 @@ namespace odl
         /// <summary>
         /// The pointer to the SDL_Texture.
         /// </summary>
-        public IntPtr Texture { get; protected set; } = IntPtr.Zero;
+        public IntPtr Texture { get; set; } = IntPtr.Zero;
         protected int _width;
         /// <summary>
         /// The width of the bitmap.
@@ -175,6 +177,7 @@ namespace odl
                 this.Height = SurfaceObject.h;
             }
             this.Lock();
+            BitmapList.Add(this);
         }
 
         protected Bitmap() { }
@@ -199,6 +202,7 @@ namespace odl
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
             if (!(this is SolidBitmap)) this.Lock();
+            BitmapList.Add(this);
         }
 
         public Bitmap(int Width, int Height, Size ChunkSize) : this(Width, Height, ChunkSize.Width, ChunkSize.Height) { }
@@ -227,6 +231,7 @@ namespace odl
             }
             this.ChunkSize = new Size(ChunkWidth, ChunkHeight);
             this.Lock();
+            BitmapList.Add(this);
         }
 
         /// <summary>
@@ -240,6 +245,7 @@ namespace odl
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
             this.Lock();
+            BitmapList.Add(this);
         }
 
         /// <summary>
@@ -263,6 +269,7 @@ namespace odl
             this.Width = this.SurfaceObject.w;
             this.Height = this.SurfaceObject.h;
             this.Lock();
+            BitmapList.Add(this);
         }
 
         /// <summary>
@@ -294,6 +301,7 @@ namespace odl
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
             this.Lock();
+            BitmapList.Add(this);
         }
 
         protected (Size Size, bool IsPNG) ValidateIMG(string Filename)
@@ -378,6 +386,7 @@ namespace odl
             {
                 Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
             }
+            if (BitmapList.Contains(this)) BitmapList.Remove(this);
         }
 
         /// <summary>
@@ -430,6 +439,7 @@ namespace odl
         public virtual void Dispose()
         {
             if (Disposed) return;
+            BitmapList.Remove(this);
             if (IsChunky)
             {
                 foreach (Bitmap b in this.InternalBitmaps) b.Dispose();
@@ -2162,17 +2172,27 @@ namespace odl
         /// <summary>
         /// Converts the SDL_Surface to an SDL_Texture used when rendering.
         /// </summary>
-        public virtual void RecreateTexture()
+        public virtual void RecreateTexture(bool Full = true)
         {
             if (this.Renderer == null) return;
-            SDL_BlendMode blend;
-            SDL_GetTextureBlendMode(this.Texture, out blend);
+            SDL_BlendMode blend = new SDL_BlendMode();
+            if (Full)
+            {
+                SDL_GetTextureBlendMode(this.Texture, out blend);
+            }
             if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
             this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
-            if (blend != SDL_BlendMode.SDL_BLENDMODE_NONE) SDL_SetTextureBlendMode(this.Texture, blend);
-            if (ColorToneBmp != null) ColorToneBmp.Dispose();
-            ColorToneBmp = null;
-            this.Renderer.Update();
+            if (this.Texture == IntPtr.Zero)
+            {
+                Console.WriteLine("Texture was invalid!");
+            }
+            if (Full)
+            {
+                if (blend != SDL_BlendMode.SDL_BLENDMODE_NONE) SDL_SetTextureBlendMode(this.Texture, blend);
+                if (ColorToneBmp != null) ColorToneBmp.Dispose();
+                ColorToneBmp = null;
+                this.Renderer.Update();
+            }
         }
 
         private Bitmap ColorToneBmp;

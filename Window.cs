@@ -441,25 +441,26 @@ namespace odl
             if (SoftwareRendering) newflags |= SDL_RendererFlags.SDL_RENDERER_SOFTWARE;
             if (TargetTexture) newflags |= SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE;
             if (VSync) newflags |= SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC;
+            for (int i = 0; i < Bitmap.BitmapList.Count; i++)
+            {
+                Bitmap bmp = Bitmap.BitmapList[i];
+                if (bmp.Texture != IntPtr.Zero)
+                {
+                    SDL_DestroyTexture(bmp.Texture);
+                    bmp.Texture = IntPtr.Zero;
+                }
+            }
             SDL_DestroyRenderer(this.Renderer.SDL_Renderer);
             this.Renderer.SDL_Renderer = SDL_CreateRenderer(this.SDL_Window, -1, newflags);
-            foreach (Viewport vp in this.Renderer.Viewports)
+            for (int i = 0; i < Bitmap.BitmapList.Count; i++)
             {
-                foreach (Sprite s in vp.Sprites)
+                Bitmap bmp = Bitmap.BitmapList[i];
+                if (bmp.Renderer == null) continue;
+                if (bmp.IsChunky)
                 {
-                    if (s.Bitmap == null) continue;
-                    if (s.Bitmap.IsChunky)
-                    {
-                        foreach (Bitmap bmp in s.Bitmap.InternalBitmaps)
-                        {
-                            bmp.RecreateTexture();
-                        }
-                    }
-                    else
-                    {
-                        s.Bitmap.RecreateTexture();
-                    }
+                    bmp.InternalBitmaps.ForEach(ibmp => ibmp.RecreateTexture(false));
                 }
+                else bmp.RecreateTexture(false);
             }
         }
 
