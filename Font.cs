@@ -80,7 +80,7 @@ namespace odl
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             int minx, maxx, miny, maxy, adv;
             TTF_GlyphMetrics(SDL_Font, Char, out minx, out maxx, out miny, out maxy, out adv);
-            return new Size(maxx - minx, TTF_FontHeight(SDL_Font));
+            return new Size(adv, TTF_FontHeight(SDL_Font));
         }
         /// <summary>
         /// Returns the size the given string would take up when rendered.

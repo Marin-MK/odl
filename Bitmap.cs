@@ -1882,6 +1882,11 @@ namespace odl
         /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public virtual void DrawText(string Text, int X, int Y, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
+            if (Text.Length == 1)
+            {
+                DrawGlyph(Convert.ToChar(Text), X, Y, c, DrawOptions);
+                return;
+            }
             if (Locked) throw new BitmapLockedException();
             if (this.Font == null)
             {
@@ -2038,6 +2043,11 @@ namespace odl
         /// <param name="DrawOptions">Additional options for drawing the text.</param>
         public virtual void DrawText(string Text, int X, int Y, int Width, int Height, Color c, DrawOptions DrawOptions = DrawOptions.LeftAlign)
         {
+            if (Text.Length == 1)
+            {
+                DrawGlyph(Convert.ToChar(Text), X, Y, Width, Height, c, DrawOptions);
+                return;
+            }
             if (Locked) throw new BitmapLockedException();
             if (this.Font == null)
             {
@@ -2121,6 +2131,73 @@ namespace odl
             if (this.Renderer != null) this.Renderer.Update();
         }
 
+        #region DrawGlyph Overloads
+        public void DrawGlyph(char c, Rect rect, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, rect.X, rect.Y, rect.Width, rect.Height, new Color(R, G, B, A), DrawOptions);
+        }
+        public void DrawGlyph(char c, Point p, Size s, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, p.X, p.Y, s.Width, s.Height, new Color(R, G, B, A), DrawOptions);
+        }
+        public void DrawGlyph(char c, Point p, int Width, int Height, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, p.X, p.Y, Width, Height, new Color(R, G, B, A), DrawOptions);
+        }
+        public void DrawGlyph(char c, int X, int Y, Size s, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, X, Y, s.Width, s.Height, new Color(R, G, B, A), DrawOptions);
+        }
+        public void DrawGlyph(char c, int X, int Y, int Width, int Height, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, X, Y, Width, Height, new Color(R, G, B, A), DrawOptions);
+        }
+        public void DrawGlyph(char c, Rect rect, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, rect.X, rect.Y, rect.Width, rect.Height, color, DrawOptions);
+        }
+        public void DrawGlyph(char c, Point p, Size s, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, p.X, p.Y, s.Width, s.Height, color, DrawOptions);
+        }
+        public void DrawGlyph(char c, Point p, int Width, int Height, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, p.X, p.Y, Width, Height, color, DrawOptions);
+        }
+        public void DrawGlyph(char c, int X, int Y, Size s, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            this.DrawGlyph(c, X, Y, s.Width, s.Height, color, DrawOptions);
+        }
+        #endregion
+        public virtual void DrawGlyph(char c, int X, int Y, int Width, int Height, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
+        {
+            if (Locked) throw new BitmapLockedException();
+            if (this.Font == null)
+            {
+                throw new Exception("No Font specified for this Bitmap.");
+            }
+            if (c == '\x00') return;
+            IntPtr SDL_Font = this.Font.SDL_Font;
+            bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
+            bool leftalign = (DrawOptions & DrawOptions.LeftAlign) == DrawOptions.LeftAlign;
+            bool centeralign = (DrawOptions & DrawOptions.CenterAlign) == DrawOptions.CenterAlign;
+            bool rightalign = (DrawOptions & DrawOptions.RightAlign) == DrawOptions.RightAlign;
+            if (leftalign && centeralign || leftalign && rightalign || centeralign && rightalign)
+            {
+                throw new Exception("Multiple alignments specified in DrawGlyph DrawOptions - can only contain one alignment setting");
+            }
+            if (!leftalign && !centeralign && !rightalign) leftalign = true;
+            TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
+            Bitmap TextBitmap;
+            if (aliased) TextBitmap = new Bitmap(TTF_RenderGlyph_Solid(SDL_Font, c, color.SDL_Color));
+            else         TextBitmap = new Bitmap(TTF_RenderGlyph_Blended(SDL_Font, c, color.SDL_Color));
+            if (centeralign) X -= TextBitmap.Width / 2;
+            if (rightalign)  X -= TextBitmap.Width;
+            this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
+            TextBitmap.Dispose();
+            if (this.Renderer != null) this.Renderer.Update();
+        }
+
         /// <summary>
         /// Locks the bitmap and converts the surface to a texture. The bitmap can no longer be modified until unlocked.
         /// </summary>
@@ -2196,6 +2273,7 @@ namespace odl
         }
 
         private Bitmap ColorToneBmp;
+
         private Color ColorToneColor;
         private Tone ColorToneTone;
         // Applies a Sprite's Color and Tone. CPU-intensive.
