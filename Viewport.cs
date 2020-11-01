@@ -37,7 +37,7 @@ namespace odl
         /// <summary>
         /// The z index of the viewport.
         /// </summary>
-        public int Z { get { return _Z; } set { if (value != _Z) Update(); _Z = value; } }
+        public int Z { get { return _Z; } set { if (value != _Z) { this.Renderer.ReorderViewports = true; Update(); } _Z = value; } }
         private int _OX = 0;
         /// <summary>
         /// The x offset of the viewport.
@@ -88,6 +88,10 @@ namespace odl
         /// The timestamp at which the viewport was created.
         /// </summary>
         public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
+        /// <summary>
+        /// Whether the sprite list needs to be reordered.
+        /// </summary>
+        public bool ReorderSprites { get; set; } = true;
 
         #region Constructor Overloads
         public Viewport(int X, int Y, int Width, int Height)
@@ -117,6 +121,7 @@ namespace odl
             this.Width = Width;
             this.Height = Height;
             this.Renderer.Viewports.Add(this);
+            this.Renderer.ReorderViewports = true;
         }
 
         ~Viewport()

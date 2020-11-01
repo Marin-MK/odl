@@ -39,6 +39,10 @@ namespace odl
         /// Additional renderer opacity factor that applies to all sprites and viewports.
         /// </summary>
         public byte Opacity = 255;
+        /// <summary>
+        /// Whether the viewport list needs to be reordered.
+        /// </summary>
+        public bool ReorderViewports { get; set; } = true;
 
         /// <summary>
         /// Whether the renderer needs to re-render.
@@ -71,10 +75,15 @@ namespace odl
                 long l1 = Stopwatch.GetTimestamp();
                 SDL_RenderClear(this.SDL_Renderer);
                 Graphics.Log("Viewport count: " + this.Viewports.Count.ToString());
-                this.Viewports.Sort(delegate (Viewport vp1, Viewport vp2) {
-                    if (vp1.Z != vp2.Z) return vp1.Z.CompareTo(vp2.Z);
-                    return vp1.TimeCreated.CompareTo(vp2.TimeCreated);
-                });
+                if (ReorderViewports)
+                {
+                    ReorderViewports = false;
+                    this.Viewports.Sort(delegate (Viewport vp1, Viewport vp2)
+                    {
+                        if (vp1.Z != vp2.Z) return vp1.Z.CompareTo(vp2.Z);
+                        return vp1.TimeCreated.CompareTo(vp2.TimeCreated);
+                    });
+                }
                 for (int i = 0; i < Viewports.Count; i++)
                 {
                     Viewport vp = Viewports[i];
@@ -114,11 +123,15 @@ namespace odl
                             SDL_RenderSetScale(SDL_Renderer, RenderScaleX, RenderScaleY);
                         }
                         SDL_RenderSetViewport(SDL_Renderer, ref ViewportRect);
-                        vp.Sprites.Sort(delegate (Sprite s1, Sprite s2)
+                        if (vp.ReorderSprites)
                         {
-                            if (s1.Z != s2.Z) return s1.Z.CompareTo(s2.Z);
-                            return s1.TimeCreated.CompareTo(s2.TimeCreated);
-                        });
+                            vp.ReorderSprites = false;
+                            vp.Sprites.Sort(delegate (Sprite s1, Sprite s2)
+                            {
+                                if (s1.Z != s2.Z) return s1.Z.CompareTo(s2.Z);
+                                return s1.TimeCreated.CompareTo(s2.TimeCreated);
+                            });
+                        }
                         for (int j = 0; j < vp.Sprites.Count; j++)
                         {
                             Sprite s = vp.Sprites[j];

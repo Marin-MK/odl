@@ -88,7 +88,7 @@ namespace odl
         /// <summary>
         /// The z index of the sprite.
         /// </summary>
-        public int Z { get { return _Z; } set { if (value != _Z) Viewport.Update(); _Z = value; } }
+        public int Z { get { return _Z; } set { if (value != _Z) { Viewport.ReorderSprites = true; Viewport.Update(); } _Z = value; } }
         private double _ZoomX = 1;
         /// <summary>
         /// The horizontal zoom factor of the sprite.
@@ -193,10 +193,10 @@ namespace odl
         public Sprite(Viewport Viewport)
         {
             this.Viewport = Viewport;
+            this.Viewport.ReorderSprites = true;
         }
 
-        public Sprite()
-            : this(DefaultViewport) { }
+        public Sprite() : this(DefaultViewport) { }
 
         public Sprite(Sprite Copy)
         {
@@ -220,6 +220,7 @@ namespace odl
             this.TimeCreated = Copy.TimeCreated;
             this.MultiplePositions = new List<Point>(Copy.MultiplePositions);
             this.Opacity = Copy.Opacity;
+            this.Viewport.ReorderSprites = true;
         }
 
         ~Sprite()
