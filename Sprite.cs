@@ -123,16 +123,16 @@ namespace odl
         /// Whether the sprite is mirrored vertically.
         /// </summary>
         public bool MirrorY { get { return _MirrorY; } set { if (value != _MirrorY) Viewport.Update(); _MirrorY = value; } }
-        private int _OX = 0;
+        private double _OX = 0;
         /// <summary>
         /// The origin x position of the sprite.
         /// </summary>
-        public int OX { get { return _OX; } set { if (value != _OX) Viewport.Update(); _OX = value; } }
-        private int _OY = 0;
+        public double OX { get { return _OX; } set { if (value != _OX) Viewport.Update(); _OX = value; } }
+        private double _OY = 0;
         /// <summary>
         /// The origin y position of the sprite.
         /// </summary>
-        public int OY { get { return _OY; } set { if (value != _OY) Viewport.Update(); _OY = value; } }
+        public double OY { get { return _OY; } set { if (value != _OY) Viewport.Update(); _OY = value; } }
         private Color _Color = new Color(255, 255, 255, 0);
         /// <summary>
         /// The color of the sprite.

@@ -233,8 +233,8 @@ namespace odl
             }
             foreach (Point p in Points)
             {
-                int oxoffset = s.FactorZoomIntoOrigin ? (int) Math.Round((double) s.OX * s.ZoomX) : s.OX;
-                int oyoffset = s.FactorZoomIntoOrigin ? (int) Math.Round((double) s.OY * s.ZoomY) : s.OY;
+                int oxoffset = s.FactorZoomIntoOrigin ? (int) Math.Round(s.OX * s.ZoomX) : (int) Math.Round(s.OX);
+                int oyoffset = s.FactorZoomIntoOrigin ? (int) Math.Round(s.OY * s.ZoomY) : (int) Math.Round(s.OY);
                 Dest.x = p.X - oxoffset + XOffset;
                 Dest.y = p.Y - oyoffset + YOffset;
 
@@ -245,8 +245,8 @@ namespace odl
                 else
                 {
                     SDL_Point Center = new SDL_Point();
-                    Center.x = s.OX;
-                    Center.y = s.OY;
+                    Center.x = (int) Math.Round(s.OX);
+                    Center.y = (int) Math.Round(s.OY);
 
                     SDL_RendererFlip MirrorState = SDL_RendererFlip.SDL_FLIP_NONE;
                     if (s.MirrorX) MirrorState |= SDL_RendererFlip.SDL_FLIP_HORIZONTAL;

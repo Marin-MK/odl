@@ -22,10 +22,10 @@ namespace odl
         public int Angle { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public bool MirrorX { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public bool MirrorY { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
-        private int _OX = 0;
-        public int OX { get { return _OX; } set { _OX = value; this.Update(); } }
-        private int _OY = 0;
-        public int OY { get { return _OY; } set { _OY = value; this.Update(); } }
+        private double _OX = 0;
+        public double OX { get { return _OX; } set { _OX = value; this.Update(); } }
+        private double _OY = 0;
+        public double OY { get { return _OY; } set { _OY = value; this.Update(); } }
         public Color Color { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public List<Point> MultiplePositions { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
         public byte Opacity { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }

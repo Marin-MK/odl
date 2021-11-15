@@ -22,8 +22,8 @@ namespace odl
         int Angle { get; set; }
         bool MirrorX { get; set; }
         bool MirrorY { get; set; }
-        int OX { get; set; }
-        int OY { get; set; }
+        double OX { get; set; }
+        double OY { get; set; }
         Color Color { get; set; }
         List<Point> MultiplePositions { get; set; }
         byte Opacity { get; set; }

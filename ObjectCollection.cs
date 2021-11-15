@@ -105,8 +105,8 @@ namespace odl
         {
             public int X;
             public int Y;
-            public int OX;
-            public int OY;
+            public double OX;
+            public double OY;
             public BitmapData Bitmap;
             public RectData SrcRect;
             public double ZoomX;
