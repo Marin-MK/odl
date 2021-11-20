@@ -111,5 +111,23 @@ namespace odl
         {
             SDL_CaptureMouse(SDL_bool.SDL_FALSE);
         }
+
+        /// <summary>
+        /// Puts text on the clipboard.
+        /// </summary>
+        /// <param name="Data">The text to put on the clipboard.</param>
+        public static void SetClipboard(string Data)
+        {
+            SDL_SetClipboardText(Data);
+        }
+
+        /// <summary>
+        /// Gets text from the clipboard.
+        /// </summary>
+        /// <returns>The text on the clipboard.</returns>
+        public static string GetClipboard()
+        {
+            return SDL_GetClipboardText();
+        }
     }
 }
