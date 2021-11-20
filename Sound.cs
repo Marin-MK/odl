@@ -47,6 +47,7 @@ namespace odl
                 _Pitch = value;
             }
         }
+        public int OriginalSampleRate { get; protected set; }
         protected int _SampleRate = 0;
         public int SampleRate
         {
@@ -173,6 +174,14 @@ namespace odl
             }
         }
 
+        public bool Alive
+        {
+            get
+            {
+                return Audio.BASS_ChannelIsActive(this.Stream) != 0;
+            }
+        }
+
         public long Length { get; protected set; }
 
         public Sound(string Filename, int Volume = 100, double Pitch = 0)
@@ -196,6 +205,7 @@ namespace odl
             }
             float sr = 0;
             Audio.BASS_ChannelGetAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_FREQ, ref sr);
+            this.OriginalSampleRate = (int) sr;
             this.Length = Audio.BASS_ChannelGetLength(this.Stream) / 4;
             _SampleRate = (int) sr;
             this.Filename = OriginalFilename;
