@@ -3,7 +3,7 @@ using static odl.SDL2.SDL;
 
 namespace odl
 {
-    public class Color : IDisposable
+    public class Color : ICloneable
     {
         /// <summary>
         /// A solid red color.
@@ -81,7 +81,7 @@ namespace odl
             this.Alpha = Alpha;
         }
 
-        public Color Clone()
+        public object Clone()
         {
             return new Color(this.Red, this.Green, this.Blue, this.Alpha);
         }
@@ -91,9 +91,23 @@ namespace odl
             return $"(Color: {this.Red},{this.Green},{this.Blue},{this.Alpha})";
         }
 
-        public void Dispose()
+        public override bool Equals(object obj)
         {
-            
+            if (this == obj) return true;
+            if (obj is Color)
+            {
+                Color c = (Color) obj;
+                return this.Red == c.Red &&
+                       this.Green == c.Green &&
+                       this.Blue == c.Blue &&
+                       this.Alpha == c.Alpha;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

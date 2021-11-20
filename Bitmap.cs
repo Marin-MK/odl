@@ -2309,8 +2309,8 @@ namespace odl
                 }
             }
             ColorToneBmp.Lock();
-            ColorToneColor = Color.Clone();
-            ColorToneTone = Tone.Clone();
+            ColorToneColor = (Color) Color.Clone();
+            ColorToneTone = (Tone) Tone.Clone();
             return ColorToneBmp.Texture;
         }
     }

@@ -1,9 +1,8 @@
 ﻿using System;
-using static odl.SDL2.SDL;
 
 namespace odl
 {
-    public class Tone : IDisposable
+    public class Tone : ICloneable
     {
         /// <summary>
         /// The Red component of the color.
@@ -37,14 +36,9 @@ namespace odl
             this.Gray = Gray;
         }
 
-        public Tone Clone()
+        public object Clone()
         {
             return new Tone(this.Red, this.Green, this.Blue, this.Gray);
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
         }
 
         public override string ToString()
