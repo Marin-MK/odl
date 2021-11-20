@@ -150,7 +150,7 @@ namespace odl
         }
         public static void BGMPlay(Sound Sound)
         {
-            if (BGM != null)
+            if (BGM != null && BGM.Alive)
             {
                 BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
                 {
@@ -181,19 +181,26 @@ namespace odl
         }
         public static void MEPlay(Sound Sound)
         {
-            BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
+            if (BGM != null && BGM.Alive)
             {
-                if (SlideType == 2)
+                BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
                 {
-                    BGM.Pause();
-                    Sound.Play();
-                    Sound.AddEndCallback(delegate (long _)
+                    if (SlideType == 2)
                     {
-                        BGM.FadeIn(BGM.SampleRate / 4);
-                        BGM.Play();
-                    });
-                }
-            });
+                        BGM.Pause();
+                        Sound.Play();
+                        Sound.AddEndCallback(delegate (long _)
+                        {
+                            BGM.FadeIn(BGM.SampleRate / 4);
+                            BGM.Play();
+                        });
+                    }
+                });
+            }
+            else
+            {
+                Sound.Play();
+            }
         }
 
         public static void SEPlay(string Filename, int Volume = 100, int Pitch = 0)
