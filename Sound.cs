@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace odl
 {
@@ -184,7 +185,7 @@ namespace odl
 
         public long Length { get; protected set; }
 
-        public Sound(string Filename, int Volume = 100, double Pitch = 0)
+        public unsafe Sound(string Filename, int Volume = 100, double Pitch = 0)
         {
             if (Pitch != 0 && !Audio.UsingBassFX) throw new Exception("Cannot change Pitch when Audio is initialized with UsingBassFX set to false.");
             string OriginalFilename = Filename;
@@ -193,15 +194,33 @@ namespace odl
                 if (File.Exists(Filename + ".ogg")) Filename += ".ogg";
                 else if (File.Exists(Filename + ".wav")) Filename += ".wav";
                 else if (File.Exists(Filename + ".mp3")) Filename += ".mp3";
+                else if (File.Exists(Filename + ".mid")) Filename += ".mid";
             }
-            if (Audio.UsingBassFX)
+            if (Filename.EndsWith(".mid"))
+            {
+                if (Audio.UsingBassMidi)
+                {
+                    this.Stream = Audio.BASS_MIDI_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_AUTOFREE);
+                    Audio.BASS_MIDI_FONT[] list = new Audio.BASS_MIDI_FONT[Audio.Soundfonts.Count];
+                    for (int i = 0; i < Audio.Soundfonts.Count; i++)
+                    {
+                        list[i] = new Audio.BASS_MIDI_FONT();
+                        list[i].font = Audio.Soundfonts[i];
+                        list[i].preset = -1;
+                        list[i].bank = 0;
+                    }
+                    fixed (Audio.BASS_MIDI_FONT* sPtr = list) Audio.BASS_MIDI_StreamSetFonts(this.Stream, sPtr, Audio.Soundfonts.Count);
+                }
+                else Console.WriteLine($"No MIDI support for file {Filename}");
+            }
+            else if (Audio.UsingBassFX)
             {
                 int BaseStream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_DECODE);
                 this.Stream = Audio.BASS_FX_TempoCreate(BaseStream, Audio.BASS_Flag.BASS_STREAM_AUTOFREE | Audio.BASS_Flag.BASS_FX_FREESOURCE);
             }
             else
             {
-                this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, 0);
+                this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_AUTOFREE);
             }
             float sr = 0;
             Audio.BASS_ChannelGetAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_FREQ, ref sr);
