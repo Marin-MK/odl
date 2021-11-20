@@ -714,6 +714,8 @@ namespace odl
         public virtual void DrawLine(int x1, int y1, int x2, int y2, byte r, byte g, byte b, byte a = 255)
         {
             if (Locked) throw new BitmapLockedException();
+            if (x1 < 0 || x2 < 0 || x1 >= Width || x2 >= Width ||
+                y1 < 0 || y2 < 0 || y1 >= Height || y2 >= Height) throw new Exception($"Line out of bounds.");
             for (int x = x1 > x2 ? x2 : x1; (x1 > x2) ? (x <= x1) : (x <= x2); x++)
             {
                 double fact = ((double) x - x1) / (x2 - x1);
