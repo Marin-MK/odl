@@ -2,6 +2,7 @@
 
 namespace odl
 {
+    [Serializable]
     public class Tone : ICloneable
     {
         /// <summary>

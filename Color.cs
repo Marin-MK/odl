@@ -3,6 +3,7 @@ using static odl.SDL2.SDL;
 
 namespace odl
 {
+    [Serializable]
     public class Color : ICloneable
     {
         /// <summary>
