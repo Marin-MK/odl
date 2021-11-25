@@ -110,10 +110,12 @@ namespace odl
         public Bitmap(string Filename)
         {
             while (Filename.Contains('\\')) Filename = Filename.Replace('\\', '/');
-            if (FileExistsCaseSensitive(Filename))
+            if (!FileExistsCaseSensitive(Filename))
             {
                 if (FileExistsCaseSensitive(Filename + ".png")) Filename += ".png";
                 else if (FileExistsCaseSensitive(Filename + ".PNG")) Filename += ".PNG";
+                else if (Filename.EndsWith(".png") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "PNG"))
+                    Filename = Filename.Substring(0, Filename.Length - 3) + "PNG";
                 else throw new FileNotFoundException($"File could not be found -- {Filename}");
             }
 
@@ -398,8 +400,16 @@ namespace odl
         public static bool FileExistsCaseSensitive(string Filename)
         {
             if (!File.Exists(Filename)) return false;
+            string fullfilepath = Path.GetFullPath(Filename);
+            while (fullfilepath.Contains('\\')) fullfilepath = fullfilepath.Replace('\\', '/');
             string dirname = Path.GetDirectoryName(Filename);
-            return dirname != null && Array.Exists(Directory.GetFiles(dirname), e => e == Path.GetFullPath(Filename));
+            string[] files = Directory.GetFiles(dirname);
+            for (int i = 0; i < files.Length; i++)
+            {
+                files[i] = Path.GetFullPath(files[i]);
+                while (files[i].Contains('\\')) files[i] = files[i].Replace('\\', '/');
+            }
+            return dirname != null && Array.Exists(files, e => e == fullfilepath);
         }
 
         /// <summary>
