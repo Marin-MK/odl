@@ -110,9 +110,10 @@ namespace odl
         public Bitmap(string Filename)
         {
             while (Filename.Contains('\\')) Filename = Filename.Replace('\\', '/');
-            if (!File.Exists(Filename))
+            if (FileExistsCaseSensitive(Filename))
             {
-                if (File.Exists(Filename + ".png")) Filename += ".png";
+                if (FileExistsCaseSensitive(Filename + ".png")) Filename += ".png";
+                else if (FileExistsCaseSensitive(Filename + ".PNG")) Filename += ".PNG";
                 else throw new FileNotFoundException($"File could not be found -- {Filename}");
             }
 
@@ -387,6 +388,18 @@ namespace odl
                 Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
             }
             if (BitmapList.Contains(this)) BitmapList.Remove(this);
+        }
+
+        /// <summary>
+        /// Case-sensitive version of File.Exists, but slower.
+        /// </summary>
+        /// <param name="Filename">The file to look for.</param>
+        /// <returns>Whether the file exists.</returns>
+        public static bool FileExistsCaseSensitive(string Filename)
+        {
+            if (!File.Exists(Filename)) return false;
+            string dirname = Path.GetDirectoryName(Filename);
+            return dirname != null && Array.Exists(Directory.GetFiles(dirname), e => e == Path.GetFullPath(Filename));
         }
 
         /// <summary>
