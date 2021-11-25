@@ -50,6 +50,11 @@ namespace odl
                     BASS_FX_GetVersion = bass_fx.GetFunction<BASS_Int>("BASS_FX_GetVersion");
                     Console.WriteLine($"BASS_FX version {BASS_FX_GetVersion()}");
                 }
+                if (UsingBassMidi)
+                {
+                    bass_midi = new NativeLibrary("./lib/linux/libbassmidi.so");
+                    Console.WriteLine($"BASS_MIDI loaded");
+                }
             }
             else if (Graphics.Platform == Platform.MacOS)
             {
