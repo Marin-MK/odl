@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using static odl.SDL2.SDL;
 using static odl.SDL2.SDL_ttf;
 using static odl.SDL2.SDL_image;
+using System.Text;
 
 namespace odl
 {
@@ -1938,8 +1939,9 @@ namespace odl
             if (!leftalign && !centeralign && !rightalign) leftalign = true;
             TTF_SetFontStyle(SDL_Font, Convert.ToInt32(DrawOptions));
             Bitmap TextBitmap;
-            if (aliased) TextBitmap = new Bitmap(TTF_RenderText_Solid  (SDL_Font, Text, c.SDL_Color));
-            else         TextBitmap = new Bitmap(TTF_RenderText_Blended(SDL_Font, Text, c.SDL_Color));
+            Text = Encoding.UTF8.GetString(Encoding.Default.GetBytes(Text));
+            if (aliased) TextBitmap = new Bitmap(TTF_RenderUTF8_Solid(SDL_Font, Text, c.SDL_Color));
+            else         TextBitmap = new Bitmap(TTF_RenderUTF8_Blended(SDL_Font, Text, c.SDL_Color));
             if (centeralign) X -= TextBitmap.Width / 2;
             if (rightalign)  X -= TextBitmap.Width;
             this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));

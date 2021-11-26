@@ -40,6 +40,8 @@ namespace odl.SDL2
             FUNC_TTF_RenderText_Blended = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderText_Blended");
             TTF_RenderGlyph_Solid = GetFunction<TTF_PtrPtrUShtColor>("TTF_RenderGlyph_Solid");
             TTF_RenderGlyph_Blended = GetFunction<TTF_PtrPtrUShtColor>("TTF_RenderGlyph_Blended");
+            FUNC_TTF_RenderUTF8_Solid = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Solid");
+            FUNC_TTF_RenderUTF8_Blended = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Blended");
         }
 
         #region SDL_ttf Functions
@@ -47,6 +49,8 @@ namespace odl.SDL2
         static TTF_IntPtrPtrOutIntOutInt FUNC_TTF_SizeText;
         static TTF_PtrPtrPtrColor FUNC_TTF_RenderText_Solid;
         static TTF_PtrPtrPtrColor FUNC_TTF_RenderText_Blended;
+        static TTF_PtrPtrPtrColor FUNC_TTF_RenderUTF8_Solid;
+        static TTF_PtrPtrPtrColor FUNC_TTF_RenderUTF8_Blended;
 
         public static TTF_Int TTF_Init;
         public static Action TTF_Quit;
@@ -69,6 +73,14 @@ namespace odl.SDL2
         public static IntPtr TTF_RenderText_Blended(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
         {
             return FUNC_TTF_RenderText_Blended(SDL_Font, SDL.StrToPtr(Text), SDL_Color);
+        }
+        public static IntPtr TTF_RenderUTF8_Solid(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
+        {
+            return FUNC_TTF_RenderUTF8_Solid(SDL_Font, SDL.StrToPtr(Text), SDL_Color);
+        }
+        public static IntPtr TTF_RenderUTF8_Blended(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
+        {
+            return FUNC_TTF_RenderUTF8_Blended(SDL_Font, SDL.StrToPtr(Text), SDL_Color);
         }
         public static TTF_PtrPtrUShtColor TTF_RenderGlyph_Solid;
         public static TTF_PtrPtrUShtColor TTF_RenderGlyph_Blended;
