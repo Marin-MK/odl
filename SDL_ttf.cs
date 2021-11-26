@@ -76,11 +76,11 @@ namespace odl.SDL2
         }
         public static IntPtr TTF_RenderUTF8_Solid(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
         {
-            return FUNC_TTF_RenderUTF8_Solid(SDL_Font, SDL.StrToPtr(Text), SDL_Color);
+            return FUNC_TTF_RenderUTF8_Solid(SDL_Font, SDL.StrUTF8ToPtr(Text), SDL_Color);
         }
         public static IntPtr TTF_RenderUTF8_Blended(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
         {
-            return FUNC_TTF_RenderUTF8_Blended(SDL_Font, SDL.StrToPtr(Text), SDL_Color);
+            return FUNC_TTF_RenderUTF8_Blended(SDL_Font, SDL.StrUTF8ToPtr(Text), SDL_Color);
         }
         public static TTF_PtrPtrUShtColor TTF_RenderGlyph_Solid;
         public static TTF_PtrPtrUShtColor TTF_RenderGlyph_Blended;
