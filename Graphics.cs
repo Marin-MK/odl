@@ -152,7 +152,7 @@ namespace odl
             if (DebugLog)
             {
                 DateTime n = DateTime.Now;
-                string str = $"{n.Minute}min {n.Second}s {n.Millisecond}ms ODL:DEBUG: " + Msg;
+                string str = $"[{n.Hour}:{n.Minute}:{n.Second}:{n.Millisecond}] [ODL:DEBUG] " + Msg;
                 Console.WriteLine(str);
             }
         }

@@ -179,7 +179,7 @@ namespace odl
         /// <param name="s">The sprite to render.</param>
         public void RenderSprite(Sprite s, Bitmap bmp, int XOffset, int YOffset)
         {
-            Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? "'" + s.Name + "' " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({bmp.Width},{bmp.Height}{(s.Bitmap is SolidBitmap ? ", " + ((SolidBitmap) s.Bitmap).Color.ToString() : "")}) ox: {s.OX} oy: {s.OY}");
+            Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? "'" + s.Name + "' " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({bmp.Width},{bmp.Height}{(s.Bitmap is SolidBitmap ? ", " + ((SolidBitmap) s.Bitmap).Color.ToString() : "")}) ox: {s.OX} oy: {s.OY} srcrect: {s.SrcRect}");
             IntPtr Texture = IntPtr.Zero;
             if (s.Tone.Red == 0 && s.Tone.Green == 0 && s.Tone.Blue == 0 && s.Tone.Gray == 0 &&
                 s.Color.Alpha == 0)

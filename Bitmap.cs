@@ -81,27 +81,16 @@ namespace odl
         public int InternalY = 0;
 
         /// <summary>
+        /// Used only for bitmaps created with a byte array.
+        /// </summary>
+        IntPtr PixelHandle = IntPtr.Zero;
+
+        /// <summary>
         /// Creates a new bitmap with the given size.
         /// </summary>
         /// <param name="Size">The size of the new bitmap.</param>
         public Bitmap(Size Size)
             : this(Size.Width, Size.Height) { }
-        /// <summary>
-        /// Creates a Bitmap from an RGBA byte list in memory.
-        /// </summary>
-        /// <param name="Pixels">List of RGBA bytes representing pixels.</param>
-        /// <param name="Width">The width of the bitmap.</param>
-        /// <param name="Height">The height of the bitmap.</param>
-        public Bitmap(List<byte> Pixels, int Width, int Height)
-            : this(Pixels.ToArray(), Width, Height) { }
-        /// <summary>
-        /// Creates a Bitmap from a Color array in memory.
-        /// </summary>
-        /// <param name="Pixels">The array of colors representing pixels.</param>
-        /// <param name="Width">The width of the bitmap.</param>
-        /// <param name="Height">The height of the bitmap.</param>
-        public Bitmap(Color[] Pixels, int Width, int Height)
-            : this(Pixels.ToList(), Width, Height) { }
 
         /// <summary>
         /// Loads the specified file into a bitmap.
@@ -135,10 +124,10 @@ namespace odl
                     {
                         int wbmp = xbmp == xbmps - 1 ? width - (xbmps - 1) * Graphics.MaxTextureSize.Width : Graphics.MaxTextureSize.Width;
                         int hbmp = ybmp == ybmps - 1 ? height - (ybmps - 1) * Graphics.MaxTextureSize.Height : Graphics.MaxTextureSize.Height;
-                        byte[] curbmp = new byte[wbmp * hbmp * 4];
+                        IntPtr curbmp = Marshal.AllocHGlobal(wbmp * hbmp * 4);
                         for (int y = 0; y < hbmp; y++)
                         {
-                            Array.Copy(bytes, xbmp * Graphics.MaxTextureSize.Width * 4 + ybmp * width * 4, curbmp, 0, wbmp * hbmp * 4);
+                            Marshal.Copy(bytes, xbmp * Graphics.MaxTextureSize.Width * 4 + ybmp * width * 4, curbmp, wbmp * hbmp * 4);
                         }
                         Bitmap bmp = new Bitmap(curbmp, wbmp, hbmp);
                         bmp.InternalX = xbmp * Graphics.MaxTextureSize.Width;
@@ -160,10 +149,10 @@ namespace odl
                 for (int ybmp = 0; ybmp < ybmps; ybmp++)
                 {
                     int hbmp = ybmp == ybmps - 1 ? height - (ybmps - 1) * Graphics.MaxTextureSize.Height : Graphics.MaxTextureSize.Height;
-                    byte[] curbmp = new byte[width * hbmp * 4];
+                    IntPtr curbmp = Marshal.AllocHGlobal(width * hbmp * 4);
                     int pos = ybmp * Graphics.MaxTextureSize.Height * width * 4;
                     int len = width * hbmp * 4;
-                    Array.Copy(bytes, pos, curbmp, 0, len);
+                    Marshal.Copy(bytes, pos, curbmp, len);
                     Bitmap bmp = new Bitmap(curbmp, width, hbmp);
                     bmp.InternalX = 0;
                     bmp.InternalY = ybmp * Graphics.MaxTextureSize.Height;
@@ -171,6 +160,7 @@ namespace odl
                 }
                 this.Width = width;
                 this.Height = height;
+                
             }
             else
             {
@@ -254,18 +244,13 @@ namespace odl
         /// <summary>
         /// Creates a Bitmap from an RGBA byte array in memory.
         /// </summary>
-        /// <param name="Pixels">Array of RGBA bytes representing pixels.</param>
+        /// <param name="PixelPtr">Pointer to RGBA byte array of pixels.</param>
         /// <param name="Width">The width of the bitmap.</param>
         /// <param name="Height">The height of the bitmap.</param>
-        public Bitmap(byte[] Pixels, int Width, int Height)
+        public Bitmap(IntPtr PixelPtr, int Width, int Height)
         {
-            unsafe
-            {
-                fixed (byte* pixelptr = Pixels)
-                {
-                    this.Surface = SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) pixelptr, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
-                }
-            }
+            this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelPtr, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
+            this.PixelHandle = PixelPtr;
             if (this.Surface == IntPtr.Zero)
                 throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
@@ -283,21 +268,15 @@ namespace odl
         /// <param name="Height">The height of the bitmap.</param>
         public Bitmap(List<Color> Pixels, int Width, int Height)
         {
-            byte[] BytePixels = new byte[Pixels.Count * 4];
+            this.PixelHandle = Marshal.AllocHGlobal(Pixels.Count * 4);
             for (int i = 0; i < Pixels.Count; i++)
             {
-                BytePixels[i * 4] = Pixels[i].Red;
-                BytePixels[i * 4 + 1] = Pixels[i].Green;
-                BytePixels[i * 4 + 2] = Pixels[i].Blue;
-                BytePixels[i * 4 + 3] = Pixels[i].Alpha;
+                Marshal.WriteByte(PixelHandle + i * 4, Pixels[i].Red);
+                Marshal.WriteByte(PixelHandle + i * 4 + 1, Pixels[i].Green);
+                Marshal.WriteByte(PixelHandle + i * 4 + 2, Pixels[i].Blue);
+                Marshal.WriteByte(PixelHandle + i * 4 + 3, Pixels[i].Alpha);
             }
-            unsafe
-            {
-                fixed (byte* pixelptr = BytePixels)
-                {
-                    this.Surface = SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) pixelptr, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
-                }
-            }
+            this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelHandle, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
             if (this.Surface == IntPtr.Zero)
                 throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
@@ -463,6 +442,7 @@ namespace odl
         {
             if (Disposed) return;
             BitmapList.Remove(this);
+            if (PixelHandle != IntPtr.Zero) Marshal.FreeHGlobal(PixelHandle);
             if (IsChunky)
             {
                 foreach (Bitmap b in this.InternalBitmaps) b.Dispose();
@@ -1786,7 +1766,6 @@ namespace odl
                         int ny = Math.Max(DestRect.Y, bmprect.Y);
                         int nw = Math.Min(DestRect.X + DestRect.Width, bmprect.X + bmprect.Width) - nx;
                         int nh = Math.Min(DestRect.Y + DestRect.Height, bmprect.Y + bmprect.Height) - ny;
-                        if (bmp.Locked) bmp.Unlock();
                         int DX = nx - bmp.InternalX;
                         int DY = ny - bmp.InternalY;
                         int DW = nw;
@@ -1795,6 +1774,7 @@ namespace odl
                         int SY = SrcRect.Y + ny - DestRect.Y;
                         int SW = DW;
                         int SH = DH;
+                        if (bmp.Locked) bmp.Unlock();
                         bmp.Build(
                             DX, DY, DW, DH,
                             SrcBitmap,
@@ -1805,13 +1785,41 @@ namespace odl
             }
             else
             {
-                SDL_Rect Src = SrcRect.SDL_Rect;
-                SDL_Rect Dest = DestRect.SDL_Rect;
-                if (Dest.w != Src.w || Dest.h != Src.h) SDL_BlitScaled (SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
-                else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+                if (SrcBitmap.IsChunky)
+                {
+                    foreach (Bitmap bmp in SrcBitmap.InternalBitmaps)
+                    {
+                        Rect bmprect = new Rect(bmp.InternalX, bmp.InternalY, SrcBitmap.ChunkSize);
+                        if (SrcRect.Overlaps(bmprect))
+                        {
+                            int nx = Math.Max(SrcRect.X, bmprect.X);
+                            int ny = Math.Max(SrcRect.Y, bmprect.Y);
+                            int nw = Math.Min(SrcRect.X + SrcRect.Width, bmprect.X + bmprect.Width) - nx;
+                            int nh = Math.Min(SrcRect.Y + SrcRect.Height, bmprect.Y + bmprect.Height) - ny;
+                            int DX = DestRect.X + (nx - SrcRect.X);
+                            int DY = DestRect.Y + (ny - SrcRect.Y);
+                            int DW = nw;
+                            int DH = nh;
+                            this.Build(
+                                DX, DY, DW, DH,
+                                bmp,
+                                nx - bmp.InternalX, ny - bmp.InternalY, nw, nh // XY - InternalXY
+                            );
+                        }
+                    }
+                }
+                else if (!SrcBitmap.Locked) throw new Exception($"Source bitmap is unlocked.");
+                else
+                {
+                    SDL_Rect Src = SrcRect.SDL_Rect;
+                    SDL_Rect Dest = DestRect.SDL_Rect;
+                    if (Dest.w != Src.w || Dest.h != Src.h) SDL_BlitScaled(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+                    else SDL_BlitSurface(SrcBitmap.Surface, ref Src, this.Surface, ref Dest);
+                }
             }
             if (this.Renderer != null) this.Renderer.Update();
         }
+
 
         /// <summary>
         /// Returns the size the given character would take up when rendered.

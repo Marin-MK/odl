@@ -56,6 +56,7 @@ namespace odl.SDL2
 		public delegate IntPtr SDL_PtrPtr(IntPtr IntPtr);
 		public delegate int SDL_IntPtrOutDisplayMode(IntPtr IntPtr, out SDL_DisplayMode DisplayMode);
 		public delegate int SDL_IntRefMessageBoxDataOutInt(ref SDL_MessageBoxData MessageBoxData, out int Int);
+		public delegate int SDL_IntPtrInt(IntPtr Ptr, int Int);
 		#endregion
 
 		public static void Bind(string Library, params string[] PreloadLibraries)
@@ -127,6 +128,9 @@ namespace odl.SDL2
 			FUNC_SDL_SetClipboardText = GetFunction<SDL_IntPtr>("SDL_SetClipboardText");
 			SDL_GetWindowDisplayMode = GetFunction<SDL_IntPtrOutDisplayMode>("SDL_GetWindowDisplayMode");
 			SDL_ShowMessageBox = GetFunction<SDL_IntRefMessageBoxDataOutInt>("SDL_ShowMessageBox");
+			SDL_LockSurface = GetFunction<SDL_IntPtr>("SDL_LockSurface");
+			SDL_UnlockSurface = GetFunction<SDL_IntPtr>("SDL_UnlockSurface");
+			SDL_SetSurfaceRLE = GetFunction<SDL_IntPtrInt>("SDL_SetSurfaceRLE");
 		}
 
 		#region Utility
@@ -239,6 +243,9 @@ namespace odl.SDL2
         }
 		public static SDL_IntPtrOutDisplayMode SDL_GetWindowDisplayMode;
 		public static SDL_IntRefMessageBoxDataOutInt SDL_ShowMessageBox;
+		public static SDL_IntPtr SDL_LockSurface;
+		public static SDL_IntPtr SDL_UnlockSurface;
+		public static SDL_IntPtrInt SDL_SetSurfaceRLE;
 		#endregion
 
 		#region Structs
