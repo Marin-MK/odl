@@ -128,7 +128,7 @@ namespace odl
         {
             if (!Disposed)
             {
-                Console.WriteLine($"An undisposed viewport is being collected by the GC! This is most likely a memory leak!");
+                Console.WriteLine($"An undisposed viewport is being collected by the GC! This is likely a memory leak!");
             }
         }
 

@@ -89,7 +89,7 @@ namespace odl
         /// </summary>
         public static void Start()
         {
-            Console.WriteLine("Start loading dependencies...");
+            Console.WriteLine("Start loading SDL2 and dependencies...");
             if (Platform == Platform.Windows)
             {
                 SetProcessDPIAware();
