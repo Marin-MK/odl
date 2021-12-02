@@ -97,18 +97,10 @@ namespace odl
         /// Loads the specified file into a bitmap.
         /// </summary>
         /// <param name="Filename">The file to load into a bitmap.</param>
-        public Bitmap(string Filename)
+        public Bitmap(string GivenFilename)
         {
-            while (Filename.Contains('\\')) Filename = Filename.Replace('\\', '/');
-            if (!FileExistsCaseSensitive(Filename))
-            {
-                if (FileExistsCaseSensitive(Filename + ".png")) Filename += ".png";
-                else if (FileExistsCaseSensitive(Filename + ".PNG")) Filename += ".PNG";
-                else if (Filename.EndsWith(".png") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "PNG"))
-                    Filename = Filename.Substring(0, Filename.Length - 3) + "PNG";
-                else throw new FileNotFoundException($"File could not be found -- {Filename}");
-            }
-
+            string Filename = FindRealFilename(GivenFilename);
+            if (Filename == null) throw new FileNotFoundException($"File could not be found -- {GivenFilename}");
             (Size ImageSize, bool IsPNG) = ValidateIMG(Filename);
             if (IsPNG && ImageSize.Width > Graphics.MaxTextureSize.Width && ImageSize.Height > Graphics.MaxTextureSize.Height)
             {
@@ -370,6 +362,20 @@ namespace odl
                 Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
             }
             if (BitmapList.Contains(this)) BitmapList.Remove(this);
+        }
+
+        public static string FindRealFilename(string Filename)
+        {
+            while (Filename.Contains('\\')) Filename = Filename.Replace('\\', '/');
+            if (!FileExistsCaseSensitive(Filename))
+            {
+                if (FileExistsCaseSensitive(Filename + ".png")) Filename += ".png";
+                else if (FileExistsCaseSensitive(Filename + ".PNG")) Filename += ".PNG";
+                else if (Filename.EndsWith(".png") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "PNG"))
+                    Filename = Filename.Substring(0, Filename.Length - 3) + "PNG";
+                else return null;
+            }
+            return Filename;
         }
 
         /// <summary>
