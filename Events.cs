@@ -1,175 +1,174 @@
 ﻿using System;
 
-namespace odl
+namespace odl;
+
+public delegate void BaseEvent(BaseEventArgs Args);
+public delegate void BoolEvent(BoolEventArgs Args);
+public delegate void MouseEvent(MouseEventArgs Args);
+public delegate void TextEvent(TextEventArgs Args);
+public delegate void TimespanEvent(TimespanEventArgs Args);
+public delegate void StringEvent(StringEventArgs Args);
+public delegate void DirectionEvent(DirectionEventArgs Args);
+public delegate void ObjectEvent(ObjectEventArgs Args);
+public delegate void ErrorEvent(ErrorEventArgs Args);
+
+public class BaseEventArgs
 {
-    public delegate void BaseEvent(BaseEventArgs Args);
-    public delegate void BoolEvent(BoolEventArgs Args);
-    public delegate void MouseEvent(MouseEventArgs Args);
-    public delegate void TextEvent(TextEventArgs Args);
-    public delegate void TimespanEvent(TimespanEventArgs Args);
-    public delegate void StringEvent(StringEventArgs Args);
-    public delegate void DirectionEvent(DirectionEventArgs Args);
-    public delegate void ObjectEvent(ObjectEventArgs Args);
-    public delegate void ErrorEvent(ErrorEventArgs Args);
+    public bool Handled = false;
+}
 
-    public class BaseEventArgs
+public class BoolEventArgs : BaseEventArgs
+{
+    public bool Value = false;
+
+    public BoolEventArgs(bool Value = false)
     {
-        public bool Handled = false;
+        this.Value = Value;
+    }
+}
+
+public class MouseEventArgs : BaseEventArgs
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public bool OldLeftButton { get; }
+    public bool LeftButton { get; }
+    public bool OldRightButton { get; }
+    public bool RightButton { get; }
+    public bool OldMiddleButton { get; }
+    public bool MiddleButton { get; }
+    public int WheelX { get; }
+    public int WheelY { get; }
+
+    public MouseEventArgs(int X, int Y,
+            bool OldLeftButton, bool LeftButton,
+            bool OldRightButton, bool RightButton,
+            bool OldMiddleButton, bool MiddleButton,
+            int WheelX = 0, int WheelY = 0)
+    {
+        this.X = X;
+        this.Y = Y;
+        this.OldLeftButton = OldLeftButton;
+        this.LeftButton = LeftButton;
+        this.OldRightButton = OldRightButton;
+        this.RightButton = RightButton;
+        this.OldMiddleButton = OldMiddleButton;
+        this.MiddleButton = MiddleButton;
+        this.WheelX = WheelX;
+        this.WheelY = WheelY;
+        Graphics.LastMouseEvent = this;
     }
 
-    public class BoolEventArgs : BaseEventArgs
+    public MouseEventArgs(int X, int Y, bool Left, bool Right, bool Middle)
     {
-        public bool Value = false;
-
-        public BoolEventArgs(bool Value = false)
-        {
-            this.Value = Value;
-        }
+        this.X = X;
+        this.Y = Y;
+        this.OldLeftButton = this.LeftButton = Left;
+        this.OldRightButton = this.RightButton = Right;
+        this.OldMiddleButton = this.MiddleButton = Middle;
+        this.WheelX = 0;
+        this.WheelY = 0;
     }
 
-    public class MouseEventArgs : BaseEventArgs
+    public bool Over(ISprite s)
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public bool OldLeftButton { get; }
-        public bool LeftButton { get; }
-        public bool OldRightButton { get; }
-        public bool RightButton { get; }
-        public bool OldMiddleButton { get; }
-        public bool MiddleButton { get; }
-        public int WheelX { get; }
-        public int WheelY { get; }
-
-        public MouseEventArgs(int X, int Y,
-                bool OldLeftButton, bool LeftButton,
-                bool OldRightButton, bool RightButton,
-                bool OldMiddleButton, bool MiddleButton,
-                int WheelX = 0, int WheelY = 0)
+        if (s.Bitmap == null) return false;
+        if (X >= s.X && X < s.X + s.Bitmap.Width * s.ZoomX &&
+            Y >= s.Y && Y < s.Y + s.Bitmap.Height * s.ZoomY)
         {
-            this.X = X;
-            this.Y = Y;
-            this.OldLeftButton = OldLeftButton;
-            this.LeftButton = LeftButton;
-            this.OldRightButton = OldRightButton;
-            this.RightButton = RightButton;
-            this.OldMiddleButton = OldMiddleButton;
-            this.MiddleButton = MiddleButton;
-            this.WheelX = WheelX;
-            this.WheelY = WheelY;
-            Graphics.LastMouseEvent = this;
+            return true;
         }
-
-        public MouseEventArgs(int X, int Y, bool Left, bool Right, bool Middle)
-        {
-            this.X = X;
-            this.Y = Y;
-            this.OldLeftButton = this.LeftButton = Left;
-            this.OldRightButton = this.RightButton = Right;
-            this.OldMiddleButton = this.MiddleButton = Middle;
-            this.WheelX = 0;
-            this.WheelY = 0;
-        }
-
-        public bool Over(ISprite s)
-        {
-            if (s.Bitmap == null) return false;
-            if (X >= s.X && X < s.X + s.Bitmap.Width * s.ZoomX &&
-                Y >= s.Y && Y < s.Y + s.Bitmap.Height * s.ZoomY)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool InArea(Rect r)
-        {
-            return InArea(r.X, r.Y, r.Width, r.Height);
-        }
-
-        public bool InArea(Point p, Size s)
-        {
-            return InArea(p.X, p.Y, s.Width, s.Height);
-        }
-
-        public bool InArea(Point p, int Width, int Height)
-        {
-            return InArea(p.X, p.Y, Width, Height);
-        }
-
-        public bool InArea(int X, int Y, Size s)
-        {
-            return InArea(X, Y, s.Width, s.Height);
-        }
-
-        public bool InArea(int X, int Y, int Width, int Height)
-        {
-            return this.X >= X && this.X < X + Width && this.Y >= Y && this.Y < Y + Height;
-        }
+        return false;
     }
 
-    public class TextEventArgs : BaseEventArgs
+    public bool InArea(Rect r)
     {
-        public string Text { get; }
-        public bool Backspace { get; }
-        public bool Delete { get; }
-
-        public TextEventArgs(string Text, bool Backspace = false, bool Delete = false)
-        {
-            this.Text = Text;
-            this.Backspace = Backspace;
-            this.Delete = Delete;
-        }
+        return InArea(r.X, r.Y, r.Width, r.Height);
     }
 
-    public class TimespanEventArgs : BaseEventArgs
+    public bool InArea(Point p, Size s)
     {
-        public TimeSpan Timespan;
-
-        public TimespanEventArgs(TimeSpan Timespan)
-        {
-            this.Timespan = Timespan;
-        }
+        return InArea(p.X, p.Y, s.Width, s.Height);
     }
 
-    public class StringEventArgs : BaseEventArgs
+    public bool InArea(Point p, int Width, int Height)
     {
-        public string String;
-
-        public StringEventArgs(string String = null)
-        {
-            this.String = String;
-        }
+        return InArea(p.X, p.Y, Width, Height);
     }
 
-    public class DirectionEventArgs : BaseEventArgs
+    public bool InArea(int X, int Y, Size s)
     {
-        public bool Up = false;
-        public bool Down = false;
-
-        public DirectionEventArgs(bool Up, bool Down)
-        {
-            this.Up = Up;
-            this.Down = Down;
-        }
+        return InArea(X, Y, s.Width, s.Height);
     }
 
-    public class ObjectEventArgs : BaseEventArgs
+    public bool InArea(int X, int Y, int Width, int Height)
     {
-        public object Object;
-
-        public ObjectEventArgs(object Object)
-        {
-            this.Object = Object;
-        }
+        return this.X >= X && this.X < X + Width && this.Y >= Y && this.Y < Y + Height;
     }
+}
 
-    public class ErrorEventArgs : BaseEventArgs
+public class TextEventArgs : BaseEventArgs
+{
+    public string Text { get; }
+    public bool Backspace { get; }
+    public bool Delete { get; }
+
+    public TextEventArgs(string Text, bool Backspace = false, bool Delete = false)
     {
-        public Exception Exception;
+        this.Text = Text;
+        this.Backspace = Backspace;
+        this.Delete = Delete;
+    }
+}
 
-        public ErrorEventArgs(Exception Exception)
-        {
-            this.Exception = Exception;
-        }
+public class TimespanEventArgs : BaseEventArgs
+{
+    public TimeSpan Timespan;
+
+    public TimespanEventArgs(TimeSpan Timespan)
+    {
+        this.Timespan = Timespan;
+    }
+}
+
+public class StringEventArgs : BaseEventArgs
+{
+    public string String;
+
+    public StringEventArgs(string String = null)
+    {
+        this.String = String;
+    }
+}
+
+public class DirectionEventArgs : BaseEventArgs
+{
+    public bool Up = false;
+    public bool Down = false;
+
+    public DirectionEventArgs(bool Up, bool Down)
+    {
+        this.Up = Up;
+        this.Down = Down;
+    }
+}
+
+public class ObjectEventArgs : BaseEventArgs
+{
+    public object Object;
+
+    public ObjectEventArgs(object Object)
+    {
+        this.Object = Object;
+    }
+}
+
+public class ErrorEventArgs : BaseEventArgs
+{
+    public Exception Exception;
+
+    public ErrorEventArgs(Exception Exception)
+    {
+        this.Exception = Exception;
     }
 }

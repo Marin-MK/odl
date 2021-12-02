@@ -1,28 +1,27 @@
 ﻿using System;
 
-namespace odl
+namespace odl;
+
+public class Size : IDisposable
 {
-    public class Size : IDisposable
+    public int Width;
+    public int Height;
+
+    public Size(Size size)
+        : this(size.Width, size.Height) { }
+    public Size(int Width, int Height)
     {
-        public int Width;
-        public int Height;
+        this.Width = Width;
+        this.Height = Height;
+    }
 
-        public Size(Size size)
-            : this(size.Width, size.Height) { }
-        public Size(int Width, int Height)
-        {
-            this.Width = Width;
-            this.Height = Height;
-        }
+    public void Dispose()
+    {
 
-        public void Dispose()
-        {
-            
-        }
+    }
 
-        public override string ToString()
-        {
-            return $"(Size: {this.Width},{this.Height})";
-        }
+    public override string ToString()
+    {
+        return $"(Size: {this.Width},{this.Height})";
     }
 }

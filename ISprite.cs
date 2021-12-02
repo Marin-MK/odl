@@ -4,34 +4,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace odl
+namespace odl;
+
+public interface ISprite
 {
-    public interface ISprite
-    {
-        string Name { get; set; }
-        Viewport Viewport { get; }
-        Rect SrcRect { get; set; }
-        Bitmap Bitmap { get; set; }
-        int X { get; set; }
-        int Y { get; set; }
-        int Z { get; set; }
-        double ZoomX { get; set; }
-        double ZoomY { get; set; }
-        bool Disposed { get; }
-        bool Visible { get; set; }
-        int Angle { get; set; }
-        bool MirrorX { get; set; }
-        bool MirrorY { get; set; }
-        double OX { get; set; }
-        double OY { get; set; }
-        Color Color { get; set; }
-        List<Point> MultiplePositions { get; set; }
-        byte Opacity { get; set; }
-        bool FactorZoomIntoOrigin { get; set; }
-        bool DestroyBitmap { get; set; }
+    string Name { get; set; }
+    Viewport Viewport { get; }
+    Rect SrcRect { get; set; }
+    Bitmap Bitmap { get; set; }
+    int X { get; set; }
+    int Y { get; set; }
+    int Z { get; set; }
+    double ZoomX { get; set; }
+    double ZoomY { get; set; }
+    bool Disposed { get; }
+    bool Visible { get; set; }
+    int Angle { get; set; }
+    bool MirrorX { get; set; }
+    bool MirrorY { get; set; }
+    double OX { get; set; }
+    double OY { get; set; }
+    Color Color { get; set; }
+    List<Point> MultiplePositions { get; set; }
+    byte Opacity { get; set; }
+    bool FactorZoomIntoOrigin { get; set; }
+    bool DestroyBitmap { get; set; }
 
-        void Update();
+    void Update();
 
-        void Dispose();
-    }
+    void Dispose();
 }
