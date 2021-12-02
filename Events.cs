@@ -10,6 +10,7 @@ namespace odl
     public delegate void StringEvent(StringEventArgs Args);
     public delegate void DirectionEvent(DirectionEventArgs Args);
     public delegate void ObjectEvent(ObjectEventArgs Args);
+    public delegate void ErrorEvent(ErrorEventArgs Args);
 
     public class BaseEventArgs
     {
@@ -159,6 +160,16 @@ namespace odl
         public ObjectEventArgs(object Object)
         {
             this.Object = Object;
+        }
+    }
+
+    public class ErrorEventArgs : BaseEventArgs
+    {
+        public Exception Exception;
+
+        public ErrorEventArgs(Exception Exception)
+        {
+            this.Exception = Exception;
         }
     }
 }

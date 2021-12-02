@@ -72,7 +72,6 @@ namespace odl
             {
                 Graphics.Log("=====================");
                 Graphics.Log("START render cycle");
-                long l1 = Stopwatch.GetTimestamp();
                 SDL_RenderClear(this.SDL_Renderer);
                 Graphics.Log("Viewport count: " + this.Viewports.Count.ToString());
                 if (ReorderViewports)
