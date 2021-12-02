@@ -36,7 +36,7 @@ namespace odl.SDL2
         public static Action IMG_Quit;
         public static IntPtr IMG_Load(string Filename)
         {
-            return FUNC_IMG_Load(SDL.StrToPtr(Filename));
+            return FUNC_IMG_Load(SDL.StrUTF8ToPtr(Filename));
         }
         public static int IMG_SavePNG(IntPtr SDL_Surface, string Filename)
         {
