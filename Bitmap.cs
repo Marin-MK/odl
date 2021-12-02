@@ -457,7 +457,7 @@ public class Bitmap : IDisposable
         }
         else
         {
-            if (this.Surface != IntPtr.Zero && this.Surface != null)
+            if (this.Surface != IntPtr.Zero)
             {
                 SDL_FreeSurface(this.Surface);
                 SDL_DestroyTexture(this.Texture);
@@ -2298,7 +2298,7 @@ public class Bitmap : IDisposable
         {
             SDL_GetTextureBlendMode(this.Texture, out blend);
         }
-        if (this.Texture != IntPtr.Zero && this.Texture != null) SDL_DestroyTexture(this.Texture);
+        if (this.Texture != IntPtr.Zero) SDL_DestroyTexture(this.Texture);
         this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
         if (this.Texture == IntPtr.Zero)
         {

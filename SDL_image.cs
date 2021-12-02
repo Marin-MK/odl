@@ -47,7 +47,7 @@ public class SDL_image : NativeLibrary
     #region Constants
     public const int SDL_IMAGE_MAJOR_VERSION = 2;
     public const int SDL_IMAGE_MINOR_VERSION = 0;
-    public const int SDL_IMAGE_PATCHLEVEL = 6;
+    public const int SDL_IMAGE_PATCHLEVEL = 5;
 
     public const uint IMG_INIT_JPG = 0x00000001;
     public const uint IMG_INIT_PNG = 0x00000002;

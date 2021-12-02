@@ -84,7 +84,7 @@ public class SolidBitmap : Bitmap
     public override void Clear()
     {
         if (Locked) throw new BitmapLockedException();
-        if (this.Surface != IntPtr.Zero && this.Surface != null)
+        if (this.Surface != IntPtr.Zero)
         {
             SDL_FreeSurface(this.Surface);
             SDL_DestroyTexture(this.Texture);

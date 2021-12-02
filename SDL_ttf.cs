@@ -89,6 +89,6 @@ public class SDL_ttf : NativeLibrary
     #region Constants
     public const int SDL_TTF_MAJOR_VERSION = 2;
     public const int SDL_TTF_MINOR_VERSION = 0;
-    public const int SDL_TTF_PATCHLEVEL = 16;
+    public const int SDL_TTF_PATCHLEVEL = 15;
     #endregion
 }

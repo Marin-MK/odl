@@ -57,6 +57,8 @@ public class SDL : NativeLibrary
     public delegate int SDL_IntPtrOutDisplayMode(IntPtr IntPtr, out SDL_DisplayMode DisplayMode);
     public delegate int SDL_IntRefMessageBoxDataOutInt(ref SDL_MessageBoxData MessageBoxData, out int Int);
     public delegate int SDL_IntPtrInt(IntPtr Ptr, int Int);
+    public delegate int SDL_IntPtrFlash(IntPtr Ptr, SDL_FlashOperation FlashOperation);
+    public delegate int SDL_IntStr(string Str);
     #endregion
 
     public static void Bind(string Library, params string[] PreloadLibraries)
@@ -131,6 +133,8 @@ public class SDL : NativeLibrary
         SDL_LockSurface = GetFunction<SDL_IntPtr>("SDL_LockSurface");
         SDL_UnlockSurface = GetFunction<SDL_IntPtr>("SDL_UnlockSurface");
         SDL_SetSurfaceRLE = GetFunction<SDL_IntPtrInt>("SDL_SetSurfaceRLE");
+        SDL_FlashWindow = GetFunction<SDL_IntPtrFlash>("SDL_FlashWindow");
+        SDL_OpenURL = GetFunction<SDL_IntStr>("SDL_OpenURL");
     }
 
     #region Utility
@@ -246,6 +250,8 @@ public class SDL : NativeLibrary
     public static SDL_IntPtr SDL_LockSurface;
     public static SDL_IntPtr SDL_UnlockSurface;
     public static SDL_IntPtrInt SDL_SetSurfaceRLE;
+    public static SDL_IntPtrFlash SDL_FlashWindow;
+    public static SDL_IntStr SDL_OpenURL;
     #endregion
 
     #region Structs
@@ -1447,12 +1453,19 @@ public class SDL : NativeLibrary
         SDLK_AUDIOREWIND = (int)SDL_Scancode.SDL_SCANCODE_AUDIOREWIND | SDLK_SCANCODE_MASK,
         SDLK_AUDIOFASTFORWARD = (int)SDL_Scancode.SDL_SCANCODE_AUDIOFASTFORWARD | SDLK_SCANCODE_MASK
     }
+
+    public enum SDL_FlashOperation
+    {
+        SDL_FLASH_CANCEl,
+        SDL_FLASH_BRIEFLY,
+        SDL_FLASH_UNTIL_FOCUSED
+    }
     #endregion
 
     #region Constants
     public const int SDL_MAJOR_VERSION = 2;
     public const int SDL_MINOR_VERSION = 0;
-    public const int SDL_PATCHLEVEL = 12;
+    public const int SDL_PATCHLEVEL = 18;
 
     public const uint SDL_INIT_TIMER = 0x00000001;
     public const uint SDL_INIT_AUDIO = 0x00000010;
