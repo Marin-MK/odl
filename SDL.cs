@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 // Some structs and enums taken from https://github.com/flibitijibibo/SDL2-CS.
 // Credit to Ethan "flibitijibibo" Lee for the aforementioned code.

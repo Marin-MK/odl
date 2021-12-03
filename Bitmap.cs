@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using static odl.SDL2.SDL;
 using static odl.SDL2.SDL_ttf;
