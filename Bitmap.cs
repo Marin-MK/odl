@@ -85,6 +85,8 @@ public class Bitmap : IDisposable
     /// </summary>
     IntPtr PixelHandle = IntPtr.Zero;
 
+    bool RGBA8 = true;
+
     /// <summary>
     /// Creates a new bitmap with the given size.
     /// </summary>
@@ -96,7 +98,7 @@ public class Bitmap : IDisposable
     /// Loads the specified file into a bitmap.
     /// </summary>
     /// <param name="Filename">The file to load into a bitmap.</param>
-    public Bitmap(string GivenFilename)
+    public unsafe Bitmap(string GivenFilename)
     {
         string Filename = FindRealFilename(GivenFilename);
         if (Filename == null) throw new FileNotFoundException($"File could not be found -- {GivenFilename}");
@@ -129,6 +131,7 @@ public class Bitmap : IDisposable
             }
             this.Width = width;
             this.Height = height;
+            RGBA8 = true;
         }
         else if (IsPNG && ImageSize.Height > Graphics.MaxTextureSize.Height)
         {
@@ -152,7 +155,7 @@ public class Bitmap : IDisposable
             }
             this.Width = width;
             this.Height = height;
-
+            RGBA8 = true;
         }
         else
         {
@@ -160,6 +163,8 @@ public class Bitmap : IDisposable
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
+            SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+            RGBA8 = format.format == SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888;
         }
         this.Lock();
         BitmapList.Add(this);
@@ -241,7 +246,7 @@ public class Bitmap : IDisposable
     /// <param name="Height">The height of the bitmap.</param>
     public Bitmap(IntPtr PixelPtr, int Width, int Height)
     {
-        this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelPtr, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
+        this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelPtr, Width, Height, 32, Width * 4, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
         this.PixelHandle = PixelPtr;
         if (this.Surface == IntPtr.Zero)
             throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
@@ -268,7 +273,7 @@ public class Bitmap : IDisposable
             Marshal.WriteByte(PixelHandle + i * 4 + 2, Pixels[i].Blue);
             Marshal.WriteByte(PixelHandle + i * 4 + 3, Pixels[i].Alpha);
         }
-        this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelHandle, Width, Height, 32, Width * 4, SDL_PIXELFORMAT_ABGR8888);
+        this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelHandle, Width, Height, 32, Width * 4, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
         if (this.Surface == IntPtr.Zero)
             throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
@@ -448,7 +453,11 @@ public class Bitmap : IDisposable
     {
         if (Disposed) return;
         BitmapList.Remove(this);
-        if (PixelHandle != IntPtr.Zero) Marshal.FreeHGlobal(PixelHandle);
+        if (PixelHandle != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(PixelHandle);
+            PixelHandle = IntPtr.Zero;
+        }
         if (IsChunky)
         {
             foreach (Bitmap b in this.InternalBitmaps) b.Dispose();
@@ -571,6 +580,7 @@ public class Bitmap : IDisposable
         if (Locked) throw new BitmapLockedException();
         if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
         if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+        if (!RGBA8) ConvertToRGBA8();
         if (IsChunky)
         {
             Bitmap bmp = GetBitmapFromCoordinate(X, Y);
@@ -606,6 +616,7 @@ public class Bitmap : IDisposable
     {
         if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
         if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+        if (!RGBA8) ConvertToRGBA8();
         if (IsChunky)
         {
             Bitmap bmp = GetBitmapFromCoordinate(X, Y);
@@ -2235,6 +2246,126 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
+        if (this.Renderer != null) this.Renderer.Update();
+    }
+
+    #region DrawGradientLine Overloads
+    public void DrawGradientLine(Point p1, Point p2, Color c1, Color c2)
+    {
+        DrawGradientLine(p1.X, p1.Y, p2.X, p2.Y, c1, c2);
+    }
+    public void DrawGradientLine(int x1, int y1, Point p2, Color c1, Color c2)
+    {
+        DrawGradientLine(x1, y1, p2.X, p2.Y, c1, c2);
+    }
+    public void DrawGradientLine(Point p1, int x2, int y2, Color c1, Color c2)
+    {
+        DrawGradientLine(p1.X, p1.Y, x2, y2, c1, c2);
+    }
+    #endregion
+    public virtual void DrawGradientLine(int x1, int y1, int x2, int y2, Color c1, Color c2)
+    {
+        if (Locked) throw new BitmapLockedException();
+        if (x1 < 0 || x2 < 0 || x1 >= Width || x2 >= Width ||
+            y1 < 0 || y2 < 0 || y1 >= Height || y2 >= Height) throw new Exception($"Line out of bounds.");
+        if (x1 != x2)
+        {
+            for (int x = x1 > x2 ? x2 : x1; (x1 > x2) ? (x <= x1) : (x <= x2); x++)
+            {
+                double fact = ((double) x - x1) / (x2 - x1);
+                int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
+                if (y >= 0)
+                {
+                    double d1 = Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
+                    double d2 = Math.Sqrt(Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
+                    double f1 = d2 / (d1 + d2);
+                    double f2 = d1 / (d1 + d2);
+                    byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red);
+                    byte g = (byte) Math.Round(f1 * c1.Green + f2 * c2.Green);
+                    byte b = (byte) Math.Round(f1 * c1.Blue + f2 * c2.Blue);
+                    byte a = (byte) Math.Round(f1 * c1.Alpha + f2 * c2.Alpha);
+                    SetPixel(x, y, r, g, b, a);
+                }
+            }
+        }
+        int sy = y1 > y2 ? y2 : y1;
+        if (y1 != y2)
+        {
+            for (int y = y1 > y2 ? y2 : y1; (y1 > y2) ? (y <= y1) : (y <= y2); y++)
+            {
+                double fact = ((double) y - y1) / (y2 - y1);
+                int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
+                if (x >= 0)
+                {
+                    double d1 = Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
+                    double d2 = Math.Sqrt(Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
+                    double f1 = d2 / (d1 + d2);
+                    double f2 = d1 / (d1 + d2);
+                    byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red);
+                    byte g = (byte) Math.Round(f1 * c1.Green + f2 * c2.Green);
+                    byte b = (byte) Math.Round(f1 * c1.Blue + f2 * c2.Blue);
+                    byte a = (byte) Math.Round(f1 * c1.Alpha + f2 * c2.Alpha);
+                    SetPixel(x, y, r, g, b, a);
+                }
+            }
+        }
+        if (this.Renderer != null) this.Renderer.Update();
+    }
+
+    public virtual void FillGradientRect(int X, int Y, int Width, int Height, Color c1, Color c2, Color c3, Color c4)
+    {
+        if (Locked) throw new BitmapLockedException();
+        if (X < 0 || Y < 0)
+        {
+            throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+        }
+        if (X >= this.Width || Y >= this.Height)
+        {
+            throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+        }
+        if (X + Width - 1 >= this.Width || Y + Height - 1 >= this.Height)
+        {
+            throw new Exception($"Invalid rectangle ({X},{Y},{Width},{Height}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+        }
+        for (int dy = Y; dy < Height; dy++)
+        {
+            for (int dx = X; dx < Width; dx++)
+            {
+                double xl = dx - X;
+                double xr = X + Width - 1 - dx;
+                double yt = dy - Y;
+                double yb = Y + Height - 1 - dy;
+                double fxr = (xl / (xl + xr));
+                double fxl = 1 - fxr;
+                double fyb = (yt / (yt + yb));
+                double fyt = 1 - fyb;
+                double f1 = fxl * fyt;
+                double f2 = fxr * fyt;
+                double f3 = fxl * fyb;
+                double f4 = fxr * fyb;
+                byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red + f3 * c3.Red + f4 * c4.Red);
+                byte g = (byte) Math.Round(f1 * c1.Green + f2 * c2.Green + f3 * c3.Green + f4 * c4.Green);
+                byte b = (byte) Math.Round(f1 * c1.Blue + f2 * c2.Blue + f3 * c3.Blue + f4 * c4.Blue);
+                byte a = (byte) Math.Round(f1 * c1.Alpha + f2 * c2.Alpha + f3 * c3.Alpha + f4 * c4.Alpha);
+                SetPixel(dx, dy, r, g, b, a);
+            }
+        }
+        if (this.Renderer != null) this.Renderer.Update();
+    }
+
+    public virtual void ConvertToRGBA8()
+    {
+        if (this.Surface == IntPtr.Zero) throw new Exception("Can not convert non-existing surface.");
+        if (PixelHandle != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(PixelHandle);
+            PixelHandle = IntPtr.Zero;
+        }
+        IntPtr oldsurface = this.Surface;
+        this.Surface = SDL_ConvertSurfaceFormat(this.Surface, SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888, 0);
+        this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+        RGBA8 = true;
+        SDL_FreeSurface(oldsurface);
         if (this.Renderer != null) this.Renderer.Update();
     }
 
