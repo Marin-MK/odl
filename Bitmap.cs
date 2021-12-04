@@ -85,7 +85,8 @@ public class Bitmap : IDisposable
     /// </summary>
     IntPtr PixelHandle = IntPtr.Zero;
 
-    bool RGBA8 = true;
+    public bool RGBA8 { get; protected set; } = true;
+    public bool ABGR8 { get; protected set; } = false;
 
     /// <summary>
     /// Creates a new bitmap with the given size.
@@ -165,6 +166,7 @@ public class Bitmap : IDisposable
             this.Height = SurfaceObject.h;
             SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
             RGBA8 = format.format == SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888;
+            ABGR8 = format.format == SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888;
         }
         this.Lock();
         BitmapList.Add(this);
@@ -580,7 +582,6 @@ public class Bitmap : IDisposable
         if (Locked) throw new BitmapLockedException();
         if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
         if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
-        if (!RGBA8) ConvertToRGBA8();
         if (IsChunky)
         {
             Bitmap bmp = GetBitmapFromCoordinate(X, Y);
@@ -589,10 +590,21 @@ public class Bitmap : IDisposable
         }
         else
         {
-            PixelPointer[Width * Y * 4 + X * 4] = r;
-            PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
-            PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
-            PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+            if (!RGBA8 && !ABGR8) ConvertToRGBA8();
+            if (RGBA8)
+            {
+                PixelPointer[Width * Y * 4 + X * 4] = a;
+                PixelPointer[Width * Y * 4 + X * 4 + 1] = b;
+                PixelPointer[Width * Y * 4 + X * 4 + 2] = g;
+                PixelPointer[Width * Y * 4 + X * 4 + 3] = r;
+            }
+            else
+            {
+                PixelPointer[Width * Y * 4 + X * 4] = r;
+                PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
+                PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
+                PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+            }
         }
         if (this.Renderer != null) this.Renderer.Update();
     }
@@ -616,7 +628,6 @@ public class Bitmap : IDisposable
     {
         if (X < 0 || Y < 0) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
         if (X >= this.Width || Y >= this.Height) throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
-        if (!RGBA8) ConvertToRGBA8();
         if (IsChunky)
         {
             Bitmap bmp = GetBitmapFromCoordinate(X, Y);
@@ -624,12 +635,25 @@ public class Bitmap : IDisposable
         }
         else
         {
-            return new Color(
-                PixelPointer[Width * Y * 4 + X * 4],
-                PixelPointer[Width * Y * 4 + X * 4 + 1],
-                PixelPointer[Width * Y * 4 + X * 4 + 2],
-                PixelPointer[Width * Y * 4 + X * 4 + 3]
-            );
+            if (!RGBA8 && !ABGR8) ConvertToRGBA8();
+            if (RGBA8)
+            {
+                return new Color(
+                    PixelPointer[Width * Y * 4 + X * 4 + 3],
+                    PixelPointer[Width * Y * 4 + X * 4 + 2],
+                    PixelPointer[Width * Y * 4 + X * 4 + 1],
+                    PixelPointer[Width * Y * 4 + X * 4]
+                );
+            }
+            else
+            {
+                return new Color(
+                    PixelPointer[Width * Y * 4 + X * 4],
+                    PixelPointer[Width * Y * 4 + X * 4 + 1],
+                    PixelPointer[Width * Y * 4 + X * 4 + 2],
+                    PixelPointer[Width * Y * 4 + X * 4 + 3]
+                );
+            }
         }
     }
 
@@ -2365,6 +2389,7 @@ public class Bitmap : IDisposable
         this.Surface = SDL_ConvertSurfaceFormat(this.Surface, SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888, 0);
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         RGBA8 = true;
+        ABGR8 = false;
         SDL_FreeSurface(oldsurface);
         if (this.Renderer != null) this.Renderer.Update();
     }
