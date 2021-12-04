@@ -554,13 +554,13 @@ public class Window : IDisposable
 
     public virtual Bitmap Screenshot()
     {
-        Bitmap bmp = new Bitmap(SDL_CreateRGBSurfaceWithFormat(0, this.Width, this.Height, 32, SDL_PIXELFORMAT_RGBA8888));
+        Bitmap bmp = new Bitmap(SDL_CreateRGBSurfaceWithFormat(0, this.Width, this.Height, 32, SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888));
         SDL_Rect rect = new SDL_Rect();
         rect.x = 0;
         rect.y = 0;
         rect.w = bmp.Width;
         rect.h = bmp.Height;
-        SDL_RenderReadPixels(this.Renderer.SDL_Renderer, rect, SDL_PIXELFORMAT_RGBA8888, bmp.SurfaceObject.pixels, bmp.SurfaceObject.pitch);
+        SDL_RenderReadPixels(this.Renderer.SDL_Renderer, rect, SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888, bmp.SurfaceObject.pixels, bmp.SurfaceObject.pitch);
         return bmp;
     }
 }

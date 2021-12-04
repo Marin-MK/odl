@@ -26,8 +26,8 @@ public class SDL : NativeLibrary
     public delegate void SDL_VoidPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
     public delegate int SDL_Int();
     public delegate void SDL_VoidPtr(IntPtr IntPtr);
-    public delegate IntPtr SDL_PtrUIntIntIntIntUInt(uint UInt1, int Int1, int Int2, int Int3, uint UInt2);
-    public delegate int SDL_IntPtrRectUIntPtrInt(IntPtr IntPtr1, SDL_Rect Rect, uint UInt, IntPtr IntPtr2, int Int);
+    public delegate IntPtr SDL_PtrUIntIntIntIntPixelFormat(uint UInt1, int Int1, int Int2, int Int3, SDL_PixelFormatEnum PixelFormat);
+    public delegate int SDL_IntPtrRectPixelFormatPtrInt(IntPtr IntPtr1, SDL_Rect Rect, SDL_PixelFormatEnum PixelFormat, IntPtr IntPtr2, int Int);
     public delegate int SDL_IntPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
     public delegate int SDL_IntPtrFltFlt(IntPtr IntPtr, float Flt1, float Flt2);
     public delegate int SDL_IntPtrRefRect(IntPtr IntPtr, ref SDL_Rect Rect);
@@ -39,7 +39,7 @@ public class SDL : NativeLibrary
     public delegate IntPtr SDL_CursorPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
     public delegate int SDL_IntSDLBool(SDL_bool Bool);
     public delegate IntPtr SDL_PtrUIntIntIntIntUIntUIntUIntUInt(uint UInt1, int Int1, int Int2, int Int3, uint UInt2, uint UInt3, uint UInt4, uint UInt5);
-    public delegate IntPtr SDL_PtrPtrIntIntIntIntUInt(IntPtr IntPtr, int Int1, int Int2, int Int3, int Int4, uint UInt);
+    public delegate IntPtr SDL_PtrPtrIntIntIntIntPixelFormat(IntPtr IntPtr, int Int1, int Int2, int Int3, int Int4, SDL_PixelFormatEnum PixelFormat);
     public delegate int SDL_IntPtrRefRectUInt(IntPtr IntPtr, ref SDL_Rect Rect, uint UInt);
     public delegate uint SDL_UIntPtrByteByteByteByte(IntPtr IntPtr, byte Byte1, byte Byte2, byte Byte3, byte Byte4);
     public delegate int SDL_IntPtrRefRectPtrRefRect(IntPtr IntPtr1, ref SDL_Rect Rect1, IntPtr IntPtr2, ref SDL_Rect Rect2);
@@ -56,6 +56,7 @@ public class SDL : NativeLibrary
     public delegate int SDL_IntPtrInt(IntPtr Ptr, int Int);
     public delegate int SDL_IntPtrFlash(IntPtr Ptr, SDL_FlashOperation FlashOperation);
     public delegate int SDL_IntStr(string Str);
+    public delegate IntPtr SDL_PtrPtrPixelFormatUInt(IntPtr Ptr, SDL_PixelFormatEnum PixelFormat, uint UInt);
     #endregion
 
     public static void Bind(string Library, params string[] PreloadLibraries)
@@ -91,8 +92,8 @@ public class SDL : NativeLibrary
         SDL_RaiseWindow = GetFunction<SDL_VoidPtr>("SDL_RaiseWindow");
         SDL_DestroyRenderer = GetFunction<SDL_VoidPtr>("SDL_DestroyRenderer");
         SDL_DestroyWindow = GetFunction<SDL_VoidPtr>("SDL_DestroyWindow");
-        SDL_CreateRGBSurfaceWithFormat = GetFunction<SDL_PtrUIntIntIntIntUInt>("SDL_CreateRGBSurfaceWithFormat");
-        SDL_RenderReadPixels = GetFunction<SDL_IntPtrRectUIntPtrInt>("SDL_RenderReadPixels");
+        SDL_CreateRGBSurfaceWithFormat = GetFunction<SDL_PtrUIntIntIntIntPixelFormat>("SDL_CreateRGBSurfaceWithFormat");
+        SDL_RenderReadPixels = GetFunction<SDL_IntPtrRectPixelFormatPtrInt>("SDL_RenderReadPixels");
         SDL_RenderSetLogicalSize = GetFunction<SDL_IntPtrIntInt>("SDL_RenderSetLogicalSize");
         SDL_RenderSetScale = GetFunction<SDL_IntPtrFltFlt>("SDL_RenderSetScale");
         SDL_RenderSetViewport = GetFunction<SDL_IntPtrRefRect>("SDL_RenderSetViewport");
@@ -110,7 +111,7 @@ public class SDL : NativeLibrary
         SDL_FreeSurface = GetFunction<SDL_VoidPtr>("SDL_FreeSurface");
         SDL_DestroyTexture = GetFunction<SDL_VoidPtr>("SDL_DestroyTexture");
         SDL_CreateRGBSurface = GetFunction<SDL_PtrUIntIntIntIntUIntUIntUIntUInt>("SDL_CreateRGBSurface");
-        SDL_CreateRGBSurfaceWithFormatFrom = GetFunction<SDL_PtrPtrIntIntIntIntUInt>("SDL_CreateRGBSurfaceWithFormatFrom");
+        SDL_CreateRGBSurfaceWithFormatFrom = GetFunction<SDL_PtrPtrIntIntIntIntPixelFormat>("SDL_CreateRGBSurfaceWithFormatFrom");
         SDL_FillRect = GetFunction<SDL_IntPtrRefRectUInt>("SDL_FillRect");
         SDL_MapRGBA = GetFunction<SDL_UIntPtrByteByteByteByte>("SDL_MapRGBA");
         SDL_BlitScaled = GetFunction<SDL_IntPtrRefRectPtrRefRect>("SDL_UpperBlitScaled");
@@ -132,6 +133,7 @@ public class SDL : NativeLibrary
         SDL_SetSurfaceRLE = GetFunction<SDL_IntPtrInt>("SDL_SetSurfaceRLE");
         SDL_FlashWindow = GetFunction<SDL_IntPtrFlash>("SDL_FlashWindow");
         SDL_OpenURL = GetFunction<SDL_IntStr>("SDL_OpenURL");
+        SDL_ConvertSurfaceFormat = GetFunction<SDL_PtrPtrPixelFormatUInt>("SDL_ConvertSurfaceFormat");
     }
 
     #region Utility
@@ -202,8 +204,8 @@ public class SDL : NativeLibrary
     public static SDL_VoidPtr SDL_RaiseWindow;
     public static SDL_VoidPtr SDL_DestroyRenderer;
     public static SDL_VoidPtr SDL_DestroyWindow;
-    public static SDL_PtrUIntIntIntIntUInt SDL_CreateRGBSurfaceWithFormat;
-    public static SDL_IntPtrRectUIntPtrInt SDL_RenderReadPixels;
+    public static SDL_PtrUIntIntIntIntPixelFormat SDL_CreateRGBSurfaceWithFormat;
+    public static SDL_IntPtrRectPixelFormatPtrInt SDL_RenderReadPixels;
     public static SDL_IntPtrIntInt SDL_RenderSetLogicalSize;
     public static SDL_IntPtrFltFlt SDL_RenderSetScale;
     public static SDL_IntPtrRefRect SDL_RenderSetViewport;
@@ -221,7 +223,7 @@ public class SDL : NativeLibrary
     public static SDL_VoidPtr SDL_FreeSurface;
     public static SDL_VoidPtr SDL_DestroyTexture;
     public static SDL_PtrUIntIntIntIntUIntUIntUIntUInt SDL_CreateRGBSurface;
-    public static SDL_PtrPtrIntIntIntIntUInt SDL_CreateRGBSurfaceWithFormatFrom;
+    public static SDL_PtrPtrIntIntIntIntPixelFormat SDL_CreateRGBSurfaceWithFormatFrom;
     public static SDL_IntPtrRefRectUInt SDL_FillRect;
     public static SDL_UIntPtrByteByteByteByte SDL_MapRGBA;
     public static SDL_IntPtrRefRectPtrRefRect SDL_BlitScaled;
@@ -249,6 +251,7 @@ public class SDL : NativeLibrary
     public static SDL_IntPtrInt SDL_SetSurfaceRLE;
     public static SDL_IntPtrFlash SDL_FlashWindow;
     public static SDL_IntStr SDL_OpenURL;
+    public static SDL_PtrPtrPixelFormatUInt SDL_ConvertSurfaceFormat;
     #endregion
 
     #region Structs
@@ -421,6 +424,47 @@ public class SDL : NativeLibrary
     {
         SDL_MOUSEWHEEL_NORMAL,
         SDL_MOUSEWHEEL_FLIPPED
+    }
+
+    public enum SDL_PixelFormatEnum : uint
+    {
+        SDL_PIXELFORMAT_UNKNOWN = 0,
+        SDL_PIXELFORMAT_INDEX1LSB = 286261504,
+        SDL_PIXELFORMAT_INDEX1MSB = 287310080,
+        SDL_PIXELFORMAT_INDEX4LSB = 303039488,
+        SDL_PIXELFORMAT_INDEX4MSB = 304088064,
+        SDL_PIXELFORMAT_INDEX8 = 318769153,
+        SDL_PIXELFORMAT_RGB332 = 336660481,
+        SDL_PIXELFORMAT_RGB444 = 353504258,
+        SDL_PIXELFORMAT_BGR444 = 357698562,
+        SDL_PIXELFORMAT_RGB555 = 353570562,
+        SDL_PIXELFORMAT_BGR555 = 286461698,
+        SDL_PIXELFORMAT_ARGB4444 = 355602434,
+        SDL_PIXELFORMAT_RGBA4444 = 356651010,
+        SDL_PIXELFORMAT_ABGR4444 = 359796738,
+        SDL_PIXELFORMAT_BGRA4444 = 360845314,
+        SDL_PIXELFORMAT_ARGB1555 = 355667970,
+        SDL_PIXELFORMAT_RGBA5551 = 356782082,
+        SDL_PIXELFORMAT_ABGR1555 = 359862274,
+        SDL_PIXELFORMAT_BGRA5551 = 360976386,
+        SDL_PIXELFORMAT_RGB565 = 353701890,
+        SDL_PIXELFORMAT_BGR565 = 353701890,
+        SDL_PIXELFORMAT_RGB24 = 386930691,
+        SDL_PIXELFORMAT_BGR24 = 390076419,
+        SDL_PIXELFORMAT_RGB888 = 370546692,
+        SDL_PIXELFORMAT_RGBX8888 = 371595268,
+        SDL_PIXELFORMAT_BGR888 = 374740996,
+        SDL_PIXELFORMAT_BGRX8888 = 375789572,
+        SDL_PIXELFORMAT_ARGB8888 = 372645892,
+        SDL_PIXELFORMAT_RGBA8888 = 373694468,
+        SDL_PIXELFORMAT_ABGR8888 = 376840196,
+        SDL_PIXELFORMAT_BGRA8888 = 377888772,
+        SDL_PIXELFORMAT_ARGB2101010 = 372711428,
+        SDL_PIXELFORMAT_YV12 = 842094169,
+        SDL_PIXELFORMAT_IYUV = 1448433993,
+        SDL_PIXELFORMAT_YUY2 = 844715353,
+        SDL_PIXELFORMAT_UYVY = 1498831189,
+        SDL_PIXELFORMAT_YVYU = 1431918169
     }
 
     public struct SDL_GenericEvent
@@ -767,6 +811,18 @@ public class SDL : NativeLibrary
         public SDL_DropEvent drop;
         [FieldOffset(0)]
         private fixed byte padding[56];
+    }
+
+    public struct SDL_PixelFormat
+    {
+        public SDL_PixelFormatEnum format;
+        public IntPtr palette;
+        public byte bitsperpixel;
+        public byte bytesperpixel;
+        public uint rmask;
+        public uint gmask;
+        public uint bmask;
+        public uint amask;
     }
     #endregion
 
@@ -1561,66 +1617,6 @@ public class SDL : NativeLibrary
     public const string SDL_HINT_DISPLAY_USABLE_BOUNDS = "SDL_DISPLAY_USABLE_BOUNDS";
     public const string SDL_HINT_VIDEO_X11_FORCE_EGL = "SDL_VIDEO_X11_FORCE_EGL";
     public const string SDL_HINT_GAMECONTROLLERTYPE = "SDL_GAMECONTROLLERTYPE";
-
-    public static readonly uint SDL_PIXELFORMAT_UNKNOWN = 0;
-    public static readonly uint SDL_PIXELFORMAT_INDEX1LSB = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_INDEX1, (uint)SDL_BitmapOrder.SDL_BITMAPORDER_4321, 0, 1, 0);
-    public static readonly uint SDL_PIXELFORMAT_INDEX1MSB = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_INDEX1, (uint)SDL_BitmapOrder.SDL_BITMAPORDER_1234, 0, 1, 0);
-    public static readonly uint SDL_PIXELFORMAT_INDEX4LSB = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_INDEX4, (uint)SDL_BitmapOrder.SDL_BITMAPORDER_4321, 0, 4, 0);
-    public static readonly uint SDL_PIXELFORMAT_INDEX4MSB = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_INDEX4, (uint)SDL_BitmapOrder.SDL_BITMAPORDER_1234, 0, 4, 0);
-    public static readonly uint SDL_PIXELFORMAT_INDEX8 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_INDEX8, 0, 0, 8, 1);
-    public static readonly uint SDL_PIXELFORMAT_RGB332 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED8, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XRGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_332, 8, 1);
-    public static readonly uint SDL_PIXELFORMAT_RGB444 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XRGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_4444, 12, 2);
-    public static readonly uint SDL_PIXELFORMAT_BGR444 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XBGR, SDL_PackedLayout.SDL_PACKEDLAYOUT_4444, 12, 2);
-    public static readonly uint SDL_PIXELFORMAT_RGB555 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XRGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_1555, 15, 2);
-    public static readonly uint SDL_PIXELFORMAT_BGR555 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_INDEX1, (uint)SDL_BitmapOrder.SDL_BITMAPORDER_4321, SDL_PackedLayout.SDL_PACKEDLAYOUT_1555, 15, 2);
-    public static readonly uint SDL_PIXELFORMAT_ARGB4444 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ARGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_4444, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_RGBA4444 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_RGBA, SDL_PackedLayout.SDL_PACKEDLAYOUT_4444, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_ABGR4444 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ABGR, SDL_PackedLayout.SDL_PACKEDLAYOUT_4444, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_BGRA4444 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_BGRA, SDL_PackedLayout.SDL_PACKEDLAYOUT_4444, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_ARGB1555 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ARGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_1555, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_RGBA5551 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_RGBA, SDL_PackedLayout.SDL_PACKEDLAYOUT_5551, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_ABGR1555 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ABGR, SDL_PackedLayout.SDL_PACKEDLAYOUT_1555, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_BGRA5551 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_BGRA, SDL_PackedLayout.SDL_PACKEDLAYOUT_5551, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_RGB565 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XRGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_565, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_BGR565 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED16, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XBGR, SDL_PackedLayout.SDL_PACKEDLAYOUT_565, 16, 2);
-    public static readonly uint SDL_PIXELFORMAT_RGB24 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_ARRAYU8, (uint)SDL_ArrayOrder.SDL_ARRAYORDER_RGB, 0, 24, 3);
-    public static readonly uint SDL_PIXELFORMAT_BGR24 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_ARRAYU8, (uint)SDL_ArrayOrder.SDL_ARRAYORDER_BGR, 0, 24, 3);
-    public static readonly uint SDL_PIXELFORMAT_RGB888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XRGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 24, 4);
-    public static readonly uint SDL_PIXELFORMAT_RGBX8888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_RGBX, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 24, 4);
-    public static readonly uint SDL_PIXELFORMAT_BGR888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_XBGR, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 24, 4);
-    public static readonly uint SDL_PIXELFORMAT_BGRX8888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_BGRX, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 24, 4);
-    public static readonly uint SDL_PIXELFORMAT_ARGB8888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ARGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 32, 4);
-    public static readonly uint SDL_PIXELFORMAT_RGBA8888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_RGBA, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 32, 4);
-    public static readonly uint SDL_PIXELFORMAT_ABGR8888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ABGR, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 32, 4);
-    public static readonly uint SDL_PIXELFORMAT_BGRA8888 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_BGRA, SDL_PackedLayout.SDL_PACKEDLAYOUT_8888, 32, 4);
-    public static readonly uint SDL_PIXELFORMAT_ARGB2101010 = SDL_DEFINE_PIXELFORMAT(SDL_PixelType.SDL_PIXELTYPE_PACKED32, (uint)SDL_PackedOrder.SDL_PACKEDORDER_ARGB, SDL_PackedLayout.SDL_PACKEDLAYOUT_2101010, 32, 4);
-    public static readonly uint SDL_PIXELFORMAT_YV12 = SDL_DEFINE_PIXELFOURCC((byte)'Y', (byte)'V', (byte)'1', (byte)'2');
-    public static readonly uint SDL_PIXELFORMAT_IYUV = SDL_DEFINE_PIXELFOURCC((byte)'I', (byte)'Y', (byte)'U', (byte)'V');
-    public static readonly uint SDL_PIXELFORMAT_YUY2 = SDL_DEFINE_PIXELFOURCC((byte)'Y', (byte)'U', (byte)'Y', (byte)'2');
-    public static readonly uint SDL_PIXELFORMAT_UYVY = SDL_DEFINE_PIXELFOURCC((byte)'U', (byte)'Y', (byte)'V', (byte)'Y');
-    public static readonly uint SDL_PIXELFORMAT_YVYU = SDL_DEFINE_PIXELFOURCC((byte)'Y', (byte)'V', (byte)'Y', (byte)'U');
-
-    public static uint SDL_FOURCC(byte A, byte B, byte C, byte D)
-    {
-        return (uint)(A | (B << 8) | (C << 16) | (D << 24));
-    }
-
-    public static uint SDL_DEFINE_PIXELFOURCC(byte A, byte B, byte C, byte D)
-    {
-        return SDL_FOURCC(A, B, C, D);
-    }
-
-    public static uint SDL_DEFINE_PIXELFORMAT(SDL_PixelType Type, uint Order, SDL_PackedLayout Layout, byte Bits, byte Bytes)
-    {
-        return (uint)(
-            (1 << 28) |
-            (((byte)Type) << 24) |
-            (((byte)Order) << 20) |
-            (((byte)Layout) << 16) |
-            (Bits << 8) |
-            (Bytes)
-        );
-    }
 
     public const int SDLK_SCANCODE_MASK = (1 << 30);
     public static SDL_Keycode SDL_SCANCODE_TO_KEYCODE(SDL_Scancode X)
