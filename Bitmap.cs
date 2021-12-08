@@ -85,8 +85,8 @@ public class Bitmap : IDisposable
     /// </summary>
     IntPtr PixelHandle = IntPtr.Zero;
 
-    public bool RGBA8 { get; protected set; } = true;
-    public bool ABGR8 { get; protected set; } = false;
+    public bool RGBA8 { get; protected set; } = false;
+    public bool ABGR8 { get; protected set; } = true;
 
     /// <summary>
     /// Creates a new bitmap with the given size.
@@ -132,7 +132,8 @@ public class Bitmap : IDisposable
             }
             this.Width = width;
             this.Height = height;
-            RGBA8 = true;
+            RGBA8 = InternalBitmaps[0].RGBA8;
+            ABGR8 = InternalBitmaps[0].ABGR8;
         }
         else if (IsPNG && ImageSize.Height > Graphics.MaxTextureSize.Height)
         {
@@ -156,7 +157,8 @@ public class Bitmap : IDisposable
             }
             this.Width = width;
             this.Height = height;
-            RGBA8 = true;
+            RGBA8 = InternalBitmaps[0].RGBA8;
+            ABGR8 = InternalBitmaps[0].ABGR8;
         }
         else
         {
@@ -2430,7 +2432,7 @@ public class Bitmap : IDisposable
     /// Saves the current bitmap to a file as a PNG.
     /// </summary>
     /// <param name="filename">The filename to save the bitmap as.</param>
-    public virtual void SaveToPNG(string filename)
+    public virtual unsafe void SaveToPNG(string filename, bool Transparency = true, bool Indexed = false, int MaxPaletteSize = 0)
     {
         if (IsChunky)
         {
@@ -2438,7 +2440,17 @@ public class Bitmap : IDisposable
         }
         else
         {
-            IMG_SavePNG(Surface, filename);
+            decodl.PNGEncoder encoder = new decodl.PNGEncoder(PixelPointer, (uint) Width, (uint) Height);
+            encoder.InvertData = RGBA8;
+            encoder.ColorType = Transparency ? decodl.ColorTypes.RGBA : decodl.ColorTypes.RGB;
+            if (Indexed)
+            {
+                encoder.ColorType = decodl.ColorTypes.Indexed;
+                encoder.ReduceUnindexableImages = true;
+                encoder.MaxPaletteSize = MaxPaletteSize;
+                encoder.IncludeIndexedTransparency = Transparency;
+            }
+            encoder.Encode(filename);
         }
     }
 
