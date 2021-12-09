@@ -13,6 +13,11 @@ public class Point : IDisposable
         this.Y = Y;
     }
 
+    public double Distance(Point p)
+    {
+        return Math.Sqrt(Math.Pow(this.X - p.X, 2) + Math.Pow(this.Y - p.Y, 2));
+    }
+
     public void Dispose()
     {
 
