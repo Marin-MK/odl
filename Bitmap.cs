@@ -592,7 +592,7 @@ public class Bitmap : IDisposable
         }
         else
         {
-            if (!RGBA8 && !ABGR8) ConvertToRGBA8();
+            if (!RGBA8 && !ABGR8) ConvertToABGR8();
             if (RGBA8)
             {
                 PixelPointer[Width * Y * 4 + X * 4] = a;
@@ -637,7 +637,7 @@ public class Bitmap : IDisposable
         }
         else
         {
-            if (!RGBA8 && !ABGR8) ConvertToRGBA8();
+            if (!RGBA8 && !ABGR8) ConvertToABGR8();
             if (RGBA8)
             {
                 return new Color(
@@ -1863,7 +1863,6 @@ public class Bitmap : IDisposable
         if (this.Renderer != null) this.Renderer.Update();
     }
 
-
     /// <summary>
     /// Returns the size the given character would take up when rendered.
     /// </summary>
@@ -1873,6 +1872,7 @@ public class Bitmap : IDisposable
     {
         return Font.TextSize(Char, DrawOptions);
     }
+
     /// <summary>
     /// Returns the size the given string would take up when rendered.
     /// </summary>
@@ -1925,7 +1925,7 @@ public class Bitmap : IDisposable
         this.DrawText(Text, p.X, p.Y, new Color(R, G, B, A), DrawOptions);
     }
     /// <summary>
-    /// Draws a string of text.
+    /// Draws a string of text at (0, 0).
     /// </summary>
     /// <param name="Text">The text to draw.</param>
     /// <param name="c">The color of the text to draw.</param>
@@ -1935,7 +1935,7 @@ public class Bitmap : IDisposable
         this.DrawText(Text, 0, 0, c, DrawOptions);
     }
     /// <summary>
-    /// Draws a string of text.
+    /// Draws a string of text at (0, 0).
     /// </summary>
     /// <param name="Text">The text to draw.</param>
     /// <param name="R">The Red component of the color.</param>
@@ -1996,7 +1996,7 @@ public class Bitmap : IDisposable
         if (this.Renderer != null) this.Renderer.Update();
     }
 
-    #region DrawText + Size Overloads
+    #region DrawText Overloads
     /// <summary>
     /// Draws a string of text.
     /// </summary>
@@ -2158,27 +2158,78 @@ public class Bitmap : IDisposable
     }
 
     #region DrawGlyph Overloads
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="X">The X position to draw the text at.</param>
+    /// <param name="Y">The Y position to draw the text at.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, int X, int Y, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, X, Y, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="p">The position to draw the text at.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Point p, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, p.X, p.Y, color, DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="p">The position to draw the text at.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Point p, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, p.X, p.Y, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character at (0, 0).
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, 0, 0, color, DrawOptions);
     }
+    /// <summary>
+    /// Draws a character at (0, 0).
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, 0, 0, new Color(R, G, B, A), DrawOptions);
     }
     #endregion
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="X">The X position to draw the text at.</param>
+    /// <param name="Y">The Y position to draw the text at.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public virtual void DrawGlyph(char c, int X, int Y, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         if (Locked) throw new BitmapLockedException();
@@ -2209,43 +2260,144 @@ public class Bitmap : IDisposable
     }
 
     #region DrawGlyph Overloads
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="rect">The rectangle within which to draw the text.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Rect rect, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, rect.X, rect.Y, rect.Width, rect.Height, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="p">The position to draw the text at.</param>
+    /// <param name="s">The size of the rectangle within which to draw the text.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Point p, Size s, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, p.X, p.Y, s.Width, s.Height, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="p">The position to draw the text at.</param>
+    /// <param name="Width">The width within which to draw the text.</param>
+    /// <param name="Height">The height within which to draw the text.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Point p, int Width, int Height, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, p.X, p.Y, Width, Height, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="X">The X position to draw the text at.</param>
+    /// <param name="Y">The Y position to draw the text at.</param>
+    /// <param name="s">The size of the rectangle within which to draw the text.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, int X, int Y, Size s, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, X, Y, s.Width, s.Height, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="X">The X position to draw the text at.</param>
+    /// <param name="Y">The Y position to draw the text at.</param>
+    /// <param name="Width">The width within which to draw the text.</param>
+    /// <param name="Height">The height within which to draw the text.</param>
+    /// <param name="R">The Red component of the color of the text to draw.</param>
+    /// <param name="G">The Green component of the color of the text to draw.</param>
+    /// <param name="B">The Blue component of the color of the text to draw.</param>
+    /// <param name="A">The Alpha component of the color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, int X, int Y, int Width, int Height, byte R, byte G, byte B, byte A = 255, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, X, Y, Width, Height, new Color(R, G, B, A), DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="rect">The rectangle within which to draw the text.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Rect rect, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, rect.X, rect.Y, rect.Width, rect.Height, color, DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="p">The position to draw the text at.</param>
+    /// <param name="s">The size of the rectangle within which to draw the text.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Point p, Size s, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, p.X, p.Y, s.Width, s.Height, color, DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="p">The position to draw the text at.</param>
+    /// <param name="Width">The width within which to draw the text.</param>
+    /// <param name="Height">The height within which to draw the text.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, Point p, int Width, int Height, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, p.X, p.Y, Width, Height, color, DrawOptions);
     }
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="X">The X position to draw the text at.</param>
+    /// <param name="Y">The Y position to draw the text at.</param>
+    /// <param name="s">The size of the rectangle within which to draw the text.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public void DrawGlyph(char c, int X, int Y, Size s, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         this.DrawGlyph(c, X, Y, s.Width, s.Height, color, DrawOptions);
     }
     #endregion
+    /// <summary>
+    /// Draws a character.
+    /// </summary>
+    /// <param name="c">The character to draw.</param>
+    /// <param name="X">The X position to draw the text at.</param>
+    /// <param name="Y">The Y position to draw the text at.</param>
+    /// <param name="Width">The width within which to draw the text.</param>
+    /// <param name="Height">The height within which to draw the text.</param>
+    /// <param name="color">The color of the text to draw.</param>
+    /// <param name="DrawOptions">Additional options for drawing the text.</param>
     public virtual void DrawGlyph(char c, int X, int Y, int Width, int Height, Color color, DrawOptions DrawOptions = DrawOptions.LeftAlign)
     {
         if (Locked) throw new BitmapLockedException();
@@ -2276,19 +2428,51 @@ public class Bitmap : IDisposable
     }
 
     #region DrawGradientLine Overloads
+    /// <summary>
+    /// Draws a line with its color linearly interpolated between two colors.
+    /// </summary>
+    /// <param name="p1">The starting position of the line.</param>
+    /// <param name="p2">The ending position of the line.</param>
+    /// <param name="c1">The starting color of the line.</param>
+    /// <param name="c2">The ending color of the line.</param>
     public void DrawGradientLine(Point p1, Point p2, Color c1, Color c2)
     {
         DrawGradientLine(p1.X, p1.Y, p2.X, p2.Y, c1, c2);
     }
+    /// <summary>
+    /// Draws a line with its color linearly interpolated between two colors.
+    /// </summary>
+    /// <param name="x1">The starting X position of the line.</param>
+    /// <param name="y1">The starting Y position of the line.</param>
+    /// <param name="p2">The ending position of the line.</param>
+    /// <param name="c1">The starting color of the line.</param>
+    /// <param name="c2">The ending color of the line.</param>
     public void DrawGradientLine(int x1, int y1, Point p2, Color c1, Color c2)
     {
         DrawGradientLine(x1, y1, p2.X, p2.Y, c1, c2);
     }
+    /// <summary>
+    /// Draws a line with its color linearly interpolated between two colors.
+    /// </summary>
+    /// <param name="p1">The starting position of the line.</param>
+    /// <param name="x2">The ending X position of the line.</param>
+    /// <param name="y2">The ending Y position of the line.</param>
+    /// <param name="c1">The starting color of the line.</param>
+    /// <param name="c2">The ending color of the line.</param>
     public void DrawGradientLine(Point p1, int x2, int y2, Color c1, Color c2)
     {
         DrawGradientLine(p1.X, p1.Y, x2, y2, c1, c2);
     }
     #endregion
+    /// <summary>
+    /// Draws a line with its color linearly interpolated between two colors.
+    /// </summary>
+    /// <param name="x1">The starting X position of the line.</param>
+    /// <param name="y1">The starting Y position of the line.</param>
+    /// <param name="x2">The ending X position of the line.</param>
+    /// <param name="y2">The ending Y position of the line.</param>
+    /// <param name="c1">The starting color of the line.</param>
+    /// <param name="c2">The ending color of the line.</param>
     public virtual void DrawGradientLine(int x1, int y1, int x2, int y2, Color c1, Color c2)
     {
         if (Locked) throw new BitmapLockedException();
@@ -2302,10 +2486,10 @@ public class Bitmap : IDisposable
                 int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
                 if (y >= 0)
                 {
-                    double d1 = Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
-                    double d2 = Math.Sqrt(Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
-                    double f1 = d2 / (d1 + d2);
-                    double f2 = d1 / (d1 + d2);
+                    long d1 = (long) (Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
+                    long d2 = (long) (Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
+                    double f1 = d2 / (double) (d1 + d2);
+                    double f2 = d1 / (double) (d1 + d2);
                     byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red);
                     byte g = (byte) Math.Round(f1 * c1.Green + f2 * c2.Green);
                     byte b = (byte) Math.Round(f1 * c1.Blue + f2 * c2.Blue);
@@ -2323,10 +2507,10 @@ public class Bitmap : IDisposable
                 int x = (int) Math.Round(x1 + ((x2 - x1) * fact));
                 if (x >= 0)
                 {
-                    double d1 = Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
-                    double d2 = Math.Sqrt(Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
-                    double f1 = d2 / (d1 + d2);
-                    double f2 = d1 / (d1 + d2);
+                    long d1 = (long) (Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
+                    long d2 = (long) (Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
+                    double f1 = d2 / (double) (d1 + d2);
+                    double f2 = d1 / (double) (d1 + d2);
                     byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red);
                     byte g = (byte) Math.Round(f1 * c1.Green + f2 * c2.Green);
                     byte b = (byte) Math.Round(f1 * c1.Blue + f2 * c2.Blue);
@@ -2338,6 +2522,125 @@ public class Bitmap : IDisposable
         if (this.Renderer != null) this.Renderer.Update();
     }
 
+    #region FillGradientRect Overloads
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="Rect">The rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="c3">The color in the bottom-left corner of the rectangle.</param>
+    /// <param name="c4">The color in the bottom-right corner of the rectangle.</param>
+    public void FillGradientRect(Rect Rect, Color c1, Color c2, Color c3, Color c4)
+    {
+        FillGradientRect(Rect.X, Rect.Y, Rect.Width, Rect.Height, c1, c2, c3, c4);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="Point">The position of the rectangle to fill.</param>
+    /// <param name="Size">The size of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="c3">The color in the bottom-left corner of the rectangle.</param>
+    /// <param name="c4">The color in the bottom-right corner of the rectangle.</param>
+    public void FillGradientRect(Point Point, Size Size, Color c1, Color c2, Color c3, Color c4)
+    {
+        FillGradientRect(Point.X, Point.Y, Size.Width, Size.Height, c1, c2, c3, c4);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="X">The X position of the rectangle to fill.</param>
+    /// <param name="Y">The Y position of the rectangle to fill.</param>
+    /// <param name="Size">The size of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="c3">The color in the bottom-left corner of the rectangle.</param>
+    /// <param name="c4">The color in the bottom-right corner of the rectangle.</param>
+    public void FillGradientRect(int X, int Y, Size Size, Color c1, Color c2, Color c3, Color c4)
+    {
+        FillGradientRect(X, Y, Size.Width, Size.Height, c1, c2, c3, c4);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="Point">The position of the rectangle to fill.</param>
+    /// <param name="Width">The width of the rectangle to fill.</param>
+    /// <param name="Height">The height of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="c3">The color in the bottom-left corner of the rectangle.</param>
+    /// <param name="c4">The color in the bottom-right corner of the rectangle.</param>
+    public void FillGradientRect(Point Point, int Width, int Height, Color c1, Color c2, Color c3, Color c4)
+    {
+        FillGradientRect(Point.X, Point.Y, Width, Height, c1, c2, c3, c4);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="Rect">The rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="Flipped">Whether to flip the direction of the gradient on the horizontal axis.</param>
+    /// <param name="UseTriangles">Whether to draw the rectangle using two triangles for a smooth gradient, or to use a simple rectangular function.</param>
+    public void FillGradientRect(Rect Rect, Color c1, Color c2, bool Flipped = false, bool UseTriangles = true)
+    {
+        FillGradientRect(Rect.X, Rect.Y, Rect.Width, Rect.Height, c1, c2, Flipped, UseTriangles);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="Point">The position of the rectangle to fill.</param>
+    /// <param name="Size">The size of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="Flipped">Whether to flip the direction of the gradient on the horizontal axis.</param>
+    /// <param name="UseTriangles">Whether to draw the rectangle using two triangles for a smooth gradient, or to use a simple rectangular function.</param>
+    public void FillGradientRect(Point Point, Size Size, Color c1, Color c2, bool Flipped = false, bool UseTriangles = true)
+    {
+        FillGradientRect(Point.X, Point.Y, Size.Width, Size.Height, c1, c2, Flipped, UseTriangles);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="X">The X position of the rectangle to fill.</param>
+    /// <param name="Y">The Y position of the rectangle to fill.</param>
+    /// <param name="Size">The size of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="Flipped">Whether to flip the direction of the gradient on the horizontal axis.</param>
+    /// <param name="UseTriangles">Whether to draw the rectangle using two triangles for a smooth gradient, or to use a simple rectangular function.</param>
+    public void FillGradientRect(int X, int Y, Size Size, Color c1, Color c2, bool Flipped = false, bool UseTriangles = true)
+    {
+        FillGradientRect(X, Y, Size.Width, Size.Height, c1, c2, Flipped, UseTriangles);
+    }
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="Point">The position of the rectangle to fill.</param>
+    /// <param name="Width">The width of the rectangle to fill.</param>
+    /// <param name="Height">The height of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="Flipped">Whether to flip the direction of the gradient on the horizontal axis.</param>
+    /// <param name="UseTriangles">Whether to draw the rectangle using two triangles for a smooth gradient, or to use a simple rectangular function.</param>
+    public void FillGradientRect(Point Point, int Width, int Height, Color c1, Color c2, bool Flipped = false, bool UseTriangles = true)
+    {
+        FillGradientRect(Point.X, Point.Y, Width, Height, c1, c2, Flipped, UseTriangles);
+    }
+    #endregion
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="X">The X position of the rectangle to fill.</param>
+    /// <param name="Y">The Y position of the rectangle to fill.</param>
+    /// <param name="Width">The width of the rectangle to fill.</param>
+    /// <param name="Height">The height of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="c3">The color in the bottom-left corner of the rectangle.</param>
+    /// <param name="c4">The color in the bottom-right corner of the rectangle.</param>
     public virtual void FillGradientRect(int X, int Y, int Width, int Height, Color c1, Color c2, Color c3, Color c4)
     {
         if (Locked) throw new BitmapLockedException();
@@ -2353,9 +2656,9 @@ public class Bitmap : IDisposable
         {
             throw new Exception($"Invalid rectangle ({X},{Y},{Width},{Height}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
         }
-        for (int dy = Y; dy < Height; dy++)
+        for (int dy = Y; dy < Y + Height; dy++)
         {
-            for (int dx = X; dx < Width; dx++)
+            for (int dx = X; dx < X + Width; dx++)
             {
                 double xl = dx - X;
                 double xr = X + Width - 1 - dx;
@@ -2379,7 +2682,193 @@ public class Bitmap : IDisposable
         if (this.Renderer != null) this.Renderer.Update();
     }
 
-    public virtual void ConvertToRGBA8()
+    /// <summary>
+    /// Fills a rectangle with colors bilinearly interpolated from 4 color values, anchored at the corners.
+    /// </summary>
+    /// <param name="X">The X position of the rectangle to fill.</param>
+    /// <param name="Y">The Y position of the rectangle to fill.</param>
+    /// <param name="Width">The width of the rectangle to fill.</param>
+    /// <param name="Height">The height of the rectangle to fill.</param>
+    /// <param name="c1">The color in the top-left corner of the rectangle.</param>
+    /// <param name="c2">The color in the top-right corner of the rectangle.</param>
+    /// <param name="Flipped">Whether to flip the direction of the gradient on the horizontal axis.</param>
+    /// <param name="UseTriangles">Whether to draw the rectangle using two triangles for a smooth gradient, or to use a simple rectangular function.</param>
+    public virtual void FillGradientRect(int X, int Y, int Width, int Height, Color c1, Color c2, bool Flipped = false, bool UseTriangles = true)
+    {
+        if (Locked) throw new BitmapLockedException();
+        if (X < 0 || Y < 0)
+        {
+            throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- minimum is (0,0)");
+        }
+        if (X >= this.Width || Y >= this.Height)
+        {
+            throw new Exception($"Invalid Bitmap coordinate ({X},{Y}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+        }
+        if (X + Width - 1 >= this.Width || Y + Height - 1 >= this.Height)
+        {
+            throw new Exception($"Invalid rectangle ({X},{Y},{Width},{Height}) -- exceeds Bitmap size of ({this.Width},{this.Height})");
+        }
+        if (UseTriangles)
+        {
+            Color half = Interpolate2D(c1, c2, 0.5);
+            FillGradientTriangle(
+                new Vertex(X, Y + Height - 1, Flipped ? c2 : half),
+                new Vertex(X, Y, Flipped ? half : c1),
+                new Vertex(X + Width - 1, Y, Flipped ? c1 : half)
+            );
+            FillGradientTriangle(
+                new Vertex(X, Y + Height - 1, Flipped ? c2 : half),
+                new Vertex(X + Width - 1, Y, Flipped ? c1 : half),
+                new Vertex(X + Width - 1, Y + Height - 1, Flipped ? half : c2)
+            );
+        }
+        else
+        {
+            for (int dy = Y; dy < Y + Height; dy++)
+            {
+                for (int dx = X; dx < X + Width; dx++)
+                {
+                    long d1 = (long) (Math.Pow(dx - X, 2) + Math.Pow(dy - (Flipped ? Y + Height : Y), 2));
+                    long d2 = (long) (Math.Pow(dx - (X + Width), 2) + Math.Pow(dy - (Flipped ? Y : Y + Height), 2));
+                    double f1 = d2 / (double) (d1 + d2);
+                    double f2 = d1 / (double) (d1 + d2);
+                    byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red);
+                    byte g = (byte) Math.Round(f1 * c1.Green + f2 * c2.Green);
+                    byte b = (byte) Math.Round(f1 * c1.Blue + f2 * c2.Blue);
+                    byte a = (byte) Math.Round(f1 * c1.Alpha + f2 * c2.Alpha);
+                    SetPixel(dx, dy, r, g, b, a);
+                }
+            }
+        }
+        if (this.Renderer != null) this.Renderer.Update();
+    }
+
+    /// <summary>
+    /// Fills a triangle with a solid color. The points must be given in clockwise order.
+    /// </summary>
+    /// <param name="v0">The left-most point of the triangle.</param>
+    /// <param name="v1">The upper-most or right-most point of the triangle.</param>
+    /// <param name="v2">The remaining point of the triangle.</param>
+    /// <param name="c">The color to fill the triangle with.</param>
+    public virtual void FillTriangle(Point v0, Point v1, Point v2, Color c)
+    {
+        if (Locked) throw new BitmapLockedException();
+        if (v0.X < 0 || v0.Y < 0 || v0.X >= Width || v0.Y >= Height) throw new Exception("First triangle vector is out of bounds.");
+        if (v1.X < 0 || v1.Y < 0 || v1.X >= Width || v1.Y >= Height) throw new Exception("Second triangle vector is out of bounds.");
+        if (v2.X < 0 || v2.Y < 0 || v2.X >= Width || v2.Y >= Height) throw new Exception("Third triangle vector is out of bounds.");
+        int minx = Math.Min(v0.X, Math.Min(v1.X, v2.X));
+        int maxx = Math.Max(v0.X, Math.Max(v1.X, v2.X));
+        int miny = Math.Min(v0.Y, Math.Min(v1.Y, v2.Y));
+        int maxy = Math.Max(v0.Y, Math.Max(v1.Y, v2.Y));
+        for (int x = minx; x <= maxx; x++)
+        {
+            for (int y = miny; y <= maxy; y++)
+            {
+                Point p = new Point(x, y);
+                double w0 = EdgeFunction(v1, v2, p);
+                double w1 = EdgeFunction(v2, v0, p);
+                double w2 = EdgeFunction(v0, v1, p);
+                if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+                {
+                    SetPixel(p, c);
+                }
+            }
+        }
+        this.Renderer?.Update();
+    }
+
+    #region FillGradientTriangle Overloads
+    /// <summary>
+    /// Fills a triangle with colors interpolated from the triangle vertices. The vertices must be given in clockwise order.
+    /// </summary>
+    /// <param name="v0">The left-most point of the triangle.</param>
+    /// <param name="v1">The upper-most of right-most point of the triangle.</param>
+    /// <param name="v2">The remaining point of the triangle.</param>
+    /// <param name="c0">The color corresponding to <paramref name="v0"/>.</param>
+    /// <param name="c1">The color corresponding to <paramref name="v1"/>.</param>
+    /// <param name="c2">The color corresponding to <paramref name="v2"/>.</param>
+    public virtual void FillGradientTriangle(Point v0, Point v1, Point v2, Color c0, Color c1, Color c2)
+    {
+        FillGradientTriangle(new Vertex(v0, c0), new Vertex(v1, c1), new Vertex(v2, c2));
+    }
+    #endregion
+    /// <summary>
+    /// Fills a triangle with colors interpolated from the triangle vertices. The vertices must be given in clockwise order.
+    /// </summary>
+    /// <param name="v0">The left-most vertex of the triangle.</param>
+    /// <param name="v1">The upper-most of right-most vertex of the triangle.</param>
+    /// <param name="v2">The remaining vertex of the triangle.</param>
+    public virtual void FillGradientTriangle(Vertex v0, Vertex v1, Vertex v2)
+    {
+        if (Locked) throw new BitmapLockedException();
+        if (v0.X < 0 || v0.Y < 0 || v0.X >= Width || v0.Y >= Height) throw new Exception("First triangle vector is out of bounds.");
+        if (v1.X < 0 || v1.Y < 0 || v1.X >= Width || v1.Y >= Height) throw new Exception("Second triangle vector is out of bounds.");
+        if (v2.X < 0 || v2.Y < 0 || v2.X >= Width || v2.Y >= Height) throw new Exception("Third triangle vector is out of bounds.");
+        int minx = Math.Min(v0.X, Math.Min(v1.X, v2.X));
+        int maxx = Math.Max(v0.X, Math.Max(v1.X, v2.X));
+        int miny = Math.Min(v0.Y, Math.Min(v1.Y, v2.Y));
+        int maxy = Math.Max(v0.Y, Math.Max(v1.Y, v2.Y));
+        for (int x = minx; x <= maxx; x++)
+        {
+            for (int y = miny; y <= maxy; y++)
+            {
+                Point p = new Point(x, y);
+                double w0 = EdgeFunction(v1, v2, p);
+                double w1 = EdgeFunction(v2, v0, p);
+                double w2 = EdgeFunction(v0, v1, p);
+                if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+                {
+                    double area = EdgeFunction(v0, v1, v2);
+                    double f0 = w0 / area;
+                    double f1 = w1 / area;
+                    double f2 = w2 / area;
+                    byte r = (byte) Math.Round(f0 * v0.R + f1 * v1.R + f2 * v2.R);
+                    byte g = (byte) Math.Round(f0 * v0.G + f1 * v1.G + f2 * v2.G);
+                    byte b = (byte) Math.Round(f0 * v0.B + f1 * v1.B + f2 * v2.B);
+                    byte a = (byte) Math.Round(f0 * v0.A + f1 * v1.A + f2 * v2.A);
+                    SetPixel(p, r, g, b, a);
+                }
+            }
+        }
+        this.Renderer?.Update();
+    }
+
+    #region EdgeFunction Overloads
+    double EdgeFunction(Vertex a, Vertex b, Vertex c)
+    {
+        return EdgeFunction(a.Point, b.Point, c.Point);
+    }
+    double EdgeFunction(Vertex a, Vertex b, Point c)
+    {
+        return EdgeFunction(a.Point, b.Point, c);
+    }
+    #endregion
+    protected virtual double EdgeFunction(Point a, Point b, Point c)
+    {
+        return (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
+    }
+
+    /// <summary>
+    /// Interpolates between two colors.
+    /// </summary>
+    /// <param name="c1">The first color.</param>
+    /// <param name="c2">The second color.</param>
+    /// <param name="f1">The percentage of the first color the new color will contain.</param>
+    /// <returns>The color interpolated between <paramref name="c1"/> and <paramref name="c2"/>.</returns>
+    public static Color Interpolate2D(Color c1, Color c2, double f1)
+    {
+        return new Color(
+            (byte) Math.Round(f1 * c1.Red + (1 - f1) * c2.Red),
+            (byte) Math.Round(f1 * c1.Green + (1 - f1) * c2.Green),
+            (byte) Math.Round(f1 * c1.Blue + (1 - f1) * c2.Blue),
+            (byte) Math.Round(f1 * c1.Alpha + (1 - f1) * c2.Alpha)
+        );
+    }
+
+    /// <summary>
+    /// Converts the bitmap to an ABGR8 format.
+    /// </summary>
+    protected virtual void ConvertToABGR8()
     {
         if (this.Surface == IntPtr.Zero) throw new Exception("Can not convert non-existing surface.");
         if (PixelHandle != IntPtr.Zero)
@@ -2388,7 +2877,7 @@ public class Bitmap : IDisposable
             PixelHandle = IntPtr.Zero;
         }
         IntPtr oldsurface = this.Surface;
-        this.Surface = SDL_ConvertSurfaceFormat(this.Surface, SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888, 0);
+        this.Surface = SDL_ConvertSurfaceFormat(this.Surface, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888, 0);
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         RGBA8 = true;
         ABGR8 = false;
@@ -2481,9 +2970,9 @@ public class Bitmap : IDisposable
     }
 
     private Bitmap ColorToneBmp;
-
     private Color ColorToneColor;
     private Tone ColorToneTone;
+
     // Applies a Sprite's Color and Tone. CPU-intensive.
     public virtual IntPtr ColorToneTexture(Color Color, Tone Tone)
     {
