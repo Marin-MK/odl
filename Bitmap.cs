@@ -2833,6 +2833,46 @@ public class Bitmap : IDisposable
         this.Renderer?.Update();
     }
 
+    /// <summary>
+    /// Draws a gradient between the <paramref name="inside"/> box and <paramref name="outside"/> box.
+    /// </summary>
+    /// <param name="outside">The outer box at which the gradient stops.</param>
+    /// <param name="inside">The inner box from where to start the gradient.</param>
+    /// <param name="c1">The inner-most color.</param>
+    /// <param name="c2">The outer-most color.</param>
+    /// <param name="FillInside">Whether to also fill the inner rectangle with <paramref name="c1"/>.</param>
+    public virtual void FillGradientRectOutside(Rect outside, Rect inside, Color c1, Color c2, bool FillInside = true)
+    {
+        for (int y = outside.Y; y < outside.Y + outside.Height; y++)
+        {
+            for (int x = outside.X; x < outside.X + outside.Width; x++)
+            {
+                if (inside.Contains(x, y)) continue;
+                double d = -1;
+                if (x < inside.X && y >= inside.Y && y <= inside.Y + inside.Height)
+                    d = x / (double) (inside.X - outside.X);
+                else if (x >= inside.X + inside.Width && y >= inside.Y && y <= inside.Y + inside.Height)
+                    d = 1 - (x - inside.X - inside.Width) / (double) (outside.X + outside.Width - inside.X - inside.Width);
+                else if (y < inside.Y)
+                    d = y / (double) (inside.Y - outside.Y);
+                else if (y >= inside.Y + inside.Height)
+                    d = 1 - (y - inside.Y - inside.Height) / (double) (outside.Y + outside.Height - inside.Y - inside.Height);
+                if (d == -1) continue;
+                d = Math.Clamp(d, 0, 1);
+                byte r = (byte) Math.Round(d * c1.Red + (1 - d) * c2.Red);
+                byte g = (byte) Math.Round(d * c1.Green + (1 - d) * c2.Green);
+                byte b = (byte) Math.Round(d * c1.Blue + (1 - d) * c2.Blue);
+                byte a = (byte) Math.Round(d * c1.Alpha + (1 - d) * c2.Alpha);
+                SetPixel(x, y, r, g, b, a);
+            }
+        }
+        if (FillInside) FillRect(inside, c1);
+        FillGradientRect(outside.X, outside.Y, inside.X, inside.Y, c2, c2, c2, c1);
+        FillGradientRect(outside.X + inside.X + inside.Width, outside.Y, outside.X + outside.Width - inside.X - inside.Width, inside.Y, c2, c2, c1, c2);
+        FillGradientRect(outside.X, outside.Y + inside.Y + inside.Height, inside.X, outside.Y + outside.Height - inside.Y - inside.Height, c2, c1, c2, c2);
+        FillGradientRect(outside.X + inside.X + inside.Width, outside.Y + inside.Y + inside.Height, outside.X + outside.Width - inside.X - inside.Width, outside.Y + outside.Height - inside.Y - inside.Height, c1, c2, c2, c2);
+    }
+
     #region EdgeFunction Overloads
     double EdgeFunction(Vertex a, Vertex b, Vertex c)
     {
