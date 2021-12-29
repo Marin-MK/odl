@@ -11,8 +11,8 @@ public class MultiSprite : ISprite, IDisposable
     public string Filename { get { throw new MethodNotSupportedException(this); } }
     public Rect SrcRect { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
     public Bitmap Bitmap { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
-    public int X { get; set; }
-    public int Y { get; set; }
+    public virtual int X { get; set; }
+    public virtual int Y { get; set; }
     public int Z { get; set; }
     public double ZoomX { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
     public double ZoomY { get { throw new MethodNotSupportedException(this); } set { throw new MethodNotSupportedException(this); } }
