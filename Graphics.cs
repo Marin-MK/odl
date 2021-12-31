@@ -433,7 +433,7 @@ public static class Graphics
                     if (sym1 == SDL_Keycode.SDLK_DELETE) delete = true;
                     if (txt.Length > 0 || backspace || delete)
                     {
-                        w.OnTextInput(new TextEventArgs(txt, backspace, delete));
+                        w.OnTextInput(new TextEventArgs(txt, null, backspace, delete));
                     }
                     break;
                 case SDL_EventType.SDL_KEYUP:
@@ -456,7 +456,7 @@ public static class Graphics
                     }
                     string text = "";
                     foreach (char c in Encoding.UTF8.GetChars(bytes)) text += c;
-                    w.OnTextInput(new TextEventArgs(text.TrimEnd('\x00')));
+                    w.OnTextInput(new TextEventArgs(text.TrimEnd('\x00'), null));
                     break;
             }
         }
