@@ -62,10 +62,6 @@ public class Color : ICloneable
     /// The Alpha component of the color.
     /// </summary>
     public byte Alpha = 255;
-    /// <summary>
-    /// Converts the Alpha component of the color (0-255) to a factor (0-1)
-    /// </summary>
-    public double AlphaFactor { get { return Alpha / 255d; } }
 
     /// <summary>
     /// Creates a new Color object.
@@ -109,5 +105,63 @@ public class Color : ICloneable
     public override int GetHashCode()
     {
         return base.GetHashCode();
+    }
+
+    public (float H, float S, float L) GetHSL()
+    {
+        float r = this.Red / 255f;
+        float g = this.Green / 255f;
+        float b = this.Blue / 255f;
+        float max = Math.Max(r, Math.Max(g, b));
+        float min = Math.Min(r, Math.Min(g, b));
+        float d = max - min;
+        float H = 0;
+        float S = 0;
+        float L = (max + min) / 2;
+        if (d == 0) { }
+        else if (r >= g && r >= b)
+        {
+            float e = ((g - b) / d) % 6;
+            if (e < 0) e += 6;
+            H = 60 * e;
+        }
+        else if (g >= b)
+        {
+            H = 60 * ((b - r) / d + 2);
+        }
+        else
+        {
+            H = 60 * ((r - g) / d + 4);
+        }
+
+        if (d != 0)
+        {
+            if (L == 0) S = 1;
+            else S = d / (1 - Math.Abs(2 * L - 1));
+        }
+        return (H, S, L);
+    }
+
+    public void SetHSL((float H, float S, float L) Color)
+    {
+        float H = Color.H;
+        float S = Color.S;
+        float L = Color.L;
+        float C = (1 - Math.Abs(2 * L - 1)) * S;
+        float X = C * (1 - Math.Abs((H / 60) % 2 - 1));
+        float m = L - C / 2;
+        (float R, float G, float B) Converted = H switch
+        {
+            >= 0 and < 60 => (C, X, 0),
+            >= 60 and < 120 => (X, C, 0),
+            >= 120 and < 180 => (0, C, X),
+            >= 180 and < 240 => (0, X, C),
+            >= 240 and < 320 => (X, 0, C),
+            >= 320 and < 360 => (C, 0, X),
+            _ => throw new Exception("Invalid color")
+        };
+        this.Red = (byte) Math.Round(255 * (Converted.R + m));
+        this.Green = (byte) Math.Round(255 * (Converted.G + m));
+        this.Blue = (byte) Math.Round(255 * (Converted.B + m));
     }
 }
