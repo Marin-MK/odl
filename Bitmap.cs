@@ -611,6 +611,23 @@ public class Bitmap : IDisposable
         if (this.Renderer != null) this.Renderer.Update();
     }
 
+    /// <summary>
+    /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous.
+    /// </summary>
+    /// <param name="X">The X position in the bitmap.</param>
+    /// <param name="Y">The Y position in the bitmap.</param>
+    /// <param name="r">The Red component of the color to set the pixel to.</param>
+    /// <param name="g">The Green component of the color to set the pixel to.</param>
+    /// <param name="b">The Blue component of the color to set the pixel to.</param>
+    /// <param name="a">The Alpha component of the color to set the pixel to.</param>
+    public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b, byte a = 255)
+    {
+        PixelPointer[Width * Y * 4 + X * 4] = r;
+        PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
+        PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
+        PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+    }
+
     #region GetPixel Overloads
     /// <summary>
     /// Returns the color at the given position.
@@ -657,6 +674,21 @@ public class Bitmap : IDisposable
                 );
             }
         }
+    }
+
+    /// <summary>
+    /// Performs purely byte reading, and no safety or validity checks. Faster when used in bulk, but more dangerous.
+    /// </summary>
+    /// <param name="X">The X position in the bitmap.</param>
+    /// <param name="Y">The Y position in the bitmap.</param>
+    public virtual unsafe Color GetPixelFast(int X, int Y)
+    {
+        return new Color(
+            PixelPointer[Width * Y * 4 + X * 4],
+            PixelPointer[Width * Y * 4 + X * 4 + 1],
+            PixelPointer[Width * Y * 4 + X * 4 + 2],
+            PixelPointer[Width * Y * 4 + X * 4 + 3]
+        );
     }
 
     #region DrawLine Overloads
@@ -2975,8 +3007,8 @@ public class Bitmap : IDisposable
         IntPtr oldsurface = this.Surface;
         this.Surface = SDL_ConvertSurfaceFormat(this.Surface, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888, 0);
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-        RGBA8 = true;
-        ABGR8 = false;
+        RGBA8 = false;
+        ABGR8 = true;
         SDL_FreeSurface(oldsurface);
         if (this.Renderer != null) this.Renderer.Update();
     }
@@ -3105,6 +3137,26 @@ public class Bitmap : IDisposable
         ColorToneColor = (Color)Color.Clone();
         ColorToneTone = (Tone)Tone.Clone();
         return ColorToneBmp.Texture;
+    }
+
+    public virtual Bitmap ApplyHue(int Hue)
+    {
+        if (!ABGR8) ConvertToABGR8();
+        Bitmap bmp = new Bitmap(Width, Height);
+        bmp.Unlock();
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                Color c = GetPixelFast(x, y);
+                (float H, float S, float L) HSL = c.GetHSL();
+                HSL.H = (HSL.H + Hue) % 360;
+                c.SetHSL(HSL);
+                bmp.SetPixelFast(x, y, c.Red, c.Green, c.Blue, c.Alpha);
+            }
+        }
+        bmp.Lock();
+        return bmp;
     }
 }
 
