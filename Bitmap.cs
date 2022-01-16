@@ -1883,7 +1883,6 @@ public class Bitmap : IDisposable
                     }
                 }
             }
-            else if (!SrcBitmap.Locked) throw new Exception($"Source bitmap is unlocked.");
             else
             {
                 SDL_Rect Src = SrcRect.SDL_Rect;
