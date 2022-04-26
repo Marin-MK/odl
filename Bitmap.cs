@@ -313,42 +313,17 @@ public class Bitmap : IDisposable
         }
         else if (Graphics.LoadedJPEG)
         {
-            byte[] jpegsignature = new byte[4] { 0xFF, 0xD8, 0xFF, 0xDB };
+            br.BaseStream.Position = 0;
+            byte[] jpegsignature = new byte[3] { 0xFF, 0xD8, 0xFF };
             bool validjpeg = true;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 3; i++)
             {
-                if (br.ReadByte() != jpegsignature[i])
+                byte bt = br.ReadByte();
+                global::System.Console.WriteLine(bt);
+                if (bt != jpegsignature[i])
                 {
                     validjpeg = false;
                     break;
-                }
-            }
-            if (!validjpeg)
-            {
-                br.BaseStream.Position = 0;
-                validjpeg = true;
-                jpegsignature = new byte[12] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01 };
-                for (int i = 0; i < 12; i++)
-                {
-                    if (br.ReadByte() != jpegsignature[i])
-                    {
-                        validjpeg = false;
-                        break;
-                    }
-                }
-            }
-            if (!validjpeg)
-            {
-                br.BaseStream.Position = 0;
-                validjpeg = true;
-                jpegsignature = new byte[4] { 0xFF, 0xD8, 0xFF, 0xEE };
-                for (int i = 0; i < 4; i++)
-                {
-                    if (br.ReadByte() != jpegsignature[i])
-                    {
-                        validjpeg = false;
-                        break;
-                    }
                 }
             }
             if (!validjpeg)
@@ -381,6 +356,14 @@ public class Bitmap : IDisposable
             else if (FileExistsCaseSensitive(Filename + ".PNG")) Filename += ".PNG";
             else if (Filename.EndsWith(".png") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "PNG"))
                 Filename = Filename.Substring(0, Filename.Length - 3) + "PNG";
+            else if (FileExistsCaseSensitive(Filename + ".jpg")) Filename += ".jpg";
+            else if (FileExistsCaseSensitive(Filename + ".jpeg")) Filename += ".jpeg";
+            else if (FileExistsCaseSensitive(Filename + ".JPG")) Filename += ".JPG";
+            else if (FileExistsCaseSensitive(Filename + ".JPEG")) Filename += ".JPEG";
+            else if (Filename.EndsWith(".jpg") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "JPG"))
+                Filename = Filename.Substring(0, Filename.Length - 3) + "JPG";
+            else if (Filename.EndsWith(".jpeg") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 4) + "JPEG"))
+                Filename = Filename.Substring(0, Filename.Length - 4) + "JPEG";
             else return null;
         }
         return Filename;
