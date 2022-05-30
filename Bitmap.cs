@@ -287,6 +287,26 @@ public class Bitmap : IDisposable
         BitmapList.Add(this);
     }
 
+    /// <summary>
+    /// Creates a Bitmap from a Color list in memory.
+    /// </summary>
+    /// <param name="Pixels">The array of bytes representing color values.</param>
+    /// <param name="Width">The width of the bitmap.</param>
+    /// <param name="Height">The height of the bitmap.</param>
+    public Bitmap(byte[] Pixels, int Width, int Height)
+    {
+        this.PixelHandle = Marshal.AllocHGlobal(Pixels.Length);
+        Marshal.Copy(Pixels, 0, this.PixelHandle, Pixels.Length);
+        this.Surface = SDL_CreateRGBSurfaceWithFormatFrom(PixelHandle, Width, Height, 32, Width * 4, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
+        if (this.Surface == IntPtr.Zero)
+            throw new Exception($"odl failed to create a Bitmap from memory.\n\n" + SDL2.SDL.SDL_GetError());
+        this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+        this.Width = SurfaceObject.w;
+        this.Height = SurfaceObject.h;
+        this.Lock();
+        BitmapList.Add(this);
+    }
+
     protected (Size Size, bool IsPNG) ValidateIMG(string Filename)
     {
         BinaryReader br = new BinaryReader(File.OpenRead(Filename));
