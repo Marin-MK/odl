@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace odl;
 
-public class Sprite : ISprite, IDisposable
+public class Sprite : IDisposable
 {
     /// <summary>
     /// The default viewport assigned if no viewport is specified.

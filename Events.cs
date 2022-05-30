@@ -70,7 +70,7 @@ public class MouseEventArgs : BaseEventArgs
         this.WheelY = 0;
     }
 
-    public bool Over(ISprite s)
+    public bool Over(Sprite s)
     {
         if (s.Bitmap == null) return false;
         if (X >= s.X && X < s.X + s.Bitmap.Width * s.ZoomX &&
