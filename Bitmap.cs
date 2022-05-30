@@ -3140,6 +3140,26 @@ public class Bitmap : IDisposable
         bmp.Lock();
         return bmp;
     }
+
+    public virtual Bitmap ApplyHue(int Hue, int OX, int OY, int Width, int Height)
+    {
+        if (!ABGR8) ConvertToABGR8();
+        Bitmap bmp = new Bitmap(Width, Height);
+        bmp.Unlock();
+        for (int y = OY; y < Height; y++)
+        {
+            for (int x = OX; x < Width; x++)
+            {
+                Color c = GetPixelFast(x, y);
+                (float H, float S, float L) HSL = c.GetHSL();
+                HSL.H = (HSL.H + Hue) % 360;
+                c.SetHSL(HSL);
+                bmp.SetPixelFast(x - OX, y - OY, c.Red, c.Green, c.Blue, c.Alpha);
+            }
+        }
+        bmp.Lock();
+        return bmp;
+    }
 }
 
 public enum BlendMode
