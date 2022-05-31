@@ -1,8 +1,8 @@
-﻿using odl.SDL2;
+﻿using NativeLibraryLoader;
+using odl.SDL2;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using static odl.SDL2.SDL;
 using static odl.SDL2.SDL_image;
@@ -23,7 +23,7 @@ public static class Graphics
     /// <summary>
     /// The list of active renderers.
     /// </summary>
-    public static List<Renderer> Renderers = new List<Renderer>();
+    internal static List<Renderer> Renderers = new List<Renderer>();
     /// <summary>
     /// The maximum size of an SDL_Texture.
     /// </summary>
@@ -58,9 +58,9 @@ public static class Graphics
         get
         {
             if (_platform != null) return (Platform)_platform;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) _platform = Platform.Windows;
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) _platform = Platform.MacOS;
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) _platform = Platform.Linux;
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)) _platform = Platform.Windows;
+            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX)) _platform = Platform.MacOS;
+            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)) _platform = Platform.Linux;
             else _platform = Platform.Unknown;
             return (Platform)_platform;
         }
@@ -70,55 +70,50 @@ public static class Graphics
 
     public static void MarkObjects()
     {
-        CurrentObjects = new ObjectCollection(Renderers[0]);
+        CurrentObjects = new ObjectCollection(Windows[0]);
     }
 
     public static void ShowDifferences()
     {
         if (CurrentObjects == null) return;
-        CurrentObjects.CompareWith(new ObjectCollection(Renderers[0]));
+        CurrentObjects.CompareWith(new ObjectCollection(Windows[0]));
     }
 
     // Windows DPI awareness
-    [DllImport("user32")]
+    [System.Runtime.InteropServices.DllImport("user32")]
     public static extern bool SetProcessDPIAware();
 
     /// <summary>
     /// Initializes SDL and its components.
     /// </summary>
-    public static void Start()
+    public static void Start(PathInfo PathInfo)
     {
-        Console.WriteLine("Start loading SDL2 and dependencies...");
-        if (Platform == Platform.Windows)
+        PathPlatformInfo Path = PathInfo.GetPlatform(NativeLibrary.Platform);
+
+        Console.WriteLine("Loading graphical components...");
+
+        SDL.Load(Path.Get("libsdl2"), Path.Get("libz"));
+        Console.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
+
+        if (Path.Has("libjpeg"))
+        {
+            NativeLibrary.Load(Path.Get("libjpeg"));
+            LoadedJPEG = true;
+        }
+
+        SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
+        Console.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
+
+        SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
+        Console.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
+
+        if (NativeLibrary.Platform == NativeLibraryLoader.Platform.Windows)
         {
             SetProcessDPIAware();
-            SDL.Bind("./lib/windows/SDL2.dll", "./lib/windows/zlib1.dll");
-            if (File.Exists("./lib/windows/libjpeg-9.dll"))
-            {
-                LoadedJPEG = true;
-                SDL_image.Bind("./lib/windows/SDL2_image.dll", "./lib/windows/libpng16-16.dll", "./lib/windows/libjpeg-9.dll");
-            }
-            else SDL_image.Bind("./lib/windows/SDL2_image.dll", "./lib/windows/libpng16-16.dll");
-            SDL_ttf.Bind("./lib/windows/SDL2_ttf.dll", "./lib/windows/libfreetype-6.dll");
         }
-        else if (Platform == Platform.Linux)
+        else if (NativeLibrary.Platform != NativeLibraryLoader.Platform.Linux)
         {
-            SDL.Bind("./lib/linux/SDL2.so", "./lib/linux/libz.so");
-            if (File.Exists("./lib/linux/libjpeg-9.so"))
-            {
-                LoadedJPEG = true;
-                SDL_image.Bind("./lib/linux/SDL2_image.so", "./lib/linux/libpng16-16.so", "./lib/linux/libjpeg-9.so");
-            }
-            else SDL_image.Bind("./lib/linux/SDL2_image.so", "./lib/linux/libpng16-16.so");
-            SDL_ttf.Bind("./lib/linux/SDL2_ttf.so", "./lib/linux/libfreetype-6.so");
-        }
-        else if (Platform == Platform.MacOS)
-        {
-            throw new Exception("MacOS support has not yet been implemented.");
-        }
-        else
-        {
-            throw new Exception("No platform could be detected.");
+            throw new NativeLibrary.UnsupportedPlatformException();
         }
 
         uint IMG_Flags = IMG_INIT_PNG;
@@ -141,6 +136,13 @@ public static class Graphics
         }
         SDL_StopTextInput();
         Initialized = true;
+    }
+
+    public static Rect GetUsableBounds(int Screen)
+    {
+        SDL_Rect rect;
+        SDL_GetDisplayUsableBounds(Screen, out rect);
+        return new Rect(rect);
     }
 
     /// <summary>
@@ -215,6 +217,16 @@ public static class Graphics
         int screen = SDL_GetWindowDisplayIndex(w.SDL_Window);
         return GetHeight(screen);
     }
+
+    /// <summary>
+    /// Opens a URL in the browser.
+    /// </summary>
+    /// <param name="url">The URL to open.</param>
+    public static void OpenURL(string url)
+    {
+        SDL_OpenURL(url);
+    }
+
     /// <summary>
     /// Returns the height of the screen at the given index.
     /// </summary>
@@ -234,7 +246,7 @@ public static class Graphics
     /// Registers a new Renderer object.
     /// </summary>
     /// <param name="Renderer">The renderer to register.</param>
-    public static void RegisterRenderer(Renderer Renderer)
+    internal static void RegisterRenderer(Renderer Renderer)
     {
         Renderers.Add(Renderer);
     }
@@ -479,8 +491,7 @@ public static class Graphics
     {
         for (int i = 0; i < Font.Cache.Count; i++)
         {
-            TTF_CloseFont(Font.Cache[i].SDL_Font);
-            Font.Cache[i] = null;
+            Font.Cache[i].Dispose();
         }
         Font.Cache.Clear();
         IMG_Quit();

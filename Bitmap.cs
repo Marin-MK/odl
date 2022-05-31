@@ -11,8 +11,14 @@ namespace odl;
 
 public class Bitmap : IDisposable
 {
+    /// <summary>
+    /// The default blend mode all bitmaps will be given.
+    /// </summary>
     public static BlendMode DefaultBlendMode = BlendMode.Blend;
 
+    /// <summary>
+    /// Stores all bitmaps ever created so that they can be recreated if the VSync state of the program is changed.
+    /// </summary>
     public static List<Bitmap> BitmapList = new List<Bitmap>();
 
     /// <summary>
@@ -45,7 +51,7 @@ public class Bitmap : IDisposable
     /// <summary>
     /// The Renderer object associated with the bitmap.
     /// </summary>
-    public Renderer Renderer { get { return _renderer; } set { _renderer = value; if (IsChunky) foreach (Bitmap b in this.InternalBitmaps) b.Renderer = value; } }
+    internal Renderer Renderer { get { return _renderer; } set { _renderer = value; if (IsChunky) foreach (Bitmap b in this.InternalBitmaps) b.Renderer = value; } }
     /// <summary>
     /// The Font object associated with the bitmap.
     /// </summary>
@@ -77,16 +83,41 @@ public class Bitmap : IDisposable
     /// </summary>
     public Size ChunkSize { get; protected set; }
 
+    /// <summary>
+    /// The X position of this bitmap as part of a chunky bitmap.
+    /// </summary>
     public int InternalX = 0;
+    /// <summary>
+    /// The Y position of this bitmap as part of a chunky bitmap.
+    /// </summary>
     public int InternalY = 0;
+
+    /// <summary>
+    /// Whether this bitmap is in RGBA8 format (non-standard).
+    /// </summary>
+    public bool RGBA8 { get; protected set; } = false;
+    /// <summary>
+    /// Whether this bitmap is in ABGR8 format (standard).
+    /// </summary>
+    public bool ABGR8 { get; protected set; } = true;
 
     /// <summary>
     /// Used only for bitmaps created with a byte array.
     /// </summary>
     IntPtr PixelHandle = IntPtr.Zero;
 
-    public bool RGBA8 { get; protected set; } = false;
-    public bool ABGR8 { get; protected set; } = true;
+    /// <summary>
+    /// The last-calculated bitmap with tone and color applied.
+    /// </summary>
+    private Bitmap ColorToneBmp;
+    /// <summary>
+    /// The color applied to <see cref="ColorToneBmp"/>
+    /// </summary>
+    private Color ColorToneColor;
+    /// <summary>
+    /// The Tone applied to <see cref="ColorToneBmp"/>
+    /// </summary>
+    private Tone ColorToneTone;
 
     /// <summary>
     /// Creates a new bitmap with the given size.
@@ -623,12 +654,27 @@ public class Bitmap : IDisposable
     /// <param name="g">The Green component of the color to set the pixel to.</param>
     /// <param name="b">The Blue component of the color to set the pixel to.</param>
     /// <param name="a">The Alpha component of the color to set the pixel to.</param>
-    public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b, byte a = 255)
+    public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b, byte a)
     {
         PixelPointer[Width * Y * 4 + X * 4] = r;
         PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
         PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
         PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+    }
+
+    /// <summary>
+    /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous. This overload does not change the alpha value of the pixel.
+    /// </summary>
+    /// <param name="X">The X position in the bitmap.</param>
+    /// <param name="Y">The Y position in the bitmap.</param>
+    /// <param name="r">The Red component of the color to set the pixel to.</param>
+    /// <param name="g">The Green component of the color to set the pixel to.</param>
+    /// <param name="b">The Blue component of the color to set the pixel to.</param>
+    public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b)
+    {
+        PixelPointer[Width * Y * 4 + X * 4] = r;
+        PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
+        PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
     }
 
     #region GetPixel Overloads
@@ -3099,11 +3145,12 @@ public class Bitmap : IDisposable
         }
     }
 
-    private Bitmap ColorToneBmp;
-    private Color ColorToneColor;
-    private Tone ColorToneTone;
-
-    // Applies a Sprite's Color and Tone. CPU-intensive.
+    /// <summary>
+    /// Applies a Sprite's Color and Tone. CPU-intensive.
+    /// </summary>
+    /// <param name="Color">The color to apply to the texture.</param>
+    /// <param name="Tone">The tone to apply to the texture.</param>
+    /// <returns>A pointer to the new texture.</returns>
     public virtual IntPtr ColorToneTexture(Color Color, Tone Tone)
     {
         if (ColorToneBmp != null &&
@@ -3120,19 +3167,21 @@ public class Bitmap : IDisposable
         {
             for (int y = 0; y < Height; y++)
             {
-                Color c = GetPixel(x, y);
+                Color c = GetPixelFast(x, y);
                 if (c.Alpha == 0) continue;
-                Color n = new Color(c.Red, c.Green, c.Blue, c.Alpha);
+                byte r = c.Red;
+                byte g = c.Green;
+                byte b = c.Blue;
                 double Avg = (c.Red + c.Green + c.Blue) / 3d;
                 // Tone
-                n.Red = Convert.ToByte(Math.Round(c.Red - ((c.Red - Avg) * (Tone.Gray / 255d))) + Tone.Red);
-                n.Green = Convert.ToByte(Math.Round(c.Green - ((c.Green - Avg) * (Tone.Gray / 255d))) + Tone.Green);
-                n.Blue = Convert.ToByte(Math.Round(c.Blue - ((c.Blue - Avg) * (Tone.Gray / 255d))) + Tone.Blue);
+                r = Convert.ToByte(Math.Round(c.Red - ((c.Red - Avg) * (Tone.Gray / 255d))) + Tone.Red);
+                g = Convert.ToByte(Math.Round(c.Green - ((c.Green - Avg) * (Tone.Gray / 255d))) + Tone.Green);
+                b = Convert.ToByte(Math.Round(c.Blue - ((c.Blue - Avg) * (Tone.Gray / 255d))) + Tone.Blue);
                 // Color - Additive blending (with double RGB strength so it can range between 0 and 255)
-                n.Red = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Red) * Color.Alpha / 255d + n.Red)));
-                n.Green = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Green) * Color.Alpha / 255d + n.Green)));
-                n.Blue = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Blue) * Color.Alpha / 255d + n.Blue)));
-                ColorToneBmp.SetPixel(x, y, n);
+                r = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Red) * Color.Alpha / 255d + r)));
+                g = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Green) * Color.Alpha / 255d + g)));
+                b = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Blue) * Color.Alpha / 255d + b)));
+                ColorToneBmp.SetPixelFast(x, y, r, g, b);
             }
         }
         ColorToneBmp.Lock();
@@ -3141,6 +3190,11 @@ public class Bitmap : IDisposable
         return ColorToneBmp.Texture;
     }
 
+    /// <summary>
+    /// Applies a hue to the bitmap.
+    /// </summary>
+    /// <param name="Hue">The hue (0-360) to apply.</param>
+    /// <returns>A new bitmap with the hue applied.</returns>
     public virtual Bitmap ApplyHue(int Hue)
     {
         if (!ABGR8) ConvertToABGR8();
@@ -3161,6 +3215,15 @@ public class Bitmap : IDisposable
         return bmp;
     }
 
+    /// <summary>
+    /// Applies a hue to a particular region of the bitmap.
+    /// </summary>
+    /// <param name="Hue">The hue (0-360) to apply.</param>
+    /// <param name="OX">The X position of the rectangle to apply the hue to.</param>
+    /// <param name="OY">The Y position of the rectangle to apply the hue to.</param>
+    /// <param name="Width">The width of the rectangle to apply the hue to.</param>
+    /// <param name="Height">The height of the rectangle to apply the hue to.</param>
+    /// <returns>A new bitmap with the hue applied.</returns>
     public virtual Bitmap ApplyHue(int Hue, int OX, int OY, int Width, int Height)
     {
         if (!ABGR8) ConvertToABGR8();

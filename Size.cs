@@ -2,7 +2,7 @@
 
 namespace odl;
 
-public class Size : IDisposable
+public class Size
 {
     public int Width;
     public int Height;
@@ -13,11 +13,6 @@ public class Size : IDisposable
     {
         this.Width = Width;
         this.Height = Height;
-    }
-
-    public void Dispose()
-    {
-
     }
 
     public override string ToString()

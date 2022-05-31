@@ -16,7 +16,7 @@ public class Window : IDisposable
     /// <summary>
     /// The renderer of this window.
     /// </summary>
-    public Renderer Renderer { get; protected set; }
+    internal Renderer Renderer { get; private set; }
 
     /// <summary>
     /// The Parent window of this window, or null if parentless.
@@ -366,6 +366,38 @@ public class Window : IDisposable
             this.X -= Graphics.Screens[this.Screen].X;
             this.Y -= Graphics.Screens[this.Screen].Y;
         }
+    }
+
+    /// <summary>
+    /// The absolute window position on screen.
+    /// </summary>
+    /// <returns></returns>
+    public virtual Point GetPosition()
+    {
+        int x, y;
+        SDL_GetWindowPosition(this.SDL_Window, out x, out y);
+        return new Point(X, Y);
+    }
+
+    /// <summary>
+    /// The size of the window.
+    /// </summary>
+    /// <returns></returns>
+    public virtual Size GetSize()
+    {
+        int w, h;
+        SDL_GetWindowSize(this.SDL_Window, out w, out h);
+        return new Size(w, h);
+    }
+
+    private SDL_WindowFlags GetWindowFlags()
+    {
+        return (SDL_WindowFlags) SDL_GetWindowFlags(this.SDL_Window);
+    }
+
+    public bool IsMaximized()
+    {
+        return (GetWindowFlags() & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
     }
 
     /// <summary>

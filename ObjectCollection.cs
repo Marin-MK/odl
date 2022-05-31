@@ -7,12 +7,12 @@ public class ObjectCollection
 {
     public List<ViewportData> Viewports;
 
-    public ObjectCollection(Renderer Renderer)
+    public ObjectCollection(Window win)
     {
         Viewports = new List<ViewportData>();
-        for (int i = 0; i < Renderer.Viewports.Count; i++)
+        for (int i = 0; i < win.Renderer.Viewports.Count; i++)
         {
-            Viewports.Add(new ViewportData(Renderer.Viewports[i]));
+            Viewports.Add(new ViewportData(win.Renderer.Viewports[i]));
         }
     }
 

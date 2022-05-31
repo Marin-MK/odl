@@ -3,7 +3,7 @@ using static odl.SDL2.SDL;
 
 namespace odl;
 
-public class Rect : IDisposable
+public class Rect
 {
     /// <summary>
     /// The x position of the rectangle.
@@ -87,10 +87,5 @@ public class Rect : IDisposable
     public override string ToString()
     {
         return $"(Rect: {this.X},{this.Y},{this.Width},{this.Height})";
-    }
-
-    public void Dispose()
-    {
-
     }
 }

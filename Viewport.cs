@@ -18,7 +18,7 @@ public class Viewport : IDisposable
     /// <summary>
     /// The Renderer associated with this viewport.
     /// </summary>
-    public Renderer Renderer;
+    internal Renderer Renderer;
     /// <summary>
     /// The sprites inside the viewport.
     /// </summary>

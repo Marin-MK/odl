@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using NativeLibraryLoader;
 
 namespace odl;
 
@@ -11,59 +11,42 @@ public static class Audio
 {
     public static Sound BGM;
 
-    public static bool UsingBassFX = true;
-    public static bool UsingBassMidi = true;
+    internal static bool UsingBassFX = false;
+    internal static bool UsingBassMidi = false;
 
     internal static List<int> Soundfonts = new List<int>();
 
-    [DllImport("kernel32")]
-    static extern IntPtr LoadLibrary(string filename);
-
-    public static void Start(bool UsingBassFX = true, bool UsingBassMidi = true)
+    public static void Start(PathInfo PathInfo)
     {
-        Audio.UsingBassFX = UsingBassFX;
-        Audio.UsingBassMidi = UsingBassMidi;
-        NativeLibrary bass = null;
+        PathPlatformInfo Path = PathInfo.GetPlatform(NativeLibrary.Platform);
+
+        Console.WriteLine("Loading audio components...");
+
+        NativeLibrary bass = NativeLibrary.Load(Path.Get("bass"));
+        Console.WriteLine("Loaded BASS");
+
         NativeLibrary bass_fx = null;
+        if (Path.Has("bass_fx"))
+        {
+            bass_fx = NativeLibrary.Load(Path.Get("bass_fx"));
+            BASS_FX_GetVersion = bass_fx.GetFunction<BASS_Int>("BASS_FX_GetVersion");
+            Console.WriteLine($"Loaded BASS_FX ({BASS_FX_GetVersion()})");
+            UsingBassFX = true;
+        }
+
         NativeLibrary bass_midi = null;
-        if (Graphics.Platform == Platform.Windows)
+        if (Path.Has("bass_midi"))
         {
-            bass = new NativeLibrary("./lib/windows/bass.dll");
-            if (UsingBassFX)
-            {
-                bass_fx = new NativeLibrary("./lib/windows/bass_fx.dll");
-                BASS_FX_GetVersion = bass_fx.GetFunction<BASS_Int>("BASS_FX_GetVersion");
-                Console.WriteLine($"BASS_FX version {BASS_FX_GetVersion()}");
-            }
-            if (UsingBassMidi)
-            {
-                bass_midi = new NativeLibrary("./lib/windows/bassmidi.dll");
-                Console.WriteLine($"BASS_MIDI loaded");
-            }
+            bass_midi = NativeLibrary.Load(Path.Get("bass_midi"));
+            Console.WriteLine($"Loaded BASS_MIDI");
+            UsingBassMidi = true;
         }
-        else if (Graphics.Platform == Platform.Linux)
+
+        if (Graphics.Platform != Platform.Windows && Graphics.Platform != Platform.Linux)
         {
-            bass = new NativeLibrary("./lib/linux/libbass.so");
-            if (UsingBassFX)
-            {
-                bass_fx = new NativeLibrary("./lib/linux/libbass_fx.so");
-                BASS_FX_GetVersion = bass_fx.GetFunction<BASS_Int>("BASS_FX_GetVersion");
-                Console.WriteLine($"BASS_FX version {BASS_FX_GetVersion()}");
-            }
-            if (UsingBassMidi)
-            {
-                bass_midi = new NativeLibrary("./lib/linux/libbassmidi.so");
-                Console.WriteLine($"BASS_MIDI loaded");
-            }
+            throw new NativeLibrary.UnsupportedPlatformException();
         }
-        else if (Graphics.Platform == Platform.MacOS)
-        {
-            throw new Exception("MacOS support has not yet been implemented.");
-        }
-        else
-        {
-            throw new Exception("No platform could be detected.");
-        }
+
         BASS_Init = bass.GetFunction<BASS_BoolIntIntUIntUIntPtr>("BASS_Init");
         BASS_Free = bass.GetFunction<BASS_Bool>("BASS_Free");
         BASS_PluginLoad = bass.GetFunction<BASS_IntStrUInt>("BASS_PluginLoad");
@@ -98,6 +81,106 @@ public static class Audio
         }
 
         BASS_Init(-1, 44100, 0, IntPtr.Zero);
+    }
+
+    public static void Stop()
+    {
+        for (int i = 0; i < Soundfonts.Count; i++)
+        {
+            FreeSoundfont(Soundfonts[i]);
+            i--;
+        }
+        BASS_Free();
+    }
+
+    public static int LoadSoundfont(string Filename)
+    {
+        int Handle = BASS_MIDI_FontInit(Filename, 0);
+        Soundfonts.Add(Handle);
+        return Handle;
+    }
+
+    public static void FreeSoundfont(int Handle)
+    {
+        BASS_MIDI_FontFree(Handle);
+        Soundfonts.Remove(Handle);
+    }
+
+    public static void BGMPlay(string Filename, int Volume = 100, int Pitch = 0)
+    {
+        BGMPlay(new Sound(Filename, Volume, Pitch));
+    }
+    public static void BGMPlay(Sound Sound)
+    {
+        if (BGM != null && BGM.Alive)
+        {
+            BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
+            {
+                if (SlideType == 2)
+                {
+                    BGM.Stop();
+                    BGM = Sound;
+                    BGM.Looping = true;
+                    BGM.AddEndCallback(delegate (long Position) { BGM = null; });
+                    BGM.FadeIn(BGM.SampleRate / 4);
+                    BGM.Play();
+                }
+            });
+        }
+        else
+        {
+            BGM = Sound;
+            BGM.Looping = true;
+            BGM.AddEndCallback(delegate (long Position) { BGM = null; });
+            BGM.Play();
+        }
+    }
+
+    public static void MEPlay(string Filename, int Volume = 100, int Pitch = 0)
+    {
+        MEPlay(new Sound(Filename, Volume, Pitch));
+
+    }
+    public static void MEPlay(Sound Sound)
+    {
+        if (BGM != null && BGM.Alive)
+        {
+            BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
+            {
+                if (SlideType == 2)
+                {
+                    BGM.Pause();
+                    Sound.Play();
+                    Sound.AddEndCallback(delegate (long _)
+                    {
+                        BGM.FadeIn(BGM.SampleRate / 4);
+                        BGM.Play();
+                    });
+                }
+            });
+        }
+        else
+        {
+            Sound.Play();
+        }
+    }
+
+    public static void SEPlay(string Filename, int Volume = 100, int Pitch = 0)
+    {
+        SEPlay(new Sound(Filename, Volume, Pitch));
+    }
+    public static void SEPlay(Sound Sound)
+    {
+        Sound.Play();
+    }
+
+    public static void Play(string Filename, int Volume = 100, int Pitch = 0)
+    {
+        Play(new Sound(Filename, Volume, Pitch));
+    }
+    public static void Play(Sound Sound)
+    {
+        Sound.Play();
     }
 
     internal delegate void BASS_Syncproc(int Int1, int Int2, int Int3, IntPtr IntPtr);
@@ -221,105 +304,5 @@ public static class Audio
         public int font;
         public int preset;
         public int bank;
-    }
-
-    public static void Stop()
-    {
-        for (int i = 0; i < Soundfonts.Count; i++)
-        {
-            FreeSoundfont(Soundfonts[i]);
-            i--;
-        }
-        BASS_Free();
-    }
-
-    public static int LoadSoundfont(string Filename)
-    {
-        int Handle = BASS_MIDI_FontInit(Filename, 0);
-        Soundfonts.Add(Handle);
-        return Handle;
-    }
-
-    public static void FreeSoundfont(int Handle)
-    {
-        BASS_MIDI_FontFree(Handle);
-        Soundfonts.Remove(Handle);
-    }
-
-    public static void BGMPlay(string Filename, int Volume = 100, int Pitch = 0)
-    {
-        BGMPlay(new Sound(Filename, Volume, Pitch));
-    }
-    public static void BGMPlay(Sound Sound)
-    {
-        if (BGM != null && BGM.Alive)
-        {
-            BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
-            {
-                if (SlideType == 2)
-                {
-                    BGM.Stop();
-                    BGM = Sound;
-                    BGM.Looping = true;
-                    BGM.AddEndCallback(delegate (long Position) { BGM = null; });
-                    BGM.FadeIn(BGM.SampleRate / 4);
-                    BGM.Play();
-                }
-            });
-        }
-        else
-        {
-            BGM = Sound;
-            BGM.Looping = true;
-            BGM.AddEndCallback(delegate (long Position) { BGM = null; });
-            BGM.Play();
-        }
-    }
-
-    public static void MEPlay(string Filename, int Volume = 100, int Pitch = 0)
-    {
-        MEPlay(new Sound(Filename, Volume, Pitch));
-
-    }
-    public static void MEPlay(Sound Sound)
-    {
-        if (BGM != null && BGM.Alive)
-        {
-            BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
-            {
-                if (SlideType == 2)
-                {
-                    BGM.Pause();
-                    Sound.Play();
-                    Sound.AddEndCallback(delegate (long _)
-                    {
-                        BGM.FadeIn(BGM.SampleRate / 4);
-                        BGM.Play();
-                    });
-                }
-            });
-        }
-        else
-        {
-            Sound.Play();
-        }
-    }
-
-    public static void SEPlay(string Filename, int Volume = 100, int Pitch = 0)
-    {
-        SEPlay(new Sound(Filename, Volume, Pitch));
-    }
-    public static void SEPlay(Sound Sound)
-    {
-        Sound.Play();
-    }
-
-    public static void Play(string Filename, int Volume = 100, int Pitch = 0)
-    {
-        Play(new Sound(Filename, Volume, Pitch));
-    }
-    public static void Play(Sound Sound)
-    {
-        Sound.Play();
     }
 }

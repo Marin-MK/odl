@@ -4,7 +4,7 @@ using static odl.SDL2.SDL;
 
 namespace odl;
 
-public class Renderer : IDisposable
+internal class Renderer : IDisposable
 {
     /// <summary>
     /// The list of viewports associated with the renderer.

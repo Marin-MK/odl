@@ -104,9 +104,13 @@ public class Color : ICloneable
 
     public override int GetHashCode()
     {
-        return base.GetHashCode();
+        return this.Red << 24 + this.Green << 16 + this.Blue << 8 + this.Alpha;
     }
 
+    /// <summary>
+    /// Returns the HSL representation of this color.
+    /// </summary>
+    /// <returns>A tuple containing the HSL values.</returns>
     public (float H, float S, float L) GetHSL()
     {
         float r = this.Red / 255f;
@@ -142,6 +146,10 @@ public class Color : ICloneable
         return (H, S, L);
     }
 
+    /// <summary>
+    /// Sets this color to value of an HSL color.
+    /// </summary>
+    /// <param name="Color">A tuple containing the HSL values.</param>
     public void SetHSL((float H, float S, float L) Color)
     {
         float H = Color.H;

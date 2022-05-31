@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\decodl\decodl.csproj" />
+    <ProjectReference Include="..\NativeLibraryLoader\NativeLibraryLoader.csproj" />
   </ItemGroup>
 
 </Project>

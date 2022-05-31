@@ -2,7 +2,7 @@
 
 namespace odl;
 
-public class Point : IDisposable
+public class Point
 {
     public int X;
     public int Y;
@@ -16,11 +16,6 @@ public class Point : IDisposable
     public double Distance(Point p)
     {
         return Math.Sqrt(Math.Pow(this.X - p.X, 2) + Math.Pow(this.Y - p.Y, 2));
-    }
-
-    public void Dispose()
-    {
-
     }
 
     public override string ToString()

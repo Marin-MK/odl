@@ -12,7 +12,7 @@ public static class Input
     public static List<long> OldKeysDown = new List<long>();
     public static List<long> KeysDown = new List<long>();
 
-    public static void Register(SDL_Keycode code, bool value)
+    internal static void Register(SDL_Keycode code, bool value)
     {
         long key = Convert.ToInt64(code);
         if (value)
@@ -30,8 +30,11 @@ public static class Input
         OldKeysDown = new List<long>(KeysDown);
     }
 
-    public static bool Trigger(SDL_Keycode code)
+    public static bool Trigger(Keycode code)
     {
+        if (code == Keycode.CTRL) return Trigger(Convert.ToInt64(SDL_Keycode.SDLK_LCTRL)) || Trigger(Convert.ToInt64(SDL_Keycode.SDLK_RCTRL));
+        if (code == Keycode.SHIFT) return Trigger(Convert.ToInt64(SDL_Keycode.SDLK_LSHIFT)) || Trigger(Convert.ToInt64(SDL_Keycode.SDLK_RSHIFT));
+        if (code == Keycode.ALT) return Trigger(Convert.ToInt64(SDL_Keycode.SDLK_LALT)) || Trigger(Convert.ToInt64(SDL_Keycode.SDLK_RALT));
         return Trigger(Convert.ToInt64(code));
     }
     public static bool Trigger(long Code)
@@ -39,8 +42,11 @@ public static class Input
         return !OldKeysDown.Contains(Code) && KeysDown.Contains(Code);
     }
 
-    public static bool Press(SDL_Keycode code)
+    public static bool Press(Keycode code)
     {
+        if (code == Keycode.CTRL) return Press(Convert.ToInt64(SDL_Keycode.SDLK_LCTRL)) || Press(Convert.ToInt64(SDL_Keycode.SDLK_RCTRL));
+        if (code == Keycode.SHIFT) return Press(Convert.ToInt64(SDL_Keycode.SDLK_LSHIFT)) || Press(Convert.ToInt64(SDL_Keycode.SDLK_RSHIFT));
+        if (code == Keycode.ALT) return Press(Convert.ToInt64(SDL_Keycode.SDLK_LALT)) || Press(Convert.ToInt64(SDL_Keycode.SDLK_RALT));
         return Press(Convert.ToInt64(code));
     }
     public static bool Press(long Code)

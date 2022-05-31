@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using static odl.SDL2.SDL_ttf;
 
 namespace odl;
@@ -11,6 +12,9 @@ public class Font : IDisposable
     /// </summary>
     public static List<Font> Cache = new List<Font>();
 
+    /// <summary>
+    /// An optional path to the folder to look for fonts in.
+    /// </summary>
     public static string FontPath = null;
 
     /// <summary>
@@ -28,39 +32,26 @@ public class Font : IDisposable
 
     public Font(string Name, int Size = 12)
     {
-        SetName(Name, false);
-        SetSize(Size, false);
-        ReloadFont();
+        this.Name = Name;
+        this.Size = Size;
+        LoadFont();
         Cache.Add(this);
     }
 
-    public void SetName(string Name, bool Reload = true)
+    /// <summary>
+    /// Loads the font.
+    /// </summary>
+    private void LoadFont()
     {
-        if (this.Name != Name)
-        {
-            this.Name = Name;
-            if (Reload) ReloadFont();
-        }
-    }
-
-    public void SetSize(int Size, bool Reload = true)
-    {
-        if (this.Size != Size)
-        {
-            this.Size = Size;
-            if (Reload) ReloadFont();
-        }
-    }
-
-    public void ReloadFont()
-    {
-        if (SDL_Font != IntPtr.Zero) TTF_CloseFont(SDL_Font);
         SDL_Font = IntPtr.Zero;
-        if (System.IO.File.Exists(this.Name + ".ttf")) this.SDL_Font = TTF_OpenFont(this.Name + ".ttf", this.Size);
-        if (this.SDL_Font == IntPtr.Zero)
+        if (!Name.EndsWith(".ttf") || !File.Exists(Name))
         {
-            throw new Exception("Invalid font: '" + this.Name + "'");
+            if (File.Exists(Name + ".ttf")) Name += ".ttf";
+            else if (!string.IsNullOrEmpty(FontPath) && Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name))) Name = Path.Combine(FontPath, Name);
+            else if (!string.IsNullOrEmpty(FontPath) && File.Exists(Path.Combine(FontPath, Name + ".ttf"))) Name = Path.Combine(FontPath, Name + ".ttf");
         }
+        SDL_Font = TTF_OpenFont(Name, Size);
+        if (SDL_Font == IntPtr.Zero) throw new Exception("Invalid font: '" + Name + "'");
     }
 
     /// <summary>
@@ -98,14 +89,6 @@ public class Font : IDisposable
     }
 
     /// <summary>
-    /// Creates a copy of the Font object.
-    /// </summary>
-    public Font Clone()
-    {
-        return new Font(this.Name, this.Size);
-    }
-
-    /// <summary>
     /// Fetches or creates a font with the given parameters.
     /// </summary>
     /// <param name="Name">The name of the font.</param>
@@ -115,20 +98,32 @@ public class Font : IDisposable
         for (int i = 0; i < Cache.Count; i++)
         {
             Font f = Cache[i];
-            if (f.Name == Name && f.Size == Size) return f;
+            if (f.Size != Size) continue;
+            if (f.Name == Name || f.Name == Name + ".ttf" ||
+                !string.IsNullOrEmpty(FontPath) &&
+                (f.Name == Path.Combine(FontPath, Name) || f.Name == Path.Combine(FontPath, Name + ".ttf")))
+                return f;
         }
         return new Font(Name, Size);
     }
 
+    /// <summary>
+    /// Returns whether a font exists at the specified path.
+    /// </summary>
+    /// <param name="Name">The name of the font to look for.</param>
+    /// <returns>Whether a font exists at that location.</returns>
     public static bool Exists(string Name)
     {
-        if (System.IO.File.Exists(Name + ".ttf")) return true;
-        else if (!string.IsNullOrEmpty(FontPath) && System.IO.File.Exists(FontPath + "/" + Name + ".ttf")) return true;
+        if (Name.EndsWith(".ttf") && File.Exists(Name)) return true;
+        else if (File.Exists(Name + ".ttf")) return true;
+        else if (!string.IsNullOrEmpty(FontPath) && Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name))) return true;
+        else if (!string.IsNullOrEmpty(FontPath) && File.Exists(Path.Combine(FontPath, Name + ".ttf"))) return true;
         return false;
     }
 
     public void Dispose()
     {
-
+        if (SDL_Font != IntPtr.Zero) TTF_CloseFont(SDL_Font);
+        SDL_Font = IntPtr.Zero;
     }
 }
