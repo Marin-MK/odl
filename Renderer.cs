@@ -92,7 +92,7 @@ internal class Renderer : IDisposable
                 }
                 else if (vp.Visible && vp.Width > 0 && vp.Height > 0 && vp.Sprites.Count > 0)
                 {
-                    Graphics.Log("Viewport " + i.ToString() + (!string.IsNullOrEmpty(vp.Name) ? ": " + vp.Name : "") + $" z={vp.Z} ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
+                    Graphics.Log("Viewport " + i.ToString() + $" z={vp.Z} ({vp.Rect}), zoomx: {vp.ZoomX} zoomy: {vp.ZoomY} sprites: {vp.Sprites.Count}");
                     SDL_Rect ViewportRect = new SDL_Rect();
                     SDL_RenderGetViewport(this.SDL_Renderer, out ViewportRect);
                     ViewportRect.x = vp.X - vp.OX + RenderOffsetX;

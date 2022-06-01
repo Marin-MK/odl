@@ -214,12 +214,10 @@ public class Window : IDisposable
         }
 
         this.Viewport = new Viewport(this, 0, 0, this.Width, this.Height);
-        this.Viewport.Name = "Main Viewport";
         if (Viewport.DefaultWindow == null) Viewport.DefaultWindow = this;
         if (Sprite.DefaultViewport == null) Sprite.DefaultViewport = this.Viewport;
 
         BackgroundViewport = new Viewport(this, 0, 0, this.Width, this.Height);
-        BackgroundViewport.Name = "Background Viewport";
         BackgroundViewport.Z = -999999999;
         BackgroundSprite = new Sprite(BackgroundViewport);
         BackgroundSprite.Name = "Background";
@@ -228,7 +226,6 @@ public class Window : IDisposable
 
         TopViewport = new Viewport(this, 0, 0, this.Width, this.Height);
         TopViewport.Z = -1;
-        TopViewport.Name = "Top Viewport";
         TopSprite = new Sprite(TopViewport, new SolidBitmap(this.Width, this.Height, Color.BLACK));
         TopSprite.Z = 999999999;
         TopSprite.Opacity = 0;

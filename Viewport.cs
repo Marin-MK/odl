@@ -9,12 +9,8 @@ public class Viewport : IDisposable
     /// <summary>
     /// The default window assigned if no window is specified.
     /// </summary>
-    public static Window DefaultWindow;
+    internal static Window DefaultWindow;
 
-    /// <summary>
-    /// The debug name of the viewport.
-    /// </summary>
-    public string Name;
     /// <summary>
     /// The Renderer associated with this viewport.
     /// </summary>
@@ -87,11 +83,11 @@ public class Viewport : IDisposable
     /// <summary>
     /// The timestamp at which the viewport was created.
     /// </summary>
-    public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
+    internal long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
     /// <summary>
     /// Whether the sprite list needs to be reordered.
     /// </summary>
-    public bool ReorderSprites { get; set; } = true;
+    internal bool ReorderSprites { get; set; } = true;
 
     #region Constructor Overloads
     public Viewport(int X, int Y, int Width, int Height)

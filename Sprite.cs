@@ -30,7 +30,7 @@ public class Sprite : IDisposable
             Viewport newvp = value ?? DefaultViewport;
             if (newvp != _Viewport)
             {
-                if (_Viewport != null)
+                if (_Viewport != null && !_Viewport.Disposed)
                 {
                     _Viewport.Sprites.Remove(this);
                     _Viewport.Update();
@@ -196,6 +196,8 @@ public class Sprite : IDisposable
         this.Viewport = Viewport;
         this.Viewport.ReorderSprites = true;
     }
+
+    internal Sprite(Renderer Renderer) { }
 
     public Sprite() : this(DefaultViewport) { }
 
