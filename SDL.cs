@@ -89,6 +89,7 @@ public class SDL : NativeLibrary
         SDL_FlashWindow = GetFunction<SDL_IntPtrFlash>("SDL_FlashWindow");
         SDL_OpenURL = GetFunction<SDL_IntStr>("SDL_OpenURL");
         SDL_ConvertSurfaceFormat = GetFunction<SDL_PtrPtrPixelFormatUInt>("SDL_ConvertSurfaceFormat");
+        SDL_GetDisplayDPI = GetFunction<SDL_IntIntFloatFloatFloat>("SDL_GetDisplayDPI");
         SDL_GetVersion(ref Version);
     }
 
@@ -140,6 +141,7 @@ public class SDL : NativeLibrary
     internal delegate int SDL_IntPtrFlash(IntPtr Ptr, SDL_FlashOperation FlashOperation);
     internal delegate int SDL_IntStr(string Str);
     internal delegate IntPtr SDL_PtrPtrPixelFormatUInt(IntPtr Ptr, SDL_PixelFormatEnum PixelFormat, uint UInt);
+    internal delegate int SDL_IntIntFloatFloatFloat(int Int, out float Float1, out float Float2, out float Float3);
     #endregion
 
     #region Utility
@@ -259,6 +261,7 @@ public class SDL : NativeLibrary
     internal static SDL_IntPtrFlash SDL_FlashWindow;
     internal static SDL_IntStr SDL_OpenURL;
     internal static SDL_PtrPtrPixelFormatUInt SDL_ConvertSurfaceFormat;
+    internal static SDL_IntIntFloatFloatFloat SDL_GetDisplayDPI;
     #endregion
 
     #region Structs

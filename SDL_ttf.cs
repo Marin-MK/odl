@@ -21,6 +21,7 @@ public class SDL_ttf : NativeLibrary
         TTF_Linked_Version = GetFunction<TTF_Version>("TTF_Linked_Version");
         TTF_Quit = GetFunction<Action>("TTF_Quit");
         FUNC_TTF_OpenFont = GetFunction<TTF_PtrPtrInt>("TTF_OpenFont");
+        FUNC_TTF_OpenFontDPI = GetFunction<TTF_PtrPtrIntUIntUInt>("TTF_OpenFontDPI");
         TTF_CloseFont = GetFunction<TTF_VoidPtr>("TTF_CloseFont");
         TTF_SetFontStyle = GetFunction<TTF_VoidPtrInt>("TTF_SetFontStyle");
         TTF_GlyphMetrics = GetFunction<TTF_IntPtrUIntOutIntOutIntOutIntOutIntOutInt>("TTF_GlyphMetrics");
@@ -32,6 +33,7 @@ public class SDL_ttf : NativeLibrary
         TTF_RenderGlyph_Blended = GetFunction<TTF_PtrPtrUShtColor>("TTF_RenderGlyph_Blended");
         FUNC_TTF_RenderUTF8_Solid = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Solid");
         FUNC_TTF_RenderUTF8_Blended = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Blended");
+        TTF_SetFontSDF = GetFunction<TTF_IntPtrBool>("TTF_SetFontSDF");
         Version = *TTF_Linked_Version();
     }
 
@@ -39,6 +41,7 @@ public class SDL_ttf : NativeLibrary
     internal delegate int TTF_Int();
     internal unsafe delegate SDL.SDL_Version* TTF_Version();
     internal delegate IntPtr TTF_PtrPtrInt(IntPtr IntPtr, int Int);
+    internal delegate IntPtr TTF_PtrPtrIntUIntUInt(IntPtr IntPtr, int Int, uint UInt1, uint UInt2);
     internal delegate void TTF_VoidPtr(IntPtr IntPtr);
     internal delegate void TTF_VoidPtrInt(IntPtr IntPtr, int Int);
     internal delegate int TTF_IntPtrUIntOutIntOutIntOutIntOutIntOutInt(IntPtr IntPtr, uint UInt, out int Int1, out int Int2, out int Int3, out int Int4, out int Int5);
@@ -46,10 +49,12 @@ public class SDL_ttf : NativeLibrary
     internal delegate int TTF_IntPtrPtrOutIntOutInt(IntPtr IntPtr1, IntPtr IntPtr2, out int Int1, out int Int2);
     internal delegate IntPtr TTF_PtrPtrPtrColor(IntPtr IntPtr1, IntPtr IntPtr2, SDL.SDL_Color Color);
     internal delegate IntPtr TTF_PtrPtrUShtColor(IntPtr IntPtr, ushort USht, SDL.SDL_Color Color);
+    internal delegate int TTF_IntPtrBool(IntPtr Ptr, SDL.SDL_bool Bool);
     #endregion
 
     #region SDL_ttf Functions
     private static TTF_PtrPtrInt FUNC_TTF_OpenFont;
+    private static TTF_PtrPtrIntUIntUInt FUNC_TTF_OpenFontDPI;
     private static TTF_IntPtrPtrOutIntOutInt FUNC_TTF_SizeText;
     private static TTF_PtrPtrPtrColor FUNC_TTF_RenderText_Solid;
     private static TTF_PtrPtrPtrColor FUNC_TTF_RenderText_Blended;
@@ -62,6 +67,10 @@ public class SDL_ttf : NativeLibrary
     internal static IntPtr TTF_OpenFont(string Filename, int Size)
     {
         return FUNC_TTF_OpenFont(SDL.StrToPtr(Filename), Size);
+    }
+    internal static IntPtr TTF_OpenFontDPI(string Filename, int Size, uint HDPI, uint VDPI)
+    {
+        return FUNC_TTF_OpenFontDPI(SDL.StrToPtr(Filename), Size, HDPI, VDPI);
     }
     internal static TTF_VoidPtr TTF_CloseFont;
     internal static TTF_VoidPtrInt TTF_SetFontStyle;
@@ -89,5 +98,6 @@ public class SDL_ttf : NativeLibrary
     }
     internal static TTF_PtrPtrUShtColor TTF_RenderGlyph_Solid;
     internal static TTF_PtrPtrUShtColor TTF_RenderGlyph_Blended;
+    internal static TTF_IntPtrBool TTF_SetFontSDF;
     #endregion
 }

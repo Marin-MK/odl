@@ -65,7 +65,7 @@ public class Window : IDisposable
     /// <summary>
     /// The index of the screen the window is displayed on.
     /// </summary>
-    public int Screen { get; protected set; } = 0;
+    public int Screen => SDL_GetWindowDisplayIndex(SDL_Window);
     /// <summary>
     /// The minimum size of the window.
     /// </summary>
@@ -362,7 +362,6 @@ public class Window : IDisposable
         if (Initialized())
         {
             SDL_SetWindowPosition(this.SDL_Window, this.X, this.Y);
-            this.Screen = SDL_GetWindowDisplayIndex(this.SDL_Window);
             this.X -= Graphics.Screens[this.Screen].X;
             this.Y -= Graphics.Screens[this.Screen].Y;
         }
@@ -403,17 +402,29 @@ public class Window : IDisposable
     /// <summary>
     /// Shows the window on a different screen.
     /// </summary>
-    /// <param name="screen">The index of the screen to display the window on.</param>
-    public virtual void SetScreen(int screen)
+    /// <param name="Screen">The index of the screen to display the window on.</param>
+    public virtual void SetScreen(int Screen)
     {
         int displaycount = SDL_GetNumVideoDisplays();
-        if (screen >= displaycount)
+        if (Screen >= displaycount)
         {
-            throw new Exception($"Cannot set window to screen {screen} as it exceeds the screen count.");
+            throw new Exception($"Cannot set window to screen {Screen} as it exceeds the screen count.");
         }
-        this.X = Graphics.Screens[screen].X + this.X;
-        this.Y = Graphics.Screens[screen].Y + this.Y;
+        this.X = Graphics.Screens[Screen].X + this.X;
+        this.Y = Graphics.Screens[Screen].Y + this.Y;
         if (Initialized()) this.SetPosition(this.X, this.Y);
+    }
+
+    /// <summary>
+    /// Gets the DPI of the given screen.
+    /// </summary>
+    /// <param name="Screen">The screen index to get the DPI of.</param>
+    /// <returns>A tuple containing diagonal, horizontal, and vertical DPI.</returns>
+    public virtual (float DDPI, float HDPI, float VDPI) GetDPI()
+    {
+        float DDPI, HDPI, VDPI;
+        SDL_GetDisplayDPI(this.Screen, out DDPI, out HDPI, out VDPI);
+        return (DDPI, HDPI, VDPI);
     }
 
     /// <summary>

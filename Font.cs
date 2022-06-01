@@ -50,7 +50,8 @@ public class Font : IDisposable
             else if (!string.IsNullOrEmpty(FontPath) && Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name))) Name = Path.Combine(FontPath, Name);
             else if (!string.IsNullOrEmpty(FontPath) && File.Exists(Path.Combine(FontPath, Name + ".ttf"))) Name = Path.Combine(FontPath, Name + ".ttf");
         }
-        SDL_Font = TTF_OpenFont(Name, Size);
+        (_, float HDPI, float VDPI) = Graphics.Windows[0].GetDPI();
+        SDL_Font = TTF_OpenFontDPI(Name, Size, (uint) Math.Round(HDPI), (uint) Math.Round(VDPI));
         if (SDL_Font == IntPtr.Zero) throw new Exception("Invalid font: '" + Name + "'");
     }
 
