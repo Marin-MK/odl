@@ -82,6 +82,10 @@ public class Bitmap : IDisposable
     /// The size of the internal bitmap chunks.
     /// </summary>
     public Size ChunkSize { get; protected set; }
+    /// <summary>
+    /// The way this bitmap is blended with other bitmaps during rendering.
+    /// </summary>
+    public BlendMode BlendMode { get; protected set; } = DefaultBlendMode;
 
     /// <summary>
     /// The X position of this bitmap as part of a chunky bitmap.
@@ -491,11 +495,6 @@ public class Bitmap : IDisposable
     {
         if (Disposed) return;
         BitmapList.Remove(this);
-        if (PixelHandle != IntPtr.Zero)
-        {
-            Marshal.FreeHGlobal(PixelHandle);
-            PixelHandle = IntPtr.Zero;
-        }
         if (IsChunky)
         {
             foreach (Bitmap b in this.InternalBitmaps) b.Dispose();
@@ -506,7 +505,12 @@ public class Bitmap : IDisposable
             if (this.Surface != IntPtr.Zero)
             {
                 SDL_FreeSurface(this.Surface);
-                SDL_DestroyTexture(this.Texture);
+                if (this.Texture != IntPtr.Zero) SDL_DestroyTexture(this.Texture);
+            }
+            if (PixelHandle != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(PixelHandle);
+                PixelHandle = IntPtr.Zero;
             }
             ColorToneBmp?.Dispose();
             ColorToneBmp = null;
@@ -2068,11 +2072,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
-        SDL_BlendMode blendmode = SDL_BlendMode.SDL_BLENDMODE_NONE;
-        if (DefaultBlendMode == BlendMode.Addition) blendmode = SDL_BlendMode.SDL_BLENDMODE_ADD;
-        else if (DefaultBlendMode == BlendMode.Blend) blendmode = SDL_BlendMode.SDL_BLENDMODE_BLEND;
-        else if (DefaultBlendMode == BlendMode.Modulation) blendmode = SDL_BlendMode.SDL_BLENDMODE_MOD;
-        SDL_SetTextureBlendMode(this.Texture, blendmode);
+        this.BlendMode = BlendMode.Blend;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -2229,11 +2229,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
-        SDL_BlendMode blendmode = SDL_BlendMode.SDL_BLENDMODE_NONE;
-        if (DefaultBlendMode == BlendMode.Addition) blendmode = SDL_BlendMode.SDL_BLENDMODE_ADD;
-        else if (DefaultBlendMode == BlendMode.Blend) blendmode = SDL_BlendMode.SDL_BLENDMODE_BLEND;
-        else if (DefaultBlendMode == BlendMode.Modulation) blendmode = SDL_BlendMode.SDL_BLENDMODE_MOD;
-        SDL_SetTextureBlendMode(this.Texture, blendmode);
+        this.BlendMode = BlendMode.Blend;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -2336,6 +2332,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
+        this.BlendMode = BlendMode.Blend;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -2504,6 +2501,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
+        this.BlendMode = BlendMode.Blend;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -3125,24 +3123,16 @@ public class Bitmap : IDisposable
     public virtual void RecreateTexture(bool Full = true)
     {
         if (this.Renderer == null) return;
-        SDL_BlendMode blend = new SDL_BlendMode();
-        if (Full)
-        {
-            SDL_GetTextureBlendMode(this.Texture, out blend);
-        }
         if (this.Texture != IntPtr.Zero) SDL_DestroyTexture(this.Texture);
         this.Texture = SDL_CreateTextureFromSurface(this.Renderer.SDL_Renderer, this.Surface);
         if (this.Texture == IntPtr.Zero)
         {
-            Console.WriteLine("Texture was invalid!");
+            throw new Exception("Invalid texture");
         }
-        if (Full)
-        {
-            if (blend != SDL_BlendMode.SDL_BLENDMODE_NONE) SDL_SetTextureBlendMode(this.Texture, blend);
-            if (ColorToneBmp != null) ColorToneBmp.Dispose();
-            ColorToneBmp = null;
-            this.Renderer.Update();
-        }
+        SDL_SetTextureBlendMode(this.Texture, (SDL_BlendMode) this.BlendMode);
+        if (ColorToneBmp != null) ColorToneBmp.Dispose();
+        ColorToneBmp = null;
+        this.Renderer.Update();
     }
 
     /// <summary>
@@ -3247,10 +3237,10 @@ public class Bitmap : IDisposable
 
 public enum BlendMode
 {
-    Addition,
-    Modulation,
-    Blend,
-    None
+    None = 0,
+    Blend = 1,
+    Addition = 2,
+    Mod = 4
 }
 
 public enum DrawOptions

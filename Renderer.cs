@@ -6,6 +6,13 @@ namespace odl;
 
 internal class Renderer : IDisposable
 {
+    private static int CreationCounter = 0;
+
+    internal static int GetCreationCount()
+    {
+        return CreationCounter++;
+    }
+
     /// <summary>
     /// The list of viewports associated with the renderer.
     /// </summary>
@@ -79,7 +86,7 @@ internal class Renderer : IDisposable
                 this.Viewports.Sort(delegate (Viewport vp1, Viewport vp2)
                 {
                     if (vp1.Z != vp2.Z) return vp1.Z.CompareTo(vp2.Z);
-                    return vp1.TimeCreated.CompareTo(vp2.TimeCreated);
+                    return vp1.CreationTime.CompareTo(vp2.CreationTime);
                 });
             }
             for (int i = 0; i < Viewports.Count; i++)
@@ -127,7 +134,7 @@ internal class Renderer : IDisposable
                         vp.Sprites.Sort(delegate (Sprite s1, Sprite s2)
                         {
                             if (s1.Z != s2.Z) return s1.Z.CompareTo(s2.Z);
-                            return s1.TimeCreated.CompareTo(s2.TimeCreated);
+                            return s1.CreationTime.CompareTo(s2.CreationTime);
                         });
                     }
                     for (int j = 0; j < vp.Sprites.Count; j++)

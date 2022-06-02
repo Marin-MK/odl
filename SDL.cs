@@ -23,6 +23,7 @@ public class SDL : NativeLibrary
         SDL_Init = GetFunction<SDL_IntUInt>("SDL_Init");
         SDL_GetVersion = GetFunction<SDL_VoidVersion>("SDL_GetVersion");
         FUNC_SDL_GetError = GetFunction<SDL_Ptr>("SDL_GetError");
+        SDL_ClearError = GetFunction<Action>("SDL_ClearError");
         SDL_Quit = GetFunction<Action>("SDL_Quit");
         SDL_RenderClear = GetFunction<SDL_IntPtr>("SDL_RenderClear");
         SDL_RenderGetViewport = GetFunction<SDL_VoidPtrOutRect>("SDL_RenderGetViewport");
@@ -178,8 +179,11 @@ public class SDL : NativeLibrary
     internal static SDL_VoidVersion SDL_GetVersion;
     internal static string SDL_GetError()
     {
-        return PtrToStr(FUNC_SDL_GetError());
+        string str = PtrToStr(FUNC_SDL_GetError());
+        SDL_ClearError();
+        return str;
     }
+    internal static Action SDL_ClearError;
     internal static Action SDL_Quit;
     internal static SDL_IntPtr SDL_RenderClear;
     internal static SDL_VoidPtrOutRect SDL_RenderGetViewport;

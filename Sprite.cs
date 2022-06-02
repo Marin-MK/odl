@@ -147,7 +147,7 @@ public class Sprite : IDisposable
     /// <summary>
     /// The timestamp at which the sprite was created.
     /// </summary>
-    public long TimeCreated = ((10000L * Stopwatch.GetTimestamp()) / TimeSpan.TicksPerMillisecond) / 100L;
+    internal int CreationTime = Renderer.GetCreationCount();
     private List<Point> _MultiplePositions = new List<Point>();
     /// <summary>
     /// The list of additional positions to render the sprite at.
@@ -220,7 +220,7 @@ public class Sprite : IDisposable
         this.OX = Copy.OX;
         this.OY = Copy.OY;
         this.Color = Copy.Color;
-        this.TimeCreated = Copy.TimeCreated;
+        this.CreationTime = Copy.CreationTime;
         this.MultiplePositions = new List<Point>(Copy.MultiplePositions);
         this.Opacity = Copy.Opacity;
         this.Viewport.ReorderSprites = true;

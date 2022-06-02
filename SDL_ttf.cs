@@ -39,6 +39,7 @@ public class SDL_ttf : NativeLibrary
 
     #region Function Delegates
     internal delegate int TTF_Int();
+    internal delegate IntPtr TTF_Ptr();
     internal unsafe delegate SDL.SDL_Version* TTF_Version();
     internal delegate IntPtr TTF_PtrPtrInt(IntPtr IntPtr, int Int);
     internal delegate IntPtr TTF_PtrPtrIntUIntUInt(IntPtr IntPtr, int Int, uint UInt1, uint UInt2);
