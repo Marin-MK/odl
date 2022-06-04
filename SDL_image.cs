@@ -45,7 +45,7 @@ public class SDL_image : NativeLibrary
     }
     internal static int IMG_SavePNG(IntPtr SDL_Surface, string Filename)
     {
-        return FUNC_IMG_SavePNG(SDL_Surface, SDL.StrToPtr(Filename));
+        return FUNC_IMG_SavePNG(SDL_Surface, SDL.StrUTF8ToPtr(Filename));
     }
     #endregion
 

@@ -34,6 +34,8 @@ public class SDL_ttf : NativeLibrary
         FUNC_TTF_RenderUTF8_Solid = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Solid");
         FUNC_TTF_RenderUTF8_Blended = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Blended");
         TTF_SetFontSDF = GetFunction<TTF_IntPtrBool>("TTF_SetFontSDF");
+        TTF_SetFontHinting = GetFunction<TTF_VoidPtrInt>("TTF_SetFontHinting");
+        TTF_GetFreeTypeVersion = GetFunction<TTF_VoidIntIntInt>("TTF_GetFreeTypeVersion");
         Version = *TTF_Linked_Version();
     }
 
@@ -51,6 +53,7 @@ public class SDL_ttf : NativeLibrary
     internal delegate IntPtr TTF_PtrPtrPtrColor(IntPtr IntPtr1, IntPtr IntPtr2, SDL.SDL_Color Color);
     internal delegate IntPtr TTF_PtrPtrUShtColor(IntPtr IntPtr, ushort USht, SDL.SDL_Color Color);
     internal delegate int TTF_IntPtrBool(IntPtr Ptr, SDL.SDL_bool Bool);
+    internal delegate void TTF_VoidIntIntInt(out int Int1, out int Int2, out int Int3);
     #endregion
 
     #region SDL_ttf Functions
@@ -100,5 +103,15 @@ public class SDL_ttf : NativeLibrary
     internal static TTF_PtrPtrUShtColor TTF_RenderGlyph_Solid;
     internal static TTF_PtrPtrUShtColor TTF_RenderGlyph_Blended;
     internal static TTF_IntPtrBool TTF_SetFontSDF;
+    internal static TTF_VoidPtrInt TTF_SetFontHinting;
+    internal static TTF_VoidIntIntInt TTF_GetFreeTypeVersion;
+    #endregion
+
+    #region Constants
+    internal static int TTF_HINTING_NORMAL         = 0;
+    internal static int TTF_HINTING_LIGHT          = 1;
+    internal static int TTF_HINTING_MONO           = 2;
+    internal static int TTF_HINTING_NONE           = 3;
+    internal static int TTF_HINTING_LIGHT_SUBPIXEL = 4;
     #endregion
 }

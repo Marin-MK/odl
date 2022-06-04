@@ -124,6 +124,11 @@ public static class Graphics
         {
             throw new Exception(SDL_GetError());
         }
+
+        int maj, min, pat;
+        TTF_GetFreeTypeVersion(out maj, out min, out pat);
+        Console.WriteLine($"FreeType ({maj}.{min}.{pat})");
+
         int screens = SDL_GetNumVideoDisplays();
         for (int i = 0; i < screens; i++)
         {

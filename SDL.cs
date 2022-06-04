@@ -179,7 +179,7 @@ public class SDL : NativeLibrary
     internal static SDL_VoidVersion SDL_GetVersion;
     internal static string SDL_GetError()
     {
-        string str = PtrToStr(FUNC_SDL_GetError());
+        string str = PtrToStrUTF8(FUNC_SDL_GetError());
         SDL_ClearError();
         return str;
     }
@@ -195,7 +195,7 @@ public class SDL : NativeLibrary
     internal static SDL_UIntPtr SDL_GetWindowFlags;
     internal static SDL_bool SDL_SetHint(string Name, string Value)
     {
-        return FUNC_SDL_SetHint(StrToPtr(Name), StrToPtr(Value));
+        return FUNC_SDL_SetHint(StrUTF8ToPtr(Name), StrUTF8ToPtr(Value));
     }
     internal static SDL_VoidPtrOutIntOutInt SDL_GetWindowPosition;
     internal static SDL_VoidPtrIntInt SDL_SetWindowPosition;
@@ -251,11 +251,11 @@ public class SDL : NativeLibrary
     internal static SDL_PtrUInt SDL_GetWindowFromID;
     internal static string SDL_GetClipboardText()
     {
-        return PtrToStr(FUNC_SDL_GetClipboardText());
+        return PtrToStrUTF8(FUNC_SDL_GetClipboardText());
     }
     internal static int SDL_SetClipboardText(string Text)
     {
-        return FUNC_SDL_SetClipboardText(StrToPtr(Text));
+        return FUNC_SDL_SetClipboardText(StrUTF8ToPtr(Text));
     }
     internal static SDL_IntPtrOutDisplayMode SDL_GetWindowDisplayMode;
     internal static SDL_IntRefMessageBoxDataOutInt SDL_ShowMessageBox;
