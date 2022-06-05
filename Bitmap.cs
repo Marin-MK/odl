@@ -2052,6 +2052,7 @@ public class Bitmap : IDisposable
         {
             throw new Exception("No Font specified for this Bitmap.");
         }
+        Text = Text.Replace("\r", "").Replace("\n", "");
         if (string.IsNullOrEmpty(Text)) return;
         IntPtr SDL_Font = this.Font.SDL_Font;
         bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
@@ -2210,6 +2211,7 @@ public class Bitmap : IDisposable
         {
             throw new Exception("No Font specified for this Bitmap.");
         }
+        Text = Text.Replace("\r", "").Replace("\n", "");
         if (string.IsNullOrEmpty(Text)) return;
         IntPtr SDL_Font = this.Font.SDL_Font;
         bool aliased = (DrawOptions & DrawOptions.Aliased) == DrawOptions.Aliased;
