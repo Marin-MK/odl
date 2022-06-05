@@ -122,6 +122,22 @@ public class Font : IDisposable
         return false;
     }
 
+    public override bool Equals(object obj)
+    {
+        if (this == obj) return true;
+        if (obj is Font)
+        {
+            Font f = (Font) obj;
+            return this.SDL_Font == f.SDL_Font;
+        }
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return (int) (SDL_Font.ToInt64() >> 32);
+    }
+
     public void Dispose()
     {
         if (SDL_Font != IntPtr.Zero) TTF_CloseFont(SDL_Font);
