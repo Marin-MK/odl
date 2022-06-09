@@ -24,11 +24,11 @@ public class Bitmap : IDisposable
     /// <summary>
     /// The pointer to the SDL_Surface.
     /// </summary>
-    public IntPtr Surface { get; protected set; } = IntPtr.Zero;
+    internal IntPtr Surface = IntPtr.Zero;
     /// <summary>
     /// The SDL_Surface object.
     /// </summary>
-    public SDL_Surface SurfaceObject { get; protected set; }
+    internal SDL_Surface SurfaceObject;
     /// <summary>
     /// The pointer to the SDL_Texture.
     /// </summary>

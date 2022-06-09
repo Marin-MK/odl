@@ -7,7 +7,7 @@ namespace odl;
 public static class Input
 {
     public static IntPtr Cursor;
-    public static SDL_SystemCursor? SystemCursor;
+    public static CursorType? SystemCursor;
 
     public static List<long> OldKeysDown = new List<long>();
     public static List<long> KeysDown = new List<long>();
@@ -69,11 +69,11 @@ public static class Input
         SDL_StopTextInput();
     }
 
-    public static void SetCursor(SDL_SystemCursor Cursor)
+    public static void SetCursor(CursorType Cursor)
     {
         if (SystemCursor != Cursor)
         {
-            IntPtr surface = SDL_CreateSystemCursor(Cursor);
+            IntPtr surface = SDL_CreateSystemCursor((SDL_SystemCursor) Cursor);
             SystemCursor = Cursor;
             SDL_SetCursor(surface);
         }
@@ -95,7 +95,7 @@ public static class Input
     /// Replaces the mouse cursor with a different cursor.
     /// </summary>
     /// <param name="Cursor">Pointer to the SDL_Cursor object.</param>
-    public static void SetCursor(IntPtr Cursor)
+    internal static void SetCursor(IntPtr Cursor)
     {
         SystemCursor = null;
         Graphics.LastCustomCursor = Cursor;
@@ -135,4 +135,20 @@ public static class Input
     {
         return SDL_GetClipboardText();
     }
+}
+
+public enum CursorType
+{
+    Arrow     = SDL_SystemCursor.SDL_SYSTEM_CURSOR_ARROW,
+    Crosshair = SDL_SystemCursor.SDL_SYSTEM_CURSOR_CROSSHAIR,
+    Hand      = SDL_SystemCursor.SDL_SYSTEM_CURSOR_HAND,
+    IBeam     = SDL_SystemCursor.SDL_SYSTEM_CURSOR_IBEAM,
+    No        = SDL_SystemCursor.SDL_SYSTEM_CURSOR_NO,
+    SizeAll   = SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZEALL,
+    SizeNESW  = SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENESW,
+    SizeNS    = SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENS,
+    SizeNWSE  = SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZENWSE,
+    SizeWE    = SDL_SystemCursor.SDL_SYSTEM_CURSOR_SIZEWE,
+    Wait      = SDL_SystemCursor.SDL_SYSTEM_CURSOR_WAIT,
+    WaitArrow = SDL_SystemCursor.SDL_SYSTEM_CURSOR_WAITARROW
 }

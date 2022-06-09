@@ -3,11 +3,11 @@ using NativeLibraryLoader;
 
 namespace odl.SDL2;
 
-public class SDL_ttf : NativeLibrary
+internal class SDL_ttf : NativeLibrary
 {
     private static SDL_ttf Main;
 
-    public static SDL.SDL_Version Version;
+    internal static SDL.SDL_Version Version;
 
     public new static SDL_ttf Load(string Library, params string[] PreloadLibraries)
     {

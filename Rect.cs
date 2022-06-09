@@ -25,7 +25,7 @@ public class Rect
     /// <summary>
     /// The SDL_Rect object associated with the rectangle.
     /// </summary>
-    public SDL_Rect SDL_Rect { get { return _SDL_Rect; } }
+    internal SDL_Rect SDL_Rect { get { return _SDL_Rect; } }
 
     public Rect(Point p, Size s)
         : this(p.X, p.Y, s.Width, s.Height) { }
@@ -42,7 +42,7 @@ public class Rect
     public Rect(int Width, int Height)
         : this(0, 0, Width, Height) { }
 
-    public Rect(SDL_Rect r)
+    internal Rect(SDL_Rect r)
     {
         this._SDL_Rect = r;
     }

@@ -6,7 +6,7 @@ using NativeLibraryLoader;
 
 namespace odl.SDL2;
 
-public class SDL : NativeLibrary
+internal class SDL : NativeLibrary
 {
     private static SDL Main;
 

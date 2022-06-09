@@ -28,7 +28,7 @@ public class Font : IDisposable
     /// <summary>
     /// The pointer to the SDL_Font object.
     /// </summary>
-    public IntPtr SDL_Font { get; private set; }
+    internal IntPtr SDL_Font;
 
     public Font(string Name, int Size = 12)
     {

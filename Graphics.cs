@@ -281,7 +281,7 @@ public static class Graphics
     static bool oldrightdown;
     static bool oldmiddledown;
 
-    public static void UpdateInput(bool IgnoreErrors = false)
+    internal static void UpdateInput(bool IgnoreErrors = false)
     {
         // Old mouse states
         oldleftdown = LeftDown;
@@ -325,7 +325,7 @@ public static class Graphics
         Input.IterationEnd();
     }
 
-    public static void UpdateGraphics(bool Force = false)
+    internal static void UpdateGraphics(bool Force = false)
     {
         // Updates the renderers
         for (int i = 0; i < Renderers.Count; i++)
@@ -334,7 +334,7 @@ public static class Graphics
         }
     }
 
-    public static void UpdateWindows()
+    internal static void UpdateWindows()
     {
         // Get events
         SDL_Event e;
@@ -344,7 +344,7 @@ public static class Graphics
         }
     }
 
-    public static void EvaluateEvent(SDL_Event e)
+    internal static void EvaluateEvent(SDL_Event e)
     {
         if (e.window.windowID == 0) return;
         IntPtr sdlwindow = SDL_GetWindowFromID(e.window.windowID);

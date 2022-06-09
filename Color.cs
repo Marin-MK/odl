@@ -34,7 +34,7 @@ public class Color : ICloneable
     /// <summary>
     /// The SDL_Color object.
     /// </summary>
-    public SDL_Color SDL_Color
+    internal SDL_Color SDL_Color
     {
         get
         {
