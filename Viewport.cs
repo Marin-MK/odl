@@ -80,6 +80,11 @@ public class Viewport : IDisposable
     /// The color effect applied to this viewport.
     /// </summary>
     public Color Color { get { return _Color; } set { if (value != _Color) Update(); _Color = value; } }
+    private byte _Opacity = 255;
+    /// <summary>
+    /// The opacity at which all this viewport's sprites are rendered.
+    /// </summary>
+    public byte Opacity { get { return _Opacity; } set { if (value != _Opacity) Update(); _Opacity = value; } }
     /// <summary>
     /// The timestamp at which the viewport was created.
     /// </summary>

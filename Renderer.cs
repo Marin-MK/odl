@@ -193,8 +193,8 @@ internal class Renderer : IDisposable
 
         if (Texture == IntPtr.Zero) throw new Exception("Attempted to render a zero-pointer texture.");
 
-        // Sprite Opacity + Renderer opacity
-        byte Alpha = Convert.ToByte(255d * (s.Opacity / 255d) * (this.Opacity / 255d));
+        // Sprite Opacity + Viewport Opacity + Renderer Opacity
+        byte Alpha = Convert.ToByte(255d * (s.Opacity / 255d) * (s.Viewport.Opacity / 255d) * (this.Opacity / 255d));
 
         SDL_SetTextureAlphaMod(Texture, Alpha);
 
