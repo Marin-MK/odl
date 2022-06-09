@@ -325,7 +325,7 @@ public static class Graphics
         Input.IterationEnd();
     }
 
-    internal static void UpdateGraphics(bool Force = false)
+    public static void UpdateGraphics(bool Force = false)
     {
         // Updates the renderers
         for (int i = 0; i < Renderers.Count; i++)
