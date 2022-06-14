@@ -31,11 +31,13 @@ internal class SDL : NativeLibrary
         SDL_CreateRenderer = GetFunction<SDL_PtrPtrIntRendererFlags>("SDL_CreateRenderer");
         SDL_GetWindowFlags = GetFunction<SDL_UIntPtr>("SDL_GetWindowFlags");
         FUNC_SDL_SetHint = GetFunction<SDL_SDLBoolPtrPtr>("SDL_SetHint");
+        FUNC_SDL_GetHint = GetFunction<SDL_PtrPtr>("SDL_GetHint");
         SDL_GetWindowPosition = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowPosition");
         SDL_SetWindowPosition = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowPosition");
         SDL_SetWindowResizable = GetFunction<SDL_VoidPtrSDLBool>("SDL_SetWindowResizable");
         SDL_SetWindowIcon = GetFunction<SDL_VoidPtrPtr>("SDL_SetWindowIcon");
-        SDL_GetRendererInfo = GetFunction<SDL_IntPtrOutRendererInfo>("SDL_GetRendererInfo");
+        SDL_GetRendererInfo = GetFunction<SDL_IntIntPtrOutRendererInfo>("SDL_GetRendererInfo");
+        SDL_GetRenderDriverInfo = GetFunction<SDL_IntIntOutRendererInfo>("SDL_GetRenderDriverInfo");
         SDL_SetWindowMinimumSize = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowMinimumSize");
         SDL_SetWindowSize = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowSize");
         SDL_GetWindowSize = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowSize");
@@ -91,6 +93,7 @@ internal class SDL : NativeLibrary
         SDL_OpenURL = GetFunction<SDL_IntStr>("SDL_OpenURL");
         SDL_ConvertSurfaceFormat = GetFunction<SDL_PtrPtrPixelFormatUInt>("SDL_ConvertSurfaceFormat");
         SDL_GetDisplayDPI = GetFunction<SDL_IntIntFloatFloatFloat>("SDL_GetDisplayDPI");
+        SDL_GetNumRenderDrivers = GetFunction<SDL_Int>("SDL_GetNumRenderDrivers");
         SDL_GetVersion(ref Version);
     }
 
@@ -107,7 +110,8 @@ internal class SDL : NativeLibrary
     internal delegate void SDL_VoidPtrOutIntOutInt(IntPtr IntPtr, out int Int1, out int Int2);
     internal delegate void SDL_VoidPtrSDLBool(IntPtr IntPtr, SDL_bool Bool);
     internal delegate void SDL_VoidPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
-    internal delegate int SDL_IntPtrOutRendererInfo(IntPtr IntPtr, out SDL_RendererInfo RendererInfo);
+    internal delegate int SDL_IntIntPtrOutRendererInfo(IntPtr IntPtr, out SDL_RendererInfo RendererInfo);
+    internal delegate int SDL_IntIntOutRendererInfo(int Int, out SDL_RendererInfo RendererInfo);
     internal delegate void SDL_VoidPtrIntInt(IntPtr IntPtr, int Int1, int Int2);
     internal delegate int SDL_Int();
     internal delegate void SDL_VoidPtr(IntPtr IntPtr);
@@ -171,6 +175,7 @@ internal class SDL : NativeLibrary
     private static SDL_Ptr FUNC_SDL_GetError;
     private static SDL_PtrStrIntIntIntIntWindowFlags FUNC_SDL_CreateWindow;
     private static SDL_SDLBoolPtrPtr FUNC_SDL_SetHint;
+    private static SDL_PtrPtr FUNC_SDL_GetHint;
     private static SDL_VoidPtrPtr FUNC_SDL_SetWindowTitle;
     private static SDL_Ptr FUNC_SDL_GetClipboardText;
     private static SDL_IntPtr FUNC_SDL_SetClipboardText;
@@ -197,11 +202,16 @@ internal class SDL : NativeLibrary
     {
         return FUNC_SDL_SetHint(StrUTF8ToPtr(Name), StrUTF8ToPtr(Value));
     }
+    internal static string SDL_GetHint(string Name)
+    {
+        return PtrToStrUTF8(FUNC_SDL_GetHint(StrUTF8ToPtr(Name)));
+    }
     internal static SDL_VoidPtrOutIntOutInt SDL_GetWindowPosition;
     internal static SDL_VoidPtrIntInt SDL_SetWindowPosition;
     internal static SDL_VoidPtrSDLBool SDL_SetWindowResizable;
     internal static SDL_VoidPtrPtr SDL_SetWindowIcon;
-    internal static SDL_IntPtrOutRendererInfo SDL_GetRendererInfo;
+    internal static SDL_IntIntPtrOutRendererInfo SDL_GetRendererInfo;
+    internal static SDL_IntIntOutRendererInfo SDL_GetRenderDriverInfo;
     internal static SDL_VoidPtrIntInt SDL_SetWindowMinimumSize;
     internal static SDL_VoidPtrIntInt SDL_SetWindowSize;
     internal static SDL_VoidPtrOutIntOutInt SDL_GetWindowSize;
@@ -266,6 +276,7 @@ internal class SDL : NativeLibrary
     internal static SDL_IntStr SDL_OpenURL;
     internal static SDL_PtrPtrPixelFormatUInt SDL_ConvertSurfaceFormat;
     internal static SDL_IntIntFloatFloatFloat SDL_GetDisplayDPI;
+    internal static SDL_Int SDL_GetNumRenderDrivers;
     #endregion
 
     #region Structs

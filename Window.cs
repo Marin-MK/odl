@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using static odl.SDL2.SDL;
 
 namespace odl;
@@ -180,11 +181,10 @@ public class Window : IDisposable
     /// <summary>
     /// Called to actually create the window and renderer.
     /// </summary>
-    public virtual void Initialize(bool HardwareAcceleration = true, bool VSync = false, bool Borderless = false, bool ForceOpenGL = false)
+    public virtual void Initialize(bool HardwareAcceleration = true, bool VSync = false, bool Borderless = false, RenderDriver PreferredDriver = RenderDriver.Default)
     {
         if (Graphics.Windows.Contains(this)) return;
         _StartTime = DateTime.Now;
-        if (ForceOpenGL) SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 
         SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
         if (Borderless) flags |= SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
@@ -200,15 +200,53 @@ public class Window : IDisposable
         {
             SDL_SetWindowIcon(this.SDL_Window, this.Icon.Surface);
         }
+
+        int count = SDL_GetNumRenderDrivers();
+        Console.Write("Supported drivers: ");
+        int OptimalIndex = -1;
+        List<string> drivers = new List<string>();
+        for (int i = 0; i < count; i++)
+        {
+            SDL_RendererInfo driverinfo = new SDL_RendererInfo();
+            SDL_GetRenderDriverInfo(i, out driverinfo);
+            string intname = System.Runtime.InteropServices.Marshal.PtrToStringUTF8(driverinfo.name);
+            string drivername = GetFullDriverName(intname);
+            drivers.Add(drivername);
+            Console.Write(drivername);
+            if (i != count - 1) Console.Write(", ");
+            bool viable = true;
+            if (HardwareAcceleration && (driverinfo.flags & (uint) SDL_RendererFlags.SDL_RENDERER_ACCELERATED) == 0) viable = false;
+            if (VSync && (driverinfo.flags & (uint) SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC) == 0) viable = false;
+            if (viable && OptimalIndex == -1) OptimalIndex = i;
+            bool IsPreferred = PreferredDriver switch
+            {
+                RenderDriver.OpenGL => intname == "opengl",
+                RenderDriver.OpenGLES => intname == "opengles",
+                RenderDriver.OpenGLES2 => intname == "opengles2",
+                RenderDriver.Direct3D => intname == "direct3d",
+                RenderDriver.Direct3D11 => intname == "direct3d11",
+                RenderDriver.Vulkan => intname == "vulkan",
+                RenderDriver.Metal => intname == "metal",
+                RenderDriver.Software => intname == "software",
+                RenderDriver.Default => false,
+                _ => false
+            };
+            if (viable && IsPreferred) OptimalIndex = i;
+        }
+        Console.WriteLine();
+
         SDL_RendererFlags renderflags = 0;
         if (HardwareAcceleration) renderflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
         if (VSync) renderflags |= SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC;
-        this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, -1, renderflags));
+        this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, OptimalIndex, renderflags));
+        SDL_RendererInfo info = new SDL_RendererInfo();
+        SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
+        Console.WriteLine($"Using {GetFullDriverName(System.Runtime.InteropServices.Marshal.PtrToStringUTF8(info.name))}");
 
         if (Graphics.MaxTextureSize == null)
         {
-            SDL_RendererInfo info;
-            SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
+            if (info.max_texture_width == 0) info.max_texture_width = 16384;
+            if (info.max_texture_height == 0) info.max_texture_height = 16384;
             Graphics.MaxTextureSize = new Size(info.max_texture_width, info.max_texture_height);
             Console.WriteLine($"Maximum Texture Size: {info.max_texture_width}x{info.max_texture_height}");
         }
@@ -602,6 +640,22 @@ public class Window : IDisposable
         rect.h = bmp.Height;
         SDL_RenderReadPixels(this.Renderer.SDL_Renderer, rect, SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888, bmp.SurfaceObject.pixels, bmp.SurfaceObject.pitch);
         return bmp;
+    }
+
+    internal string GetFullDriverName(string InternalName)
+    {
+        return InternalName switch
+        {
+            "opengl" => "OpenGL",
+            "opengles" => "OpenGLES",
+            "opengles2" => "OpenGLES2",
+            "direct3d" => "Direct3D",
+            "direct3d11" => "Direct3D11",
+            "vulkan" => "Vulkan",
+            "metal" => "Metal",
+            "software" => "Software",
+            _ => InternalName
+        };
     }
 }
 

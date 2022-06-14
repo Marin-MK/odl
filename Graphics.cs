@@ -515,3 +515,16 @@ public enum Platform
     IOS,
     Android
 }
+
+public enum RenderDriver
+{
+    Default,
+    OpenGL,
+    OpenGLES,
+    OpenGLES2,
+    Direct3D,
+    Direct3D11,
+    Vulkan,
+    Metal,
+    Software
+}
