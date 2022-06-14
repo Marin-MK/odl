@@ -372,17 +372,12 @@ public static class Graphics
                     }
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
+                    w.OnPositionChanged(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
-                    int width1;
-                    int height1;
-                    SDL_GetWindowSize(w.SDL_Window, out width1, out height1);
                     w.OnSizeChanged(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
-                    int width2;
-                    int height2;
-                    SDL_GetWindowSize(w.SDL_Window, out width2, out height2);
                     w.OnSizeChanged(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
