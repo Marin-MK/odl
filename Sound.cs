@@ -41,7 +41,7 @@ public class Sound
         }
         set
         {
-            if (value != 0 && !Audio.UsingBassFX) throw new Exception("Cannot change Pitch when odl Audio is initialized with UsingBassFX set to false.");
+            if (value != 0 && !Audio.UsingBassFX) throw new Exception("Pitch module was not initialized.");
             if (value != _Pitch && Stream != 0)
                 Audio.BASS_ChannelSetAttribute(Stream, Audio.BASS_Attribute.BASS_ATTRIB_TEMPO_PITCH, (float)value);
             _Pitch = value;
@@ -186,7 +186,7 @@ public class Sound
 
     public unsafe Sound(string Filename, int Volume = 100, double Pitch = 0)
     {
-        if (Pitch != 0 && !Audio.UsingBassFX) throw new Exception("Cannot change Pitch when Audio is initialized with UsingBassFX set to false.");
+        if (Pitch != 0 && !Audio.UsingBassFX) throw new Exception("Pitch module was not initialized.");
         string OriginalFilename = Filename;
         if (!File.Exists(Filename))
         {
@@ -195,32 +195,31 @@ public class Sound
             else if (File.Exists(Filename + ".mp3")) Filename += ".mp3";
             else if (File.Exists(Filename + ".mid")) Filename += ".mid";
         }
-        if (Filename.EndsWith(".mid"))
+        Audio.BASS_Flag flags = Audio.UsingBassFX ? Audio.BASS_Flag.BASS_STREAM_DECODE : Audio.BASS_Flag.BASS_STREAM_AUTOFREE;
+        this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, flags);
+        if (this.Stream == 0)
         {
-            if (Audio.UsingBassMidi)
+            if (Filename.EndsWith(".mid"))
             {
-                this.Stream = Audio.BASS_MIDI_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_AUTOFREE);
-                Audio.BASS_MIDI_FONT[] list = new Audio.BASS_MIDI_FONT[Audio.Soundfonts.Count];
-                for (int i = 0; i < Audio.Soundfonts.Count; i++)
-                {
-                    list[i] = new Audio.BASS_MIDI_FONT();
-                    list[i].font = Audio.Soundfonts[i];
-                    list[i].preset = -1;
-                    list[i].bank = 0;
-                }
-                fixed (Audio.BASS_MIDI_FONT* sPtr = list) Audio.BASS_MIDI_StreamSetFonts(this.Stream, sPtr, Audio.Soundfonts.Count);
+                if (Audio.UsingBassMidi) throw new Exception("Failed to stream MIDI.");
+                else throw new Exception("Midi module was not initialized.");
             }
-            else Console.WriteLine($"No MIDI support for file {Filename}");
+            else throw new Exception("Failed to stream file.");
         }
-        else if (Audio.UsingBassFX)
+        if (Filename.EndsWith(".mid") && Audio.UsingBassMidi)
         {
-            int BaseStream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_DECODE);
-            this.Stream = Audio.BASS_FX_TempoCreate(BaseStream, Audio.BASS_Flag.BASS_STREAM_AUTOFREE | Audio.BASS_Flag.BASS_FX_FREESOURCE);
+            if (Audio.Soundfonts.Count == 0) throw new Exception("No soundfonts were loaded.");
+            Audio.BASS_MIDI_FONT[] list = new Audio.BASS_MIDI_FONT[Audio.Soundfonts.Count];
+            for (int i = 0; i < Audio.Soundfonts.Count; i++)
+            {
+                list[i] = new Audio.BASS_MIDI_FONT();
+                list[i].font = Audio.Soundfonts[i];
+                list[i].preset = -1;
+                list[i].bank = 0;
+            }
+            fixed (Audio.BASS_MIDI_FONT* sPtr = list) Audio.BASS_MIDI_StreamSetFonts(this.Stream, sPtr, Audio.Soundfonts.Count);
         }
-        else
-        {
-            this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, Audio.BASS_Flag.BASS_STREAM_AUTOFREE);
-        }
+        if (Audio.UsingBassFX) this.Stream = Audio.BASS_FX_TempoCreate(this.Stream, Audio.BASS_Flag.BASS_STREAM_AUTOFREE | Audio.BASS_Flag.BASS_FX_FREESOURCE);
         float sr = 0;
         Audio.BASS_ChannelGetAttribute(this.Stream, Audio.BASS_Attribute.BASS_ATTRIB_FREQ, ref sr);
         this.OriginalSampleRate = (int)sr;

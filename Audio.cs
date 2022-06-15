@@ -10,6 +10,7 @@ public delegate void SlideCallback(int SlideType);
 public static class Audio
 {
     public static Sound BGM;
+    public static bool Initialized;
 
     internal static bool UsingBassFX = false;
     internal static bool UsingBassMidi = false;
@@ -23,14 +24,12 @@ public static class Audio
         Console.WriteLine("Loading audio components...");
 
         NativeLibrary bass = NativeLibrary.Load(Path.Get("bass"));
-        Console.WriteLine("Loaded BASS");
 
         NativeLibrary bass_fx = null;
         if (Path.Has("bass_fx"))
         {
             bass_fx = NativeLibrary.Load(Path.Get("bass_fx"));
-            BASS_FX_GetVersion = bass_fx.GetFunction<BASS_Int>("BASS_FX_GetVersion");
-            Console.WriteLine($"Loaded BASS_FX ({BASS_FX_GetVersion()})");
+            BASS_FX_GetVersion = bass_fx.GetFunction<BASS_UInt>("BASS_FX_GetVersion");
             UsingBassFX = true;
         }
 
@@ -38,7 +37,6 @@ public static class Audio
         if (Path.Has("bass_midi"))
         {
             bass_midi = NativeLibrary.Load(Path.Get("bass_midi"));
-            Console.WriteLine($"Loaded BASS_MIDI");
             UsingBassMidi = true;
         }
 
@@ -48,8 +46,10 @@ public static class Audio
         }
 
         BASS_Init = bass.GetFunction<BASS_BoolIntIntUIntUIntPtr>("BASS_Init");
+        BASS_GetVersion = bass.GetFunction<BASS_UInt>("BASS_GetVersion");
         BASS_Free = bass.GetFunction<BASS_Bool>("BASS_Free");
-        BASS_PluginLoad = bass.GetFunction<BASS_IntStrUInt>("BASS_PluginLoad");
+        BASS_PluginLoad = bass.GetFunction<BASS_IntStr>("BASS_PluginLoad");
+        BASS_PluginGetInfo = bass.GetFunction<BASS_PtrInt>("BASS_PluginGetInfo");
         BASS_PluginFree = bass.GetFunction<BASS_BoolInt>("BASS_PluginFree");
         BASS_ChannelSetAttribute = bass.GetFunction<BASS_BoolIntAttributeFlt>("BASS_ChannelSetAttribute");
         BASS_ChannelGetPosition = bass.GetFunction<BASS_LngInt>("BASS_ChannelGetPosition");
@@ -81,10 +81,32 @@ public static class Audio
         }
 
         BASS_Init(-1, 44100, 0, IntPtr.Zero);
+        uint bassversion = BASS_GetVersion();
+        Console.WriteLine($"Loaded BASS ({StringifyVersion(bassversion)})");
+        if (UsingBassFX)
+        {
+            BASS_PluginLoad(Path.Get("bass_fx"));
+            uint fxversion = BASS_FX_GetVersion();
+            Console.WriteLine($"Loaded BASS_FX ({StringifyVersion(fxversion)})");
+        }
+        if (UsingBassMidi)
+        {
+            int midihandle = BASS_PluginLoad(Path.Get("bass_midi"));
+            BASS_PluginInfo info = System.Runtime.InteropServices.Marshal.PtrToStructure<BASS_PluginInfo>(BASS_PluginGetInfo(midihandle));
+            Console.WriteLine($"Loaded BASS_MIDI ({StringifyVersion(info.version)})");
+        }
+        Initialized = true;
+    }
+
+    internal static string StringifyVersion(uint version)
+    {
+        return Convert.ToString((version & 0xFF000000) >> 24) + "." + Convert.ToString((version & 0x00FF0000) >> 16) +
+            "." + Convert.ToString((version & 0x0000FF00) >> 8) + "." + Convert.ToString(version & 0x000000FF);
     }
 
     public static void Stop()
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
         for (int i = 0; i < Soundfonts.Count; i++)
         {
             FreeSoundfont(Soundfonts[i]);
@@ -95,6 +117,8 @@ public static class Audio
 
     public static int LoadSoundfont(string Filename)
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
+        if (!UsingBassMidi) throw new Exception("Midi module was not initialized.");
         int Handle = BASS_MIDI_FontInit(Filename, 0);
         Soundfonts.Add(Handle);
         return Handle;
@@ -102,6 +126,7 @@ public static class Audio
 
     public static void FreeSoundfont(int Handle)
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
         BASS_MIDI_FontFree(Handle);
         Soundfonts.Remove(Handle);
     }
@@ -112,6 +137,7 @@ public static class Audio
     }
     public static void BGMPlay(Sound Sound)
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
         if (BGM != null && BGM.Alive)
         {
             BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
@@ -143,6 +169,7 @@ public static class Audio
     }
     public static void MEPlay(Sound Sound)
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
         if (BGM != null && BGM.Alive)
         {
             BGM.FadeOut(BGM.SampleRate / 4, delegate (int SlideType)
@@ -171,6 +198,7 @@ public static class Audio
     }
     public static void SEPlay(Sound Sound)
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
         Sound.Play();
     }
 
@@ -180,15 +208,17 @@ public static class Audio
     }
     public static void Play(Sound Sound)
     {
+        if (!Initialized) throw new Exception("Audio module was not initialized.");
         Sound.Play();
     }
 
     internal delegate void BASS_Syncproc(int Int1, int Int2, int Int3, IntPtr IntPtr);
-    internal delegate int BASS_IntStrUInt(string IntPtr, uint UInt);
+    internal delegate int BASS_IntStr(string IntPtr);
+    internal delegate IntPtr BASS_PtrInt(int Int);
     internal delegate bool BASS_BoolIntIntUIntUIntPtr(int Int, uint UInt1, uint UInt2, IntPtr Ptr);
     internal delegate bool BASS_Bool();
     internal delegate bool BASS_BoolInt(int Int);
-    internal delegate int BASS_Int();
+    internal delegate uint BASS_UInt();
     internal delegate bool BASS_BoolIntAttributeFlt(int Int, BASS_Attribute Attribute, float Flt);
     internal delegate long BASS_LngInt(int Int);
     internal delegate bool BASS_BoolIntLong(int Int, long Lng);
@@ -205,8 +235,10 @@ public static class Audio
     internal delegate BASS_Error BASS_BASSError();
     internal unsafe delegate bool BASS_BoolIntPtrInt(int Int1, BASS_MIDI_FONT* Ptr, int Int2);
 
-    internal static BASS_Int BASS_FX_GetVersion;
-    internal static BASS_IntStrUInt BASS_PluginLoad;
+    internal static BASS_UInt BASS_FX_GetVersion;
+    internal static BASS_UInt BASS_GetVersion;
+    internal static BASS_IntStr BASS_PluginLoad;
+    internal static BASS_PtrInt BASS_PluginGetInfo;
     internal static BASS_BoolIntIntUIntUIntPtr BASS_Init;
     internal static BASS_Bool BASS_Free;
     internal static BASS_BoolInt BASS_PluginFree;
@@ -304,5 +336,12 @@ public static class Audio
         public int font;
         public int preset;
         public int bank;
+    }
+
+    internal struct BASS_PluginInfo
+    {
+        public uint version;
+        public uint formatc;
+        public IntPtr formats;
     }
 }
