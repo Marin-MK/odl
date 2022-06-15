@@ -362,7 +362,7 @@ public static class Graphics
             {
                 case SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE:
                     BoolEventArgs ClosingArgs = new BoolEventArgs();
-                    w.OnClosing(ClosingArgs);
+                    w.OnClosing?.Invoke(ClosingArgs);
                     if (!ClosingArgs.Value)
                     {
                         SDL_DestroyWindow(w.SDL_Window);
@@ -372,21 +372,21 @@ public static class Graphics
                     }
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
-                    w.OnPositionChanged(new BaseEventArgs());
+                    w.OnPositionChanged?.Invoke(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
-                    w.OnSizeChanged(new BaseEventArgs());
+                    w.OnSizeChanged?.Invoke(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
-                    w.OnSizeChanged(new BaseEventArgs());
+                    w.OnSizeChanged?.Invoke(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                     w.Focus = true;
-                    w.OnFocusGained(new BaseEventArgs());
+                    w.OnFocusGained?.Invoke(new BaseEventArgs());
                     break;
                 case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                     w.Focus = false;
-                    w.OnFocusLost(new BaseEventArgs());
+                    w.OnFocusLost?.Invoke(new BaseEventArgs());
                     break;
             }
         }
@@ -401,7 +401,7 @@ public static class Graphics
                         LeftDown = (e.button.button & 1) == 1;
                         MiddleDown = (e.button.button & 2) == 2;
                         RightDown = (e.button.button & 4) == 4;
-                        w.OnMouseMoving(new MouseEventArgs(e.motion.x, e.motion.y,
+                        w.OnMouseMoving?.Invoke(new MouseEventArgs(e.motion.x, e.motion.y,
                                                            oldleftdown, LeftDown,
                                                            oldrightdown, RightDown,
                                                            oldmiddledown, MiddleDown));
@@ -413,7 +413,7 @@ public static class Graphics
                     if (e.button.button == 1) LeftDown = true;
                     if (e.button.button == 2) MiddleDown = true;
                     if (e.button.button == 3) RightDown = true;
-                    w.OnMouseDown(new MouseEventArgs(e.motion.x, e.motion.y,
+                    w.OnMouseDown?.Invoke(new MouseEventArgs(e.motion.x, e.motion.y,
                                                      oldleftdown, LeftDown,
                                                      oldrightdown, RightDown,
                                                      oldmiddledown, MiddleDown));
@@ -422,13 +422,13 @@ public static class Graphics
                     if (e.button.button == 1) LeftDown = false;
                     if (e.button.button == 2) MiddleDown = false;
                     if (e.button.button == 3) RightDown = false;
-                    w.OnMouseUp(new MouseEventArgs(e.motion.x, e.motion.y,
+                    w.OnMouseUp?.Invoke(new MouseEventArgs(e.motion.x, e.motion.y,
                                                    oldleftdown, LeftDown,
                                                    oldrightdown, RightDown,
                                                    oldmiddledown, MiddleDown));
                     break;
                 case SDL_EventType.SDL_MOUSEWHEEL:
-                    w.OnMouseWheel(new MouseEventArgs(OldMouseX, OldMouseY,
+                    w.OnMouseWheel?.Invoke(new MouseEventArgs(OldMouseX, OldMouseY,
                                                       oldleftdown, LeftDown,
                                                       oldrightdown, RightDown,
                                                       oldmiddledown, MiddleDown,
@@ -445,7 +445,7 @@ public static class Graphics
                     if (sym1 == SDL_Keycode.SDLK_DELETE) delete = true;
                     if (txt.Length > 0 || backspace || delete)
                     {
-                        w.OnTextInput(new TextEventArgs(txt, null, backspace, delete));
+                        w.OnTextInput?.Invoke(new TextEventArgs(txt, null, backspace, delete));
                     }
                     break;
                 case SDL_EventType.SDL_KEYUP:
@@ -468,7 +468,7 @@ public static class Graphics
                     }
                     string text = "";
                     foreach (char c in Encoding.UTF8.GetChars(bytes)) text += c;
-                    w.OnTextInput(new TextEventArgs(text.TrimEnd('\x00'), null));
+                    w.OnTextInput?.Invoke(new TextEventArgs(text.TrimEnd('\x00'), null));
                     break;
             }
         }
