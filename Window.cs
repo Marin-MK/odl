@@ -238,7 +238,6 @@ public class Window : IDisposable
             if (viable && IsPreferred) OptimalIndex = i;
         }
         Console.WriteLine();
-        OptimalIndex = -1;
 
         SDL_RendererFlags renderflags = 0;
         if (HardwareAcceleration) renderflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
