@@ -15,7 +15,7 @@ public class Font : IDisposable
     /// <summary>
     /// An optional path to the folder to look for fonts in.
     /// </summary>
-    public static string FontPath = null;
+    public static List<string> FontPaths { get; } = new List<string>();
 
     /// <summary>
     /// The name of the font.
@@ -28,7 +28,7 @@ public class Font : IDisposable
     /// <summary>
     /// The pointer to the SDL_Font object.
     /// </summary>
-    internal IntPtr SDL_Font;
+    public IntPtr SDL_Font;
 
     public Font(string Name, int Size = 12)
     {
@@ -47,10 +47,24 @@ public class Font : IDisposable
         if (!Name.EndsWith(".ttf") || !File.Exists(Name))
         {
             if (File.Exists(Name + ".ttf")) Name += ".ttf";
-            else if (!string.IsNullOrEmpty(FontPath) && Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name))) Name = Path.Combine(FontPath, Name);
-            else if (!string.IsNullOrEmpty(FontPath) && File.Exists(Path.Combine(FontPath, Name + ".ttf"))) Name = Path.Combine(FontPath, Name + ".ttf");
+            else
+            {
+                foreach (string FontPath in FontPaths)
+                {
+                    if (Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name)))
+                    {
+                        Name = Path.Combine(FontPath, Name);
+                        break;
+                    }
+                    else if (File.Exists(Path.Combine(FontPath, Name + ".ttf")))
+                    {
+                        Name = Path.Combine(FontPath, Name + ".ttf");
+                        break;
+                    }
+                }
+            }
         }
-        (_, float HDPI, float VDPI) = Graphics.Windows[0].GetDPI();
+        (_, float HDPI, float VDPI) = Graphics.Windows.Count > 0 ? Graphics.Windows[0].GetDPI() : (0, 100, 100);
         SDL_Font = TTF_OpenFontDPI(Name, Size, (uint) Math.Round(HDPI), (uint) Math.Round(VDPI));
         if (SDL_Font == IntPtr.Zero) throw new Exception("Invalid font: '" + Name + "'");
     }
@@ -100,10 +114,11 @@ public class Font : IDisposable
         {
             Font f = Cache[i];
             if (f.Size != Size) continue;
-            if (f.Name == Name || f.Name == Name + ".ttf" ||
-                !string.IsNullOrEmpty(FontPath) &&
-                (f.Name == Path.Combine(FontPath, Name) || f.Name == Path.Combine(FontPath, Name + ".ttf")))
-                return f;
+            if (f.Name == Name || f.Name == Name + ".ttf") return f;
+            foreach (string FontPath in FontPaths)
+            {
+                if (f.Name == Path.Combine(FontPath, Name) || f.Name == Path.Combine(FontPath, Name + ".ttf")) return f;
+            }
         }
         return new Font(Name, Size);
     }
@@ -117,9 +132,20 @@ public class Font : IDisposable
     {
         if (Name.EndsWith(".ttf") && File.Exists(Name)) return true;
         else if (File.Exists(Name + ".ttf")) return true;
-        else if (!string.IsNullOrEmpty(FontPath) && Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name))) return true;
-        else if (!string.IsNullOrEmpty(FontPath) && File.Exists(Path.Combine(FontPath, Name + ".ttf"))) return true;
+        else
+        {
+            foreach (string FontPath in FontPaths)
+            {
+                if (Name.EndsWith(".ttf") && File.Exists(Path.Combine(FontPath, Name))) return true;
+                else if (File.Exists(Path.Combine(FontPath, Name + ".ttf"))) return true;
+            }
+        }
         return false;
+    }
+
+    public static void AddFontPath(string FontPath)
+    {
+        FontPaths.Add(FontPath);
     }
 
     public override bool Equals(object obj)

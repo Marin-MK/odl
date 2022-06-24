@@ -92,8 +92,12 @@ public static class Audio
         if (UsingBassMidi)
         {
             int midihandle = BASS_PluginLoad(Path.Get("bass_midi"));
-            BASS_PluginInfo info = System.Runtime.InteropServices.Marshal.PtrToStructure<BASS_PluginInfo>(BASS_PluginGetInfo(midihandle));
-            Console.WriteLine($"Loaded BASS_MIDI ({StringifyVersion(info.version)})");
+            if (midihandle != 0)
+            {
+                BASS_PluginInfo info = System.Runtime.InteropServices.Marshal.PtrToStructure<BASS_PluginInfo>(BASS_PluginGetInfo(midihandle));
+                Console.WriteLine($"Loaded BASS_MIDI ({StringifyVersion(info.version)})");
+            }
+            else Console.WriteLine("Loaded BASS_MIDI (unknown version)");
         }
         Initialized = true;
     }

@@ -29,10 +29,12 @@ internal class SDL_ttf : NativeLibrary
         FUNC_TTF_SizeText = GetFunction<TTF_IntPtrPtrOutIntOutInt>("TTF_SizeText");
         FUNC_TTF_RenderText_Solid = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderText_Solid");
         FUNC_TTF_RenderText_Blended = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderText_Blended");
+        FUNC_TTF_RenderText_Shaded = GetFunction<TTF_PtrPtrPtrColorColor>("TTF_RenderText_Shaded");
         TTF_RenderGlyph_Solid = GetFunction<TTF_PtrPtrUShtColor>("TTF_RenderGlyph_Solid");
         TTF_RenderGlyph_Blended = GetFunction<TTF_PtrPtrUShtColor>("TTF_RenderGlyph_Blended");
         FUNC_TTF_RenderUTF8_Solid = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Solid");
         FUNC_TTF_RenderUTF8_Blended = GetFunction<TTF_PtrPtrPtrColor>("TTF_RenderUTF8_Blended");
+        FUNC_TTF_RenderUTF8_Shaded = GetFunction<TTF_PtrPtrPtrColorColor>("TTF_RenderUTF8_Shaded");
         TTF_SetFontSDF = GetFunction<TTF_IntPtrBool>("TTF_SetFontSDF");
         TTF_SetFontHinting = GetFunction<TTF_VoidPtrInt>("TTF_SetFontHinting");
         TTF_GetFreeTypeVersion = GetFunction<TTF_VoidIntIntInt>("TTF_GetFreeTypeVersion");
@@ -51,6 +53,7 @@ internal class SDL_ttf : NativeLibrary
     internal delegate int TTF_IntPtr(IntPtr IntPtr);
     internal delegate int TTF_IntPtrPtrOutIntOutInt(IntPtr IntPtr1, IntPtr IntPtr2, out int Int1, out int Int2);
     internal delegate IntPtr TTF_PtrPtrPtrColor(IntPtr IntPtr1, IntPtr IntPtr2, SDL.SDL_Color Color);
+    internal delegate IntPtr TTF_PtrPtrPtrColorColor(IntPtr IntPtr1, IntPtr IntPtr2, SDL.SDL_Color Color1, SDL.SDL_Color Color2);
     internal delegate IntPtr TTF_PtrPtrUShtColor(IntPtr IntPtr, ushort USht, SDL.SDL_Color Color);
     internal delegate int TTF_IntPtrBool(IntPtr Ptr, SDL.SDL_bool Bool);
     internal delegate void TTF_VoidIntIntInt(out int Int1, out int Int2, out int Int3);
@@ -62,8 +65,10 @@ internal class SDL_ttf : NativeLibrary
     private static TTF_IntPtrPtrOutIntOutInt FUNC_TTF_SizeText;
     private static TTF_PtrPtrPtrColor FUNC_TTF_RenderText_Solid;
     private static TTF_PtrPtrPtrColor FUNC_TTF_RenderText_Blended;
+    private static TTF_PtrPtrPtrColorColor FUNC_TTF_RenderText_Shaded;
     private static TTF_PtrPtrPtrColor FUNC_TTF_RenderUTF8_Solid;
     private static TTF_PtrPtrPtrColor FUNC_TTF_RenderUTF8_Blended;
+    private static TTF_PtrPtrPtrColorColor FUNC_TTF_RenderUTF8_Shaded;
 
     internal static TTF_Int TTF_Init;
     internal static TTF_Version TTF_Linked_Version;
@@ -92,6 +97,10 @@ internal class SDL_ttf : NativeLibrary
     {
         return FUNC_TTF_RenderText_Blended(SDL_Font, SDL.StrToPtr(Text), SDL_Color);
     }
+    internal static IntPtr TTF_RenderText_Shaded(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color1, SDL.SDL_Color SDL_Color2)
+    {
+        return FUNC_TTF_RenderText_Shaded(SDL_Font, SDL.StrToPtr(Text), SDL_Color1, SDL_Color2);
+    }
     internal static IntPtr TTF_RenderUTF8_Solid(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
     {
         return FUNC_TTF_RenderUTF8_Solid(SDL_Font, SDL.StrUTF8ToPtr(Text), SDL_Color);
@@ -99,6 +108,10 @@ internal class SDL_ttf : NativeLibrary
     internal static IntPtr TTF_RenderUTF8_Blended(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color)
     {
         return FUNC_TTF_RenderUTF8_Blended(SDL_Font, SDL.StrUTF8ToPtr(Text), SDL_Color);
+    }
+    internal static IntPtr TTF_RenderUTF8_Shaded(IntPtr SDL_Font, string Text, SDL.SDL_Color SDL_Color1, SDL.SDL_Color SDL_Color2)
+    {
+        return FUNC_TTF_RenderUTF8_Shaded(SDL_Font, SDL.StrUTF8ToPtr(Text), SDL_Color1, SDL_Color2);
     }
     internal static TTF_PtrPtrUShtColor TTF_RenderGlyph_Solid;
     internal static TTF_PtrPtrUShtColor TTF_RenderGlyph_Blended;
