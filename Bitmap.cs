@@ -2566,8 +2566,8 @@ public class Bitmap : IDisposable
                 int y = (int) Math.Round(y1 + ((y2 - y1) * fact));
                 if (y >= 0)
                 {
-                    long d1 = (long) (Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
-                    long d2 = (long) (Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
+                    long d1 = (long) Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
+                    long d2 = (long) Math.Sqrt(Math.Pow(x - x2, 2) + Math.Pow(y - y2, 2));
                     double f1 = d2 / (double) (d1 + d2);
                     double f2 = d1 / (double) (d1 + d2);
                     byte r = (byte) Math.Round(f1 * c1.Red + f2 * c2.Red);
@@ -2930,13 +2930,13 @@ public class Bitmap : IDisposable
                 if (inside.Contains(x, y)) continue;
                 double d = -1;
                 if (x < inside.X && y >= inside.Y && y <= inside.Y + inside.Height)
-                    d = x / (double) (inside.X - outside.X);
+                    d = x / (double) (inside.X - outside.X - 1);
                 else if (x >= inside.X + inside.Width && y >= inside.Y && y <= inside.Y + inside.Height)
-                    d = 1 - (x - inside.X - inside.Width) / (double) (outside.X + outside.Width - inside.X - inside.Width);
-                else if (y < inside.Y)
-                    d = y / (double) (inside.Y - outside.Y);
-                else if (y >= inside.Y + inside.Height)
-                    d = 1 - (y - inside.Y - inside.Height) / (double) (outside.Y + outside.Height - inside.Y - inside.Height);
+                    d = 1 - (x - inside.X - inside.Width) / (double) (outside.X + outside.Width - inside.X - inside.Width - 1);
+                else if (y < inside.Y && x >= inside.X && x <= inside.X + inside.Width)
+                    d = y / (double) (inside.Y - outside.Y - 1);
+                else if (y >= inside.Y + inside.Height && x >= inside.X && x <= inside.X + inside.Width)
+                    d = 1 - (y - inside.Y - inside.Height) / (double) (outside.Y + outside.Height - inside.Y - inside.Height - 1);
                 if (d == -1) continue;
                 d = Math.Clamp(d, 0, 1);
                 byte r = (byte) Math.Round(d * c1.Red + (1 - d) * c2.Red);
@@ -3024,6 +3024,82 @@ public class Bitmap : IDisposable
         if (this.Renderer != null) this.Renderer.Update();
     }
 
+    public virtual void FillGradientQuadrant(int ox, int oy, int Radius, Location Location, Color c1, Color c2, double Multiplier = 1.0, bool FillOutsideQuadrant = true)
+    {
+        if (Locked) throw new BitmapLockedException();
+        int x = Radius - 1;
+        int y = 0;
+        int dx = 1;
+        int dy = 1;
+        if (FillOutsideQuadrant) FillRect(ox, oy, Radius, Radius, c1);
+        if (Location == Location.TopLeft)
+        {
+            ox += Radius - 1;
+            oy += Radius - 1;
+        }
+        else if (Location == Location.TopRight) oy += Radius - 1;
+        else if (Location == Location.BottomLeft) ox += Radius - 1;
+        Point center = new Point(ox, oy);
+        int err = dx - (Radius << 1);
+        while (x >= y)
+        {
+            if (Location == Location.TopRight) // 0 - 90
+            {
+                for (int i = ox + y; i <= ox + x; i++)
+                {
+                    SetPixel(i, oy - y, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(i, oy - oy)) / Radius));
+                }
+                for (int i = oy - x; i <= oy - y; i++)
+                {
+                    SetPixel(ox + y, i, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(ox + y, i)) / Radius));
+                }
+            }
+            else if (Location == Location.TopLeft) // 90 - 180
+            {
+                for (int i = ox - x; i <= ox - y; i++)
+                {
+                    SetPixel(i, oy - y, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(i, oy - y)) / Radius));
+                }
+                for (int i = oy - x; i <= oy - y; i++)
+                {
+                    SetPixel(ox - y, i, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(ox - y, i)) / Radius));
+                }
+            }
+            else if (Location == Location.BottomLeft) // 180 - 270
+            {
+                for (int i = ox - x; i <= ox - y; i++)
+                {
+                    SetPixel(i, oy + y, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(i, oy + oy)) / Radius));
+                }
+                for (int i = oy + y; i <= oy + x; i++)
+                {
+                    SetPixel(ox - y, i, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(ox - y, i)) / Radius));
+                }
+            }
+            else if (Location == Location.BottomRight) // 270 - 360
+            {
+                for (int i = ox + y; i <= ox + x; i++)
+                {
+                    SetPixel(i, oy + y, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(i, oy + oy)) / Radius));
+                }
+                for (int i = oy + y; i <= oy + x; i++)
+                {
+                    SetPixel(ox + y, i, Interpolate2D(c1, c2, Multiplier * center.Distance(new Point(ox + y, i)) / Radius));
+                }
+            }
+            y++;
+            err += dy;
+            dy += 2;
+            if (err > 0)
+            {
+                x--;
+                dx += 2;
+                err += dx - (Radius << 1);
+            }
+        }
+        if (this.Renderer != null) this.Renderer.Update();
+    }
+
     /// <summary>
     /// Interpolates between two colors.
     /// </summary>
@@ -3033,6 +3109,7 @@ public class Bitmap : IDisposable
     /// <returns>The color interpolated between <paramref name="c1"/> and <paramref name="c2"/>.</returns>
     public static Color Interpolate2D(Color c1, Color c2, double f1)
     {
+        f1 = Math.Clamp(f1, 0, 1);
         return new Color(
             (byte) Math.Round(f1 * c1.Red + (1 - f1) * c2.Red),
             (byte) Math.Round(f1 * c1.Green + (1 - f1) * c2.Green),
