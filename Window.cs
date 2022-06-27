@@ -188,6 +188,7 @@ public class Window : IDisposable
     public virtual void Initialize(bool HardwareAcceleration = true, bool VSync = false, bool Borderless = false, RenderDriver PreferredDriver = RenderDriver.Default)
     {
         if (Graphics.Windows.Contains(this)) return;
+        if (HardwareAcceleration && PreferredDriver == RenderDriver.Software) throw new Exception("Cannot use Software renderer with hardware acceleration.");
         _StartTime = DateTime.Now;
 
         SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
