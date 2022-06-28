@@ -85,7 +85,7 @@ public class Bitmap : IDisposable
     /// <summary>
     /// The way this bitmap is blended with other bitmaps during rendering.
     /// </summary>
-    public BlendMode BlendMode { get; protected set; } = DefaultBlendMode;
+    public BlendMode BlendMode { get; set; } = DefaultBlendMode;
 
     /// <summary>
     /// The X position of this bitmap as part of a chunky bitmap.

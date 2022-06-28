@@ -164,6 +164,9 @@ public class Window : IDisposable
     private DateTime _StartTime;
     private bool Init = false;
 
+    internal IntPtr TargetTexture;
+    internal Rect ClientRect;
+
     public Window(Window Parent = null)
     {
         this.Parent = Parent;
@@ -193,6 +196,7 @@ public class Window : IDisposable
 
         SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
         if (Borderless) flags |= SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+        if (PreferredDriver == RenderDriver.OpenGL) flags |= SDL_WindowFlags.SDL_WINDOW_OPENGL;
         this.SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             this.Width, this.Height, flags);
         int WX;
@@ -240,13 +244,17 @@ public class Window : IDisposable
         }
         Console.WriteLine();
 
-        SDL_RendererFlags renderflags = 0;
+        SDL_RendererFlags renderflags = SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE;
         if (HardwareAcceleration) renderflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
         if (VSync) renderflags |= SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC;
-        this.Renderer = new Renderer(SDL_CreateRenderer(this.SDL_Window, OptimalIndex, renderflags));
+        this.Renderer = new Renderer(this, SDL_CreateRenderer(this.SDL_Window, OptimalIndex, renderflags));
         SDL_RendererInfo info = new SDL_RendererInfo();
         SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
         Console.WriteLine($"Using {GetFullDriverName(System.Runtime.InteropServices.Marshal.PtrToStringUTF8(info.name))}");
+
+        // As long as the viewport when drawing with OpenGL remains underneath the title bar (and as long as I can't be bothered to fix it and don't need GLSL shaders per se),
+        // I won't bother trying to fix it, and thus OpenGL will use the default renderer too. Therefore this is commented out.
+        //if (PreferredDriver == RenderDriver.OpenGL) OpenGL.Load();
 
         if (Graphics.MaxTextureSize == null)
         {
@@ -276,6 +284,10 @@ public class Window : IDisposable
         Graphics.AddWindow(this);
 
         if (MinimumSize != null) SDL_SetWindowMinimumSize(SDL_Window, MinimumSize.Width, MinimumSize.Height);
+
+        // Create the render target texture (2 stands for SDL_TEXTUREACESS_TARGET)
+        TargetTexture = SDL_CreateTexture(this.Renderer.SDL_Renderer, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888, 2, this.Width, this.Height);
+        if (TargetTexture == IntPtr.Zero) throw new Exception("Failed to create texture.");
 
         Init = true;
         if (this.GetType() == typeof(Window)) Start();
@@ -332,6 +344,10 @@ public class Window : IDisposable
         SDL_GetWindowSize(this.SDL_Window, out w, out h);
         this.Width = w;
         this.Height = h;
+        SDL_DestroyTexture(TargetTexture);
+        TargetTexture = SDL_CreateTexture(this.Renderer.SDL_Renderer, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888, 2, this.Width, this.Height);
+        if (TargetTexture == IntPtr.Zero) throw new Exception("Failed to create texture.");
+        this.Renderer.Redraw();
     }
 
     /// <summary>

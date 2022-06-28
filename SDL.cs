@@ -76,6 +76,8 @@ internal class SDL : NativeLibrary
         SDL_BlitSurface = GetFunction<SDL_IntPtrRefRectPtrRefRect>("SDL_UpperBlit");
         SDL_SetTextureBlendMode = GetFunction<SDL_IntPtrBlendMode>("SDL_SetTextureBlendMode");
         SDL_GetTextureBlendMode = GetFunction<SDL_IntPtrOutBlendMode>("SDL_GetTextureBlendMode");
+        SDL_SetSurfaceBlendMode = GetFunction<SDL_IntPtrBlendMode>("SDL_SetSurfaceBlendMode");
+        SDL_GetSurfaceBlendMode = GetFunction<SDL_IntPtrOutBlendMode>("SDL_GetSurfaceBlendMode");
         SDL_CreateTextureFromSurface = GetFunction<SDL_PtrPtrPtr>("SDL_CreateTextureFromSurface");
         SDL_GetDisplayBounds = GetFunction<SDL_IntIntOutRect>("SDL_GetDisplayBounds");
         SDL_GetDisplayUsableBounds = GetFunction<SDL_IntIntOutRect>("SDL_GetDisplayUsableBounds");
@@ -94,7 +96,20 @@ internal class SDL : NativeLibrary
         SDL_ConvertSurfaceFormat = GetFunction<SDL_PtrPtrPixelFormatUInt>("SDL_ConvertSurfaceFormat");
         SDL_GetDisplayDPI = GetFunction<SDL_IntIntFloatFloatFloat>("SDL_GetDisplayDPI");
         SDL_GetNumRenderDrivers = GetFunction<SDL_Int>("SDL_GetNumRenderDrivers");
+        SDL_SetRenderTarget = GetFunction<SDL_IntPtrPtr>("SDL_SetRenderTarget");
+        SDL_CreateTexture = GetFunction<SDL_PtrPtrPixelFormatIntIntInt>("SDL_CreateTexture");
+        SDL_GL_GetProcAddress = GetFunction<SDL_PtrStr>("SDL_GL_GetProcAddress");
+        SDL_GL_BindTexture = GetFunction<SDL_IntPtrPtrPtr>("SDL_GL_BindTexture");
+        SDL_GL_SwapWindow = GetFunction<SDL_VoidPtr>("SDL_GL_SwapWindow");
+        SDL_GetWindowWMInfo = GetFunction<SDL_BoolPtrWMinfo>("SDL_GetWindowWMInfo");
         SDL_GetVersion(ref Version);
+    }
+
+    internal static TDelegate GetGLFunction<TDelegate>(string FunctionName)
+    {
+        IntPtr funcaddr = SDL_GL_GetProcAddress(FunctionName);
+        if (funcaddr == IntPtr.Zero) throw new InvalidEntryPointException(Main.LibraryName, FunctionName);
+        return System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer<TDelegate>(funcaddr);
     }
 
     #region Function Delegates
@@ -147,6 +162,11 @@ internal class SDL : NativeLibrary
     internal delegate int SDL_IntStr(string Str);
     internal delegate IntPtr SDL_PtrPtrPixelFormatUInt(IntPtr Ptr, SDL_PixelFormatEnum PixelFormat, uint UInt);
     internal delegate int SDL_IntIntFloatFloatFloat(int Int, out float Float1, out float Float2, out float Float3);
+    internal delegate int SDL_IntPtrPtr(IntPtr Ptr1, IntPtr Ptr2);
+    internal delegate IntPtr SDL_PtrPtrPixelFormatIntIntInt(IntPtr Ptr, SDL_PixelFormatEnum PixelFormat, int Int1, int Int2, int Int3);
+    internal delegate IntPtr SDL_PtrStr(string Str);
+    internal delegate int SDL_IntPtrPtrPtr(IntPtr Ptr1, IntPtr Ptr2, IntPtr Ptr3);
+    internal delegate SDL_bool SDL_BoolPtrWMinfo(IntPtr Ptr1, ref SDL_SysWMinfo Ptr2);
     #endregion
 
     #region Utility
@@ -253,6 +273,8 @@ internal class SDL : NativeLibrary
     internal static SDL_IntPtrRefRectPtrRefRect SDL_BlitSurface;
     internal static SDL_IntPtrBlendMode SDL_SetTextureBlendMode;
     internal static SDL_IntPtrOutBlendMode SDL_GetTextureBlendMode;
+    internal static SDL_IntPtrBlendMode SDL_SetSurfaceBlendMode;
+    internal static SDL_IntPtrOutBlendMode SDL_GetSurfaceBlendMode;
     internal static SDL_PtrPtrPtr SDL_CreateTextureFromSurface;
     internal static SDL_IntIntOutRect SDL_GetDisplayBounds;
     internal static SDL_IntIntOutRect SDL_GetDisplayUsableBounds;
@@ -277,6 +299,12 @@ internal class SDL : NativeLibrary
     internal static SDL_PtrPtrPixelFormatUInt SDL_ConvertSurfaceFormat;
     internal static SDL_IntIntFloatFloatFloat SDL_GetDisplayDPI;
     internal static SDL_Int SDL_GetNumRenderDrivers;
+    internal static SDL_IntPtrPtr SDL_SetRenderTarget;
+    internal static SDL_PtrPtrPixelFormatIntIntInt SDL_CreateTexture;
+    internal static SDL_PtrStr SDL_GL_GetProcAddress;
+    internal static SDL_IntPtrPtrPtr SDL_GL_BindTexture;
+    internal static SDL_VoidPtr SDL_GL_SwapWindow;
+    internal static SDL_BoolPtrWMinfo SDL_GetWindowWMInfo;
     #endregion
 
     #region Structs
@@ -855,6 +883,20 @@ internal class SDL : NativeLibrary
         public uint gmask;
         public uint bmask;
         public uint amask;
+    }
+
+    public struct SDL_SysWMinfo
+    {
+        public SDL_Version version;
+        public uint subsystem;
+        // Lazy: now follows a union with window data per platform, but we only ever need hWnd for OpenGL purposes.
+        public winstruct win;
+    }
+
+    public struct winstruct
+    {
+        public int window;
+        // etc.
     }
     #endregion
 

@@ -14,6 +14,10 @@ internal class Renderer : IDisposable
     }
 
     /// <summary>
+    /// The window this renderer renders for.
+    /// </summary>
+    public Window Window;
+    /// <summary>
     /// The list of viewports associated with the renderer.
     /// </summary>
     public List<Viewport> Viewports = new List<Viewport>();
@@ -55,8 +59,9 @@ internal class Renderer : IDisposable
     /// </summary>
     bool NeedUpdate = false;
 
-    public Renderer(IntPtr SDL_Renderer)
+    public Renderer(Window Window, IntPtr SDL_Renderer)
     {
+        this.Window = Window;
         this.SDL_Renderer = SDL_Renderer;
         Graphics.RegisterRenderer(this);
     }
@@ -78,6 +83,7 @@ internal class Renderer : IDisposable
         {
             Graphics.Log("=====================");
             Graphics.Log("START render cycle");
+            SDL_SetRenderTarget(this.SDL_Renderer, Window.TargetTexture);
             SDL_RenderClear(this.SDL_Renderer);
             Graphics.Log("Viewport count: " + this.Viewports.Count.ToString());
             if (ReorderViewports)
@@ -171,7 +177,58 @@ internal class Renderer : IDisposable
                 }
             }
             Graphics.Log("Presenting renderer");
-            SDL_RenderPresent(this.SDL_Renderer);
+
+            SDL_SetRenderTarget(this.SDL_Renderer, IntPtr.Zero);
+            SDL_RenderClear(this.SDL_Renderer);
+
+            if (OpenGL.Loaded)
+            {
+                SDL_GL_BindTexture(this.Window.TargetTexture, IntPtr.Zero, IntPtr.Zero);
+                OpenGL.glBegin(OpenGL.GL_QUADS);
+                int w = this.Window.Width;
+                int h = this.Window.Height;
+                OpenGL.glViewport(0, -32, w, h);
+                //IntPtr ptr = System.Runtime.InteropServices.Marshal.AllocHGlobal(sizeof(int) * 4);
+                //unsafe
+                //{
+                //    fixed (int* intptr = new int[4])
+                //    {
+                //        OpenGL.glGetIntegerv(0x0BA2, intptr); // 0x0BA2 = GL_VIEWPORT
+                //        int a = intptr[0];
+                //        int b = intptr[1];
+                //        int c = intptr[2];
+                //        int d = intptr[3];
+                //    }
+                //}
+                //SDL_Rect r = System.Runtime.InteropServices.Marshal.PtrToStructure<SDL_Rect>(ptr);
+
+                OpenGL.glTexCoord2f(0.0f, 1.0f);
+                OpenGL.glVertex2f(0, -32);
+
+                OpenGL.glTexCoord2f(0.0f, 0.0f);
+                OpenGL.glVertex2f(0, h);
+
+                OpenGL.glTexCoord2f(1.0f, 0.0f);
+                OpenGL.glVertex2f(w, h);
+
+                OpenGL.glTexCoord2f(1.0f, 1.0f);
+                OpenGL.glVertex2f(w, -32);
+
+                OpenGL.glEnd();
+                SDL_GL_SwapWindow(this.Window.SDL_Window);
+            }
+            else
+            {
+                SDL_Rect src = new SDL_Rect();
+                src.w = this.Window.Width;
+                src.h = this.Window.Height;
+                SDL_Rect dest = new SDL_Rect();
+                dest.w = src.w;
+                dest.h = src.h;
+                SDL_RenderCopy(this.SDL_Renderer, Window.TargetTexture, ref src, ref dest);
+                SDL_RenderPresent(this.SDL_Renderer);
+            }
+
             NeedUpdate = false;
             Graphics.Log("FINISHED render cycle");
             Graphics.Log("=====================\n\n");

@@ -252,4 +252,9 @@ public class Sprite : IDisposable
         if (this.Viewport.Sprites != null) this.Viewport.Sprites.Remove(this);
         this.Viewport.Update();
     }
+
+    public void SetQuality(string Quality)
+    {
+        SDL2.SDL.SDL_SetHint(SDL2.SDL.SDL_HINT_RENDER_SCALE_QUALITY, Quality);
+    }
 }
