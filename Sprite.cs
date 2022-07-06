@@ -139,14 +139,6 @@ public class Sprite : IDisposable
     /// The color of the sprite.
     /// </summary>
     public Color Color { get { return _Color; } set { if (value != _Color) Viewport.Update(); _Color = value; } }
-    private Tone _Tone = new Tone(0, 0, 0, 0);
-    /// <summary>
-    /// The tone of the sprite.
-    /// </summary>
-    public Tone Tone { get { return _Tone; } set { if (value != _Tone) Viewport.Update(); _Tone = value; } }
-    /// <summary>
-    /// The timestamp at which the sprite was created.
-    /// </summary>
     internal int CreationTime = Renderer.GetCreationCount();
     private List<Point> _MultiplePositions = new List<Point>();
     /// <summary>
@@ -251,10 +243,5 @@ public class Sprite : IDisposable
         this.Disposed = true;
         if (this.Viewport.Sprites != null) this.Viewport.Sprites.Remove(this);
         this.Viewport.Update();
-    }
-
-    public void SetQuality(string Quality)
-    {
-        SDL2.SDL.SDL_SetHint(SDL2.SDL.SDL_HINT_RENDER_SCALE_QUALITY, Quality);
     }
 }

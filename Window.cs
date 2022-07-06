@@ -98,6 +98,18 @@ public class Window : IDisposable
         }
     }
 
+    /// <summary>
+    /// Whether or not the window has a border.
+    /// </summary>
+    public bool Bordered
+    {
+        get 
+        {
+            SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(SDL_Window);
+            return (flags & SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+        }
+    }
+
     protected Sprite BackgroundSprite;
     protected Viewport BackgroundViewport;
     protected Viewport TopViewport;
@@ -373,6 +385,11 @@ public class Window : IDisposable
     {
         this.Resizable = Resizable;
         if (Initialized()) SDL_SetWindowResizable(this.SDL_Window, Resizable ? SDL_bool.SDL_TRUE : SDL_bool.SDL_FALSE);
+    }
+
+    public virtual void SetBordered(bool Bordered)
+    {
+        if (Initialized()) SDL_SetWindowBordered(this.SDL_Window, Bordered ? SDL_bool.SDL_TRUE : SDL_bool.SDL_FALSE);
     }
 
     /// <summary>

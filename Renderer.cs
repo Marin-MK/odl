@@ -187,8 +187,6 @@ internal class Renderer : IDisposable
                 OpenGL.glBegin(OpenGL.GL_QUADS);
                 int w = this.Window.Width;
                 int h = this.Window.Height;
-                OpenGL.glViewport(0, -32, w, h);
-                //IntPtr ptr = System.Runtime.InteropServices.Marshal.AllocHGlobal(sizeof(int) * 4);
                 //unsafe
                 //{
                 //    fixed (int* intptr = new int[4])
@@ -200,10 +198,9 @@ internal class Renderer : IDisposable
                 //        int d = intptr[3];
                 //    }
                 //}
-                //SDL_Rect r = System.Runtime.InteropServices.Marshal.PtrToStructure<SDL_Rect>(ptr);
 
                 OpenGL.glTexCoord2f(0.0f, 1.0f);
-                OpenGL.glVertex2f(0, -32);
+                OpenGL.glVertex2f(0, 0);
 
                 OpenGL.glTexCoord2f(0.0f, 0.0f);
                 OpenGL.glVertex2f(0, h);
@@ -212,7 +209,7 @@ internal class Renderer : IDisposable
                 OpenGL.glVertex2f(w, h);
 
                 OpenGL.glTexCoord2f(1.0f, 1.0f);
-                OpenGL.glVertex2f(w, -32);
+                OpenGL.glVertex2f(w, 0);
 
                 OpenGL.glEnd();
                 SDL_GL_SwapWindow(this.Window.SDL_Window);
@@ -242,17 +239,14 @@ internal class Renderer : IDisposable
     public void RenderSprite(Sprite s, Bitmap bmp, int XOffset, int YOffset)
     {
         Graphics.Log($"Rendering sprite {(!string.IsNullOrEmpty(s.Name) ? "'" + s.Name + "' " : "")}-- color: {s.Color} x: {s.X} y: {s.Y} bmp({bmp.Width},{bmp.Height}{(s.Bitmap is SolidBitmap ? ", " + ((SolidBitmap)s.Bitmap).Color.ToString() : "")}) ox: {s.OX} oy: {s.OY} srcrect: {s.SrcRect}");
-        IntPtr Texture = IntPtr.Zero;
-        if (s.Tone.Red == 0 && s.Tone.Green == 0 && s.Tone.Blue == 0 && s.Tone.Gray == 0 &&
-            s.Color.Alpha == 0)
-            Texture = bmp.Texture;
-        else Texture = bmp.ColorToneTexture(s.Color, s.Tone);
-
+        IntPtr Texture = bmp.Texture;
+        
         if (Texture == IntPtr.Zero) throw new Exception("Attempted to render a zero-pointer texture.");
 
         // Sprite Opacity + Viewport Opacity + Renderer Opacity
         byte Alpha = Convert.ToByte(255d * (s.Opacity / 255d) * (s.Viewport.Opacity / 255d) * (this.Opacity / 255d));
 
+        SDL_SetTextureColorMod(Texture, s.Color.Red, s.Color.Green, s.Color.Blue);
         SDL_SetTextureAlphaMod(Texture, Alpha);
 
         List<Point> Points;

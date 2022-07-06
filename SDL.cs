@@ -98,6 +98,8 @@ internal class SDL : NativeLibrary
         SDL_GetNumRenderDrivers = GetFunction<SDL_Int>("SDL_GetNumRenderDrivers");
         SDL_SetRenderTarget = GetFunction<SDL_IntPtrPtr>("SDL_SetRenderTarget");
         SDL_CreateTexture = GetFunction<SDL_PtrPtrPixelFormatIntIntInt>("SDL_CreateTexture");
+        SDL_SetTextureColorMod = GetFunction<SDL_IntPtrByteByteByte>("SDL_SetTextureColorMod");
+        SDL_SetWindowBordered = GetFunction<SDL_VoidPtrSDLBool>("SDL_SetWindowBordered");
         SDL_GL_GetProcAddress = GetFunction<SDL_PtrStr>("SDL_GL_GetProcAddress");
         SDL_GL_BindTexture = GetFunction<SDL_IntPtrPtrPtr>("SDL_GL_BindTexture");
         SDL_GL_SwapWindow = GetFunction<SDL_VoidPtr>("SDL_GL_SwapWindow");
@@ -167,6 +169,7 @@ internal class SDL : NativeLibrary
     internal delegate IntPtr SDL_PtrStr(string Str);
     internal delegate int SDL_IntPtrPtrPtr(IntPtr Ptr1, IntPtr Ptr2, IntPtr Ptr3);
     internal delegate SDL_bool SDL_BoolPtrWMinfo(IntPtr Ptr1, ref SDL_SysWMinfo Ptr2);
+    internal delegate int SDL_IntPtrByteByteByte(IntPtr Ptr, byte Byte1, byte Byte2, byte Byte3);
     #endregion
 
     #region Utility
@@ -301,6 +304,8 @@ internal class SDL : NativeLibrary
     internal static SDL_Int SDL_GetNumRenderDrivers;
     internal static SDL_IntPtrPtr SDL_SetRenderTarget;
     internal static SDL_PtrPtrPixelFormatIntIntInt SDL_CreateTexture;
+    internal static SDL_IntPtrByteByteByte SDL_SetTextureColorMod;
+    internal static SDL_VoidPtrSDLBool SDL_SetWindowBordered;
     internal static SDL_PtrStr SDL_GL_GetProcAddress;
     internal static SDL_IntPtrPtrPtr SDL_GL_BindTexture;
     internal static SDL_VoidPtr SDL_GL_SwapWindow;

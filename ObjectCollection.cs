@@ -115,7 +115,6 @@ public class ObjectCollection
         public bool MirrorX;
         public bool MirrorY;
         public ColorData Color;
-        public ToneData Tone;
         public bool Disposed;
         public bool Visible;
         public ViewportData Viewport;
@@ -136,7 +135,6 @@ public class ObjectCollection
             this.Bitmap = new BitmapData(Sprite.Bitmap);
             this.SrcRect = new RectData(Sprite.SrcRect);
             this.Color = new ColorData(Sprite.Color);
-            this.Tone = new ToneData(Sprite.Tone);
             this.Disposed = Sprite.Disposed;
             this.Visible = Sprite.Visible;
             this.Viewport = Viewport;
@@ -155,7 +153,6 @@ public class ObjectCollection
             if (this.Z != Sprite.Z) Diff += $"(Z {this.Z}->{Sprite.Z}) ";
             if (this.Opacity != Sprite.Opacity) Diff += $"(Opacity {this.Opacity}->{Sprite.Opacity}) ";
             Diff += this.Color.CompareWith(Sprite.Color);
-            Diff += this.Tone.CompareWith(Sprite.Tone);
             if (this.ZoomX != Sprite.ZoomX) Diff += $"(ZoomX {this.ZoomX}->{Sprite.ZoomX}) ";
             if (this.ZoomY != Sprite.ZoomY) Diff += $"(ZoomY {this.ZoomY}->{Sprite.ZoomY}) ";
             if (this.Angle != Sprite.Angle) Diff += $"(Angle {this.Angle}->{Sprite.Angle}) ";
@@ -251,32 +248,6 @@ public class ObjectCollection
             if (this.Blue != Color.Blue) Diff += $"(Blue {this.Blue}->{Color.Blue}) ";
             if (this.Alpha != Color.Alpha) Diff += $"(Alpha {this.Alpha}->{Color.Alpha}) ";
             return Diff == "(Color " ? "" : Diff.Substring(0, Diff.Length - 1) + ")";
-        }
-    }
-
-    public class ToneData
-    {
-        public short Red;
-        public short Green;
-        public short Blue;
-        public byte Grey;
-
-        public ToneData(Tone t)
-        {
-            this.Red = t.Red;
-            this.Green = t.Green;
-            this.Blue = t.Blue;
-            this.Grey = t.Gray;
-        }
-
-        public string CompareWith(ToneData Tone)
-        {
-            string Diff = "(Tone ";
-            if (this.Red != Tone.Red) Diff += $"(Red {this.Red}->{Tone.Red}) ";
-            if (this.Green != Tone.Green) Diff += $"(Green {this.Green}->{Tone.Green}) ";
-            if (this.Blue != Tone.Blue) Diff += $"(Blue {this.Blue}->{Tone.Blue}) ";
-            if (this.Grey != Tone.Grey) Diff += $"(Grey {this.Grey}->{Tone.Grey}) ";
-            return Diff == "(Tone " ? "" : Diff.Substring(0, Diff.Length - 1) + ")";
         }
     }
 }

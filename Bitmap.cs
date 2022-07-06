@@ -111,19 +111,6 @@ public class Bitmap : IDisposable
     IntPtr PixelHandle = IntPtr.Zero;
 
     /// <summary>
-    /// The last-calculated bitmap with tone and color applied.
-    /// </summary>
-    private Bitmap ColorToneBmp;
-    /// <summary>
-    /// The color applied to <see cref="ColorToneBmp"/>
-    /// </summary>
-    private Color ColorToneColor;
-    /// <summary>
-    /// The Tone applied to <see cref="ColorToneBmp"/>
-    /// </summary>
-    private Tone ColorToneTone;
-
-    /// <summary>
     /// Creates a new bitmap with the given size.
     /// </summary>
     /// <param name="Size">The size of the new bitmap.</param>
@@ -226,7 +213,8 @@ public class Bitmap : IDisposable
         {
             throw new Exception($"Bitmap ({Width},{Height}) exceeded maximum possible texture size ({Graphics.MaxTextureSize.Width},{Graphics.MaxTextureSize.Height})");
         }
-        this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+        this.Surface = SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 32, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
+        //this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         this.Width = SurfaceObject.w;
         this.Height = SurfaceObject.h;
@@ -512,8 +500,6 @@ public class Bitmap : IDisposable
                 Marshal.FreeHGlobal(PixelHandle);
                 PixelHandle = IntPtr.Zero;
             }
-            ColorToneBmp?.Dispose();
-            ColorToneBmp = null;
             this.Surface = IntPtr.Zero;
             this.Texture = IntPtr.Zero;
             this.SurfaceObject = new SDL_Surface();
@@ -3209,54 +3195,7 @@ public class Bitmap : IDisposable
             throw new Exception("Invalid texture");
         }
         SDL_SetTextureBlendMode(this.Texture, (SDL_BlendMode) this.BlendMode);
-        if (ColorToneBmp != null) ColorToneBmp.Dispose();
-        ColorToneBmp = null;
         this.Renderer.Update();
-    }
-
-    /// <summary>
-    /// Applies a Sprite's Color and Tone. CPU-intensive.
-    /// </summary>
-    /// <param name="Color">The color to apply to the texture.</param>
-    /// <param name="Tone">The tone to apply to the texture.</param>
-    /// <returns>A pointer to the new texture.</returns>
-    public virtual IntPtr ColorToneTexture(Color Color, Tone Tone)
-    {
-        if (ColorToneBmp != null &&
-            ColorToneColor.Red == Color.Red && ColorToneColor.Green == Color.Green && ColorToneColor.Blue == Color.Blue && ColorToneColor.Alpha == Color.Alpha &&
-            ColorToneTone.Red == Tone.Red && ColorToneTone.Green == Tone.Green && ColorToneTone.Blue == Tone.Blue && ColorToneTone.Gray == Tone.Gray)
-        {
-            return ColorToneBmp.Texture;
-        }
-        ColorToneBmp?.Dispose();
-        ColorToneBmp = new Bitmap(Width, Height);
-        ColorToneBmp.Renderer = this.Renderer;
-        ColorToneBmp.Unlock();
-        for (int x = 0; x < Width; x++)
-        {
-            for (int y = 0; y < Height; y++)
-            {
-                Color c = GetPixelFast(x, y);
-                if (c.Alpha == 0) continue;
-                byte r = c.Red;
-                byte g = c.Green;
-                byte b = c.Blue;
-                double Avg = (c.Red + c.Green + c.Blue) / 3d;
-                // Tone
-                r = Convert.ToByte(Math.Round(c.Red - ((c.Red - Avg) * (Tone.Gray / 255d))) + Tone.Red);
-                g = Convert.ToByte(Math.Round(c.Green - ((c.Green - Avg) * (Tone.Gray / 255d))) + Tone.Green);
-                b = Convert.ToByte(Math.Round(c.Blue - ((c.Blue - Avg) * (Tone.Gray / 255d))) + Tone.Blue);
-                // Color - Additive blending (with double RGB strength so it can range between 0 and 255)
-                r = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Red) * Color.Alpha / 255d + r)));
-                g = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Green) * Color.Alpha / 255d + g)));
-                b = Convert.ToByte(Math.Min(255, Math.Max(0, (-255 + 2 * Color.Blue) * Color.Alpha / 255d + b)));
-                ColorToneBmp.SetPixelFast(x, y, r, g, b);
-            }
-        }
-        ColorToneBmp.Lock();
-        ColorToneColor = (Color)Color.Clone();
-        ColorToneTone = (Tone)Tone.Clone();
-        return ColorToneBmp.Texture;
     }
 
     /// <summary>
