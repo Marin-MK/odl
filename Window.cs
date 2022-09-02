@@ -509,6 +509,14 @@ public class Window : IDisposable
     }
 
     /// <summary>
+    /// Hides the window if it was shown.
+    /// </summary>
+    public virtual void Hide()
+    {
+        SDL_HideWindow(this.SDL_Window);
+    }
+
+    /// <summary>
     /// Minimizes the window to the system trey.
     /// </summary>
     public virtual void Minimize()

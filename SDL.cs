@@ -45,6 +45,7 @@ internal class SDL : NativeLibrary
         SDL_GetWindowDisplayIndex = GetFunction<SDL_IntPtr>("SDL_GetWindowDisplayIndex");
         SDL_GetNumVideoDisplays = GetFunction<SDL_Int>("SDL_GetNumVideoDisplays");
         SDL_ShowWindow = GetFunction<SDL_VoidPtr>("SDL_ShowWindow");
+        SDL_HideWindow = GetFunction<SDL_VoidPtr>("SDL_HideWindow");
         SDL_MinimizeWindow = GetFunction<SDL_VoidPtr>("SDL_MinimizeWindow");
         SDL_MaximizeWindow = GetFunction<SDL_VoidPtr>("SDL_MaximizeWindow");
         SDL_RaiseWindow = GetFunction<SDL_VoidPtr>("SDL_RaiseWindow");
@@ -245,6 +246,7 @@ internal class SDL : NativeLibrary
     internal static SDL_IntPtr SDL_GetWindowDisplayIndex;
     internal static SDL_Int SDL_GetNumVideoDisplays;
     internal static SDL_VoidPtr SDL_ShowWindow;
+    internal static SDL_VoidPtr SDL_HideWindow;
     internal static SDL_VoidPtr SDL_MinimizeWindow;
     internal static SDL_VoidPtr SDL_MaximizeWindow;
     internal static SDL_VoidPtr SDL_RaiseWindow;
