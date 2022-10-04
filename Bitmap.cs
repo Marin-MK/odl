@@ -2916,11 +2916,11 @@ public class Bitmap : IDisposable
                 if (inside.Contains(x, y)) continue;
                 double d = -1;
                 if (x < inside.X && y >= inside.Y && y <= inside.Y + inside.Height)
-                    d = x / (double) (inside.X - outside.X - 1);
+                    d = (x - outside.X) / (double) (inside.X - outside.X - 1);
                 else if (x >= inside.X + inside.Width && y >= inside.Y && y <= inside.Y + inside.Height)
                     d = 1 - (x - inside.X - inside.Width) / (double) (outside.X + outside.Width - inside.X - inside.Width - 1);
                 else if (y < inside.Y && x >= inside.X && x <= inside.X + inside.Width)
-                    d = y / (double) (inside.Y - outside.Y - 1);
+                    d = (y - outside.Y) / (double) (inside.Y - outside.Y - 1);
                 else if (y >= inside.Y + inside.Height && x >= inside.X && x <= inside.X + inside.Width)
                     d = 1 - (y - inside.Y - inside.Height) / (double) (outside.Y + outside.Height - inside.Y - inside.Height - 1);
                 if (d == -1) continue;
@@ -2933,10 +2933,10 @@ public class Bitmap : IDisposable
             }
         }
         if (FillInside) FillRect(inside, c1);
-        FillGradientRect(outside.X, outside.Y, inside.X, inside.Y, c2, c2, c2, c1);
-        FillGradientRect(outside.X + inside.X + inside.Width, outside.Y, outside.X + outside.Width - inside.X - inside.Width, inside.Y, c2, c2, c1, c2);
-        FillGradientRect(outside.X, outside.Y + inside.Y + inside.Height, inside.X, outside.Y + outside.Height - inside.Y - inside.Height, c2, c1, c2, c2);
-        FillGradientRect(outside.X + inside.X + inside.Width, outside.Y + inside.Y + inside.Height, outside.X + outside.Width - inside.X - inside.Width, outside.Y + outside.Height - inside.Y - inside.Height, c1, c2, c2, c2);
+        FillGradientRect(outside.X, outside.Y, inside.X - outside.X, inside.Y - outside.Y, c2, c2, c2, c1);
+        FillGradientRect(inside.X + inside.Width, outside.Y, outside.X + outside.Width - (inside.X + inside.Width), inside.Y - outside.Y, c2, c2, c1, c2);
+        FillGradientRect(outside.X, inside.Y + inside.Height, inside.X - outside.X, outside.Y + outside.Height - (inside.Y + inside.Height), c2, c1, c2, c2);
+        FillGradientRect(inside.X + inside.Width, inside.Y + inside.Height, outside.X + outside.Width - (inside.X + inside.Width), outside.Y + outside.Height - inside.Y - inside.Height, c1, c2, c2, c2);
     }
 
     #region EdgeFunction Overloads
@@ -3084,6 +3084,168 @@ public class Bitmap : IDisposable
             }
         }
         if (this.Renderer != null) this.Renderer.Update();
+    }
+
+    public void FlipVertically()
+    {
+        FlipVertically(0, 0, Width, Height);
+    }
+
+    public void FlipVertically(int X, int Y, int Width, int Height)
+    {
+        if (X < 0 || Y < 0 || X + Width > this.Width || Y + Height > this.Height || this.Width < 0 || this.Height < 0)
+            throw new Exception("Region out of bounds");
+        if (Locked) throw new BitmapLockedException();
+        if (!ABGR8) ConvertToABGR8();
+        // TODO: Solve with memory/block copying for performance improvement vs. individual byte accesses
+        Stack<Queue<Color>> Colors = new Stack<Queue<Color>>();
+        for (int dy = Y; dy < Y + Height; dy++)
+        {
+            Queue<Color> Pixels = new Queue<Color>();
+            for (int dx = X; dx < X + Width; dx++)
+            {
+                Pixels.Enqueue(GetPixelFast(dx, dy));
+            }
+            Colors.Push(Pixels);
+        }
+        for (int dy = Y; dy < Y + Height; dy++)
+        {
+            Queue<Color> Pixels = Colors.Pop();
+            for (int dx = X; dx < X + Width; dx++)
+            {
+                Color c = Pixels.Dequeue();
+                SetPixelFast(dx, dy, c.Red, c.Green, c.Blue, c.Alpha);
+            }
+        }
+    }
+
+    public void FlipHorizontally()
+    {
+        FlipHorizontally(0, 0, Width, Height);
+    }
+
+    public void FlipHorizontally(int X, int Y, int Width, int Height)
+    {
+        if (X < 0 || Y < 0 || X + Width > this.Width || Y + Height > this.Height || this.Width < 0 || this.Height < 0)
+            throw new Exception("Region out of bounds");
+        if (Locked) throw new BitmapLockedException();
+        if (!ABGR8) ConvertToABGR8();
+        // TODO: Solve with memory/block copying for performance improvement vs. individual byte accesses
+        Stack<Queue<Color>> Colors = new Stack<Queue<Color>>();
+        for (int dx = X; dx < X + Width; dx++)
+        {
+            Queue<Color> Pixels = new Queue<Color>();
+            for (int dy = Y; dy < Y + Height; dy++)
+            {
+                Pixels.Enqueue(GetPixelFast(dx, dy));
+            }
+            Colors.Push(Pixels);
+        }
+        for (int dx = X; dx < X + Width; dx++)
+        {
+            Queue<Color> Pixels = Colors.Pop();
+            for (int dy = Y; dy < Y + Height; dy++)
+            {
+                Color c = Pixels.Dequeue();
+                SetPixelFast(dx, dy, c.Red, c.Green, c.Blue, c.Alpha);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Applies a box blur filter on the original image.
+    /// </summary>
+    /// <param name="Weight">The weight or size of the blur. Runtime increases exponentially with the weight. Must be at least 1.</param>
+    /// <param name="TransparentEdges">If true, non-existent pixels for filtering near edges are seen as transparent. If false, a the filter weight is reduced locally.</param>
+    /// <returns>The new blurred bitmap.</returns>
+    public Bitmap Blur(int Weight = 1, bool TransparentEdges = true)
+    {
+        if (Weight < 1) throw new Exception("Blur weight must be at least 1.");
+        Bitmap bmp = new Bitmap(Width, Height);
+        bmp.Unlock();
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                int Red = 0,
+                    Green = 0,
+                    Blue = 0,
+                    Alpha = 0;
+                int count = 0;
+                for (int dy = y - Weight; dy <= y + Weight; dy++)
+                {
+                    for (int dx = x - Weight; dx <= x + Weight; dx++)
+                    {
+                        if (dx >= 0 && dx < Width && dy >= 0 && dy < Height)
+                        {
+                            Color c = GetPixel(dx, dy);
+                            Red += c.Red;
+                            Green += c.Green;
+                            Blue += c.Blue;
+                            Alpha += c.Alpha;
+                            count++;
+                        }
+                        else if (TransparentEdges) count++;
+                    }
+                }
+                Red /= count;
+                Green /= count;
+                Blue /= count;
+                Alpha /= count;
+                bmp.SetPixel(x, y, (byte) Red, (byte) Green, (byte) Blue, (byte) Alpha);
+            }
+        }
+        bmp.Lock();
+        return bmp;
+    }
+
+    /// <summary>
+    /// Applies a box blur filter on the original image.
+    /// </summary>
+    /// <param name="Inside">Points within this region are not blurred, so as to save processing time. Useful especially when working with solid colors.</param>
+    /// <param name="Weight">The weight or size of the blur. Runtime increases exponentially with the weight. Must be at least 1.</param>
+    /// <param name="TransparentEdges">If true, non-existent pixels for filtering near edges are seen as transparent. If false, a the filter weight is reduced locally.</param>
+    /// <returns>The new blurred bitmap.</returns>
+    public Bitmap BlurExcludeRectangle(Rect Inside, int Weight = 1, bool TransparentEdges = true)
+    {
+        if (Weight < 1) throw new Exception("Blur weight must be at least 1.");
+        Bitmap bmp = new Bitmap(Width, Height);
+        bmp.Unlock();
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                if (Inside.Contains(x, y)) continue;
+                int Red = 0,
+                    Green = 0,
+                    Blue = 0,
+                    Alpha = 0;
+                int count = 0;
+                for (int dy = y - Weight; dy <= y + Weight; dy++)
+                {
+                    for (int dx = x - Weight; dx <= x + Weight; dx++)
+                    {
+                        if (dx >= 0 && dx < Width && dy >= 0 && dy < Height)
+                        {
+                            Color c = GetPixel(dx, dy);
+                            Red += c.Red;
+                            Green += c.Green;
+                            Blue += c.Blue;
+                            Alpha += c.Alpha;
+                            count++;
+                        }
+                        else if (TransparentEdges) count++;
+                    }
+                }
+                Red /= count;
+                Green /= count;
+                Blue /= count;
+                Alpha /= count;
+                bmp.SetPixel(x, y, (byte)Red, (byte)Green, (byte)Blue, (byte)Alpha);
+            }
+        }
+        bmp.Lock();
+        return bmp;
     }
 
     /// <summary>
