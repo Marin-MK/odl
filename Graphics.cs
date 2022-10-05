@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using static odl.SDL2.SDL;
 using static odl.SDL2.SDL_image;
 using static odl.SDL2.SDL_ttf;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace odl;
 
@@ -474,6 +476,33 @@ public static class Graphics
         }
     }
 
+    static int PrevSecond;
+    static int Frames;
+    static bool _ShowFrames;
+    public static bool ShowFrames
+    {
+        get
+        {
+            return _ShowFrames;
+        }
+        set
+        {
+            _ShowFrames = value;
+            if (!_ShowFrames)
+            {
+                Window w = Windows[0];
+                if (w == null || w.Disposed) return;
+                string text = w.Text;
+                Match m = Regex.Match(text, @"(^.*) - \d+ FPS");
+                if (m.Success)
+                {
+                    text = m.Groups[1].Value;
+                    w.SetText(text);
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Updates input, graphics and the window.
     /// </summary>
@@ -482,6 +511,30 @@ public static class Graphics
         UpdateInput(IgnoreErrors);
         UpdateGraphics(ForceRerender);
         UpdateWindows();
+        if (ShowFrames)
+        {
+            int CurSecond = DateTime.Now.Second;
+            Frames++;
+            if (CurSecond != PrevSecond)
+            {
+                SetFrameCount(Frames);
+                Frames = 0;
+                PrevSecond = CurSecond;
+            }
+        }
+    }
+
+    static void SetFrameCount(int Frames)
+    {
+        Window w = Windows[0];
+        if (w == null || w.Disposed) return;
+        string text = w.Text;
+        Match m = Regex.Match(text, @"(^.*) - \d+ FPS");
+        if (m.Success)
+        {
+            text = m.Groups[1].Value;
+        }
+        w.SetText(text + " - " + Frames.ToString() + " FPS");
     }
 
     /// <summary>
