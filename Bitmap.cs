@@ -2059,7 +2059,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
-        this.BlendMode = BlendMode.Blend;
+        this.BlendMode = BlendMode.Addition;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -2217,7 +2217,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
-        this.BlendMode = BlendMode.Blend;
+        this.BlendMode = BlendMode.Addition;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -2320,7 +2320,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, TextBitmap.Width, TextBitmap.Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
-        this.BlendMode = BlendMode.Blend;
+        this.BlendMode = BlendMode.Addition;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
@@ -2489,7 +2489,7 @@ public class Bitmap : IDisposable
         if (rightalign) X -= TextBitmap.Width;
         this.Build(new Rect(X, Y, Width, Height), TextBitmap, new Rect(0, 0, TextBitmap.Width, TextBitmap.Height));
         TextBitmap.Dispose();
-        this.BlendMode = BlendMode.Blend;
+        this.BlendMode = BlendMode.Addition;
         if (this.Renderer != null) this.Renderer.Update();
     }
 
