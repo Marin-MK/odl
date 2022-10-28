@@ -196,7 +196,8 @@ public class Sound
             else if (File.Exists(Filename + ".mid")) Filename += ".mid";
         }
         Audio.BASS_Flag flags = Audio.UsingBassFX ? Audio.BASS_Flag.BASS_STREAM_DECODE : Audio.BASS_Flag.BASS_STREAM_AUTOFREE;
-        this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, flags);
+        if (Filename.EndsWith(".mid")) this.Stream = Audio.BASS_MIDI_StreamCreateFile(false, Filename, 0, 0, flags, 0);
+        else this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, flags);
         if (this.Stream == 0)
         {
             if (Filename.EndsWith(".mid"))

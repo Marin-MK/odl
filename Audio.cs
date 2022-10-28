@@ -74,7 +74,7 @@ public static class Audio
 
         if (UsingBassMidi)
         {
-            BASS_MIDI_StreamCreateFile = bass_midi.GetFunction<BASS_IntBoolStrLngLngFlag>("BASS_MIDI_StreamCreateFile");
+            BASS_MIDI_StreamCreateFile = bass_midi.GetFunction<BASS_IntBoolStrLngLngFlagInt>("BASS_MIDI_StreamCreateFile");
             BASS_MIDI_FontInit = bass_midi.GetFunction<BASS_IntStrInt>("BASS_MIDI_FontInit");
             BASS_MIDI_FontFree = bass_midi.GetFunction<BASS_BoolInt>("BASS_MIDI_FontFree");
             BASS_MIDI_StreamSetFonts = bass_midi.GetFunction<BASS_BoolIntPtrInt>("BASS_MIDI_StreamSetFonts");
@@ -119,6 +119,7 @@ public static class Audio
         if (!Initialized) throw new Exception("Audio module was not initialized.");
         if (!UsingBassMidi) throw new Exception("Midi module was not initialized.");
         int Handle = BASS_MIDI_FontInit(Filename, 0);
+        if (Handle < 1) throw new Exception("Soundfont could not be loaded.");
         Soundfonts.Add(Handle);
         return Handle;
     }
@@ -233,6 +234,7 @@ public static class Audio
     internal delegate int BASS_IntStrInt(string Str, int Int);
     internal delegate BASS_Error BASS_BASSError();
     internal unsafe delegate bool BASS_BoolIntPtrInt(int Int1, BASS_MIDI_FONT* Ptr, int Int2);
+    internal delegate int BASS_IntBoolStrLngLngFlagInt(bool Bool, string Str, long Lng1, long Lng2, BASS_Flag Flag, int Int);
 
     internal static BASS_UInt BASS_FX_GetVersion;
     internal static BASS_UInt BASS_GetVersion;
@@ -258,7 +260,7 @@ public static class Audio
     internal static BASS_BoolInt BASS_ChannelStop;
     internal static BASS_BASSError BASS_ErrorGetCode;
 
-    internal static BASS_IntBoolStrLngLngFlag BASS_MIDI_StreamCreateFile;
+    internal static BASS_IntBoolStrLngLngFlagInt BASS_MIDI_StreamCreateFile;
     internal static BASS_IntStrInt BASS_MIDI_FontInit;
     internal static BASS_BoolInt BASS_MIDI_FontFree;
     internal static BASS_BoolIntPtrInt BASS_MIDI_StreamSetFonts;
