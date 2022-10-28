@@ -65,7 +65,8 @@ public class Font : IDisposable
             }
         }
         (_, float HDPI, float VDPI) = Graphics.Windows.Count > 0 ? Graphics.Windows[0].GetDPI() : (0, 100, 100);
-        SDL_Font = TTF_OpenFontDPI(Name, Size, (uint) Math.Round(HDPI), (uint) Math.Round(VDPI));
+        //SDL_Font = TTF_OpenFontDPI(Name, Size, (uint) Math.Round(HDPI), (uint) Math.Round(VDPI));
+        SDL_Font = TTF_OpenFont(Name, Size+5);
         if (SDL_Font == IntPtr.Zero) throw new Exception("Invalid font: '" + Name + "'");
     }
 
