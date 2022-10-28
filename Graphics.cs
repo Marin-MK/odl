@@ -81,9 +81,9 @@ public static class Graphics
         CurrentObjects.CompareWith(new ObjectCollection(Windows[0]));
     }
 
-    // Windows DPI awareness
-    [System.Runtime.InteropServices.DllImport("user32")]
-    public static extern bool SetProcessDPIAware();
+    delegate bool SetProcessDPIAwareDelegate();
+    delegate bool SetProcessDpiAwarenessContextDelegate(long value);
+    delegate int SetProcessDpiAwarenessDelegate(long value);
 
     /// <summary>
     /// Initializes SDL and its components.
@@ -111,7 +111,42 @@ public static class Graphics
 
         if (NativeLibrary.Platform == NativeLibraryLoader.Platform.Windows)
         {
-            SetProcessDPIAware();
+            // DPI-aware per monitor
+            // Windows 10.1607+
+            NativeLibrary user32 = NativeLibrary.Load("user32");
+            if (user32.HasFunction("SetProcessDpiAwarenessContext"))
+            {
+                // -1 unaware, -2 aware, -3 per monitor aware, -4 per monitor aware v2 (?), -5 unaware gdi scaled (?)
+                bool ret = user32.GetFunction<SetProcessDpiAwarenessContextDelegate>("SetProcessDpiAwarenessContext").Invoke(-4);
+                if (ret) Console.WriteLine("Set DPI awareness per monitor v2 (v10.1607+)");
+                else Console.WriteLine("Failed to set DPI awareness per monitor v2 (v10.1607+)");
+            }
+            else
+            {
+                // DPI-aware per monitor
+                // Windows 8.1+
+                NativeLibrary shcore = NativeLibrary.Load("shcore");
+                if (shcore.HasFunction("SetProcessDpiAwareness"))
+                {
+                    // 0 unaware, 1 aware, 2 per monitor aware
+                    int ret = shcore.GetFunction<SetProcessDpiAwarenessDelegate>("SetProcessDpiAwareness").Invoke(2);
+                    if (ret == 0) Console.WriteLine("Set DPI awareness per monitor (v8.1+)");
+                    else Console.WriteLine("Failed to set DPI awareness per monitor (v8.1+)");
+                }
+                else
+                {
+                    // Global DPI awareness
+                    // Windows Vista+
+                    if (user32.HasFunction("SetProcessDPIAware"))
+                    {
+                        // Fully aware; not per monitor.
+                        bool ret = user32.GetFunction<SetProcessDPIAwareDelegate>("SetProcessDPIAware").Invoke();
+                        if (ret) Console.WriteLine("Set DPI awareness globally");
+                        else Console.WriteLine("Failed to set DPI awareness globally");
+                    }
+                }
+            }
+            
         }
         else if (NativeLibrary.Platform != NativeLibraryLoader.Platform.Linux)
         {
