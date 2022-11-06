@@ -12,9 +12,10 @@ public class Sprite : IDisposable
     public static Viewport DefaultViewport;
 
     /// <summary>
-    /// The debug name of the sprite.
+    /// Name of the sprite used for debug display.
     /// </summary>
     public string Name { get; set; }
+
     private Viewport _Viewport;
     /// <summary>
     /// The viewport associated with the sprite.

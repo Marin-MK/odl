@@ -3158,7 +3158,7 @@ public class Bitmap : IDisposable
     /// <param name="Weight">The weight or size of the blur. Runtime increases exponentially with the weight. Must be at least 1.</param>
     /// <param name="TransparentEdges">If true, non-existent pixels for filtering near edges are seen as transparent. If false, a the filter weight is reduced locally.</param>
     /// <returns>The new blurred bitmap.</returns>
-    public Bitmap Blur(int Weight = 1, bool TransparentEdges = true)
+    public Bitmap Blur(int Weight = 1, float Scale = 1, bool TransparentEdges = true)
     {
         if (Weight < 1) throw new Exception("Blur weight must be at least 1.");
         Bitmap bmp = new Bitmap(Width, Height);
@@ -3167,7 +3167,7 @@ public class Bitmap : IDisposable
         {
             for (int x = 0; x < Width; x++)
             {
-                int Red = 0,
+                float Red = 0,
                     Green = 0,
                     Blue = 0,
                     Alpha = 0;
@@ -3188,9 +3188,9 @@ public class Bitmap : IDisposable
                         else if (TransparentEdges) count++;
                     }
                 }
-                Red /= count;
-                Green /= count;
-                Blue /= count;
+                Red = Math.Clamp((float) Math.Round(Red * Scale / count), 0, 255);
+                Green = Math.Clamp((float) Math.Round(Green * Scale / count), 0, 255);
+                Blue = Math.Clamp((float) Math.Round(Blue * Scale / count), 0, 255);
                 Alpha /= count;
                 bmp.SetPixel(x, y, (byte) Red, (byte) Green, (byte) Blue, (byte) Alpha);
             }
@@ -3242,6 +3242,48 @@ public class Bitmap : IDisposable
                 Blue /= count;
                 Alpha /= count;
                 bmp.SetPixel(x, y, (byte)Red, (byte)Green, (byte)Blue, (byte)Alpha);
+            }
+        }
+        bmp.Lock();
+        return bmp;
+    }
+
+    public Bitmap Bloom(float Scaling, float Threshold, int Weight)
+    {
+        Bitmap HighThreshold = WithThreshold(Threshold);
+        Bitmap Filter = HighThreshold.Blur(Weight, Scaling);
+        Bitmap Result = new Bitmap(Width, Height);
+        Result.Unlock();
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                Color source = GetPixel(x, y);
+                Color filter = Filter.GetPixel(x, y);
+                Color ret = new Color(
+                    (byte) Math.Clamp(Math.Round((double) (source.Red + filter.Red)), 0, 255),
+                    (byte) Math.Clamp(Math.Round((double) (source.Green + filter.Green)), 0, 255),
+                    (byte) Math.Clamp(Math.Round((double) (source.Blue + filter.Blue)), 0, 255),
+                    (byte) Math.Clamp(Math.Round((double) (source.Alpha + filter.Alpha)), 0, 255)
+                );
+                Result.SetPixel(x, y, ret);
+            }
+        }
+        Result.Lock();
+        return Result;
+    }
+
+    public Bitmap WithThreshold(float Threshold)
+    {
+        Bitmap bmp = new Bitmap(Width, Height);
+        bmp.Unlock();
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                Color c = GetPixel(x, y);
+                if (c.Red / 255d >= Threshold || c.Green / 255d >= Threshold || c.Blue / 255d >= Threshold)
+                    bmp.SetPixel(x, y, c);
             }
         }
         bmp.Lock();

@@ -88,7 +88,7 @@ public class Viewport : IDisposable
     /// <summary>
     /// The timestamp at which the viewport was created.
     /// </summary>
-    internal int CreationTime = Renderer.GetCreationCount();
+    public int CreationTime { get; } = Renderer.GetCreationCount();
     /// <summary>
     /// Whether the sprite list needs to be reordered.
     /// </summary>
