@@ -42,4 +42,15 @@ public class Point
     {
         return new Size(this.X, this.Y);
     }
+
+    public override bool Equals(object obj)
+    {
+        if (this == obj) return true;
+        if (obj is Point)
+        {
+            Point p = (Point) obj;
+            return this.X == p.X && this.Y == p.Y;
+        }
+        return false;
+    }
 }

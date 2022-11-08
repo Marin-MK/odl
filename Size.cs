@@ -19,4 +19,15 @@ public class Size
     {
         return $"(Size: {this.Width},{this.Height})";
     }
+
+    public override bool Equals(object obj)
+    {
+        if (this == obj) return true;
+        if (obj is Size)
+        {
+            Size s = (Size) obj;
+            return this.Width == s.Width && this.Height == s.Height;
+        }
+        return false;
+    }
 }

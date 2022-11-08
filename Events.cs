@@ -158,10 +158,12 @@ public class DirectionEventArgs : BaseEventArgs
 public class ObjectEventArgs : BaseEventArgs
 {
     public object Object;
+    public object OldObject;
 
-    public ObjectEventArgs(object Object)
+    public ObjectEventArgs(object Object, object OldObject = null)
     {
         this.Object = Object;
+        this.OldObject = OldObject;
     }
 }
 
