@@ -31,6 +31,7 @@ public class MouseEventArgs : BaseEventArgs
 {
     public int X { get; set; }
     public int Y { get; set; }
+    public bool CursorHandled { get; set; } = false;
     public bool OldLeftButton { get; }
     public bool LeftButton { get; }
     public bool OldRightButton { get; }
