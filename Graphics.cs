@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using static odl.SDL2.SDL;
 using static odl.SDL2.SDL_image;
 using static odl.SDL2.SDL_ttf;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace odl;
 
@@ -67,6 +66,11 @@ public static class Graphics
             return (Platform)_platform;
         }
     }
+
+    /// <summary>
+    /// Callbacks that were added from threads other than Main, required for execution on the Main thread.
+    /// </summary>
+    private static List<Action> ScheduledCallbacks = new List<Action>();
 
     private static ObjectCollection CurrentObjects;
 
@@ -180,6 +184,19 @@ public static class Graphics
         Initialized = true;
     }
 
+    /// <summary>
+    /// This method schedules callbacks to be run on the main UI thread. This is to be used when inside an awaited method or a different thread,
+    /// when you must be sure that the code is running on the UI thread.
+    /// </summary>
+    /// <param name="Callback">The callback that will be executed on the UI thread.</param>
+    public static void Schedule(Action Callback)
+    {
+        lock (ScheduledCallbacks)
+        {
+            ScheduledCallbacks.Add(Callback);
+        }
+    }
+
     public static Rect GetUsableBounds(int Screen)
     {
         SDL_Rect rect;
@@ -209,7 +226,7 @@ public static class Graphics
         {
             for (int i = 0; i < Renderers.Count; i++)
             {
-                lock (Renderers[i]) { Renderers[i].Redraw(); }
+                Renderers[i].Redraw();
             }
         }
     }
@@ -546,6 +563,17 @@ public static class Graphics
         UpdateInput(IgnoreErrors);
         UpdateGraphics(ForceRerender);
         UpdateWindows();
+        while (ScheduledCallbacks.Count > 0)
+        {
+            // Remove the callback before calling it, so that if Graphics.Update() happens in our callback, we
+            // don't call the callback again in an infinite loop.
+            lock (ScheduledCallbacks)
+            {
+                Action Callback = ScheduledCallbacks[0];
+                ScheduledCallbacks.RemoveAt(0);
+                Callback();
+            }
+        }
         if (ShowFrames)
         {
             int CurSecond = DateTime.Now.Second;
