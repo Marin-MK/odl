@@ -32,7 +32,7 @@ public class Font : IDisposable
 
     public Font(string Name, int Size = 12)
     {
-        this.Name = Name;
+        this.Name = Name.Replace('\\', '/');
         this.Size = Size;
         LoadFont();
         Cache.Add(this);
@@ -67,6 +67,7 @@ public class Font : IDisposable
         (_, float HDPI, float VDPI) = Graphics.Windows.Count > 0 ? Graphics.Windows[0].GetDPI() : (0, 100, 100);
         //SDL_Font = TTF_OpenFontDPI(Name, Size, (uint) Math.Round(HDPI), (uint) Math.Round(VDPI));
         SDL_Font = TTF_OpenFont(Name, Size+5);
+        Name = Name.Replace('\\', '/');
         if (SDL_Font == IntPtr.Zero) throw new Exception("Invalid font: '" + Name + "'");
     }
 
@@ -118,7 +119,7 @@ public class Font : IDisposable
             if (f.Name == Name || f.Name == Name + ".ttf") return f;
             foreach (string FontPath in FontPaths)
             {
-                if (f.Name == Path.Combine(FontPath, Name) || f.Name == Path.Combine(FontPath, Name + ".ttf")) return f;
+                if (f.Name == Path.Combine(FontPath, Name).Replace('\\', '/') || f.Name == Path.Combine(FontPath, Name + ".ttf").Replace('\\', '/')) return f;
             }
         }
         return new Font(Name, Size);
@@ -155,7 +156,7 @@ public class Font : IDisposable
         if (obj is Font)
         {
             Font f = (Font) obj;
-            return this.SDL_Font == f.SDL_Font;
+            return this.Name == f.Name && this.Size == f.Size;
         }
         return false;
     }

@@ -30,10 +30,6 @@ public static class Graphics
     /// </summary>
     public static Size MaxTextureSize;
     /// <summary>
-    /// Whether the debug log should be printed to the console.
-    /// </summary>
-    public static bool DebugLog = false;
-    /// <summary>
     /// The last used MouseEventArgs object.
     /// </summary>
     public static MouseEventArgs LastMouseEvent = new MouseEventArgs(0, 0, false, false, false, false, false, false, 0, 0);
@@ -204,17 +200,11 @@ public static class Graphics
         return new Rect(rect);
     }
 
-    /// <summary>
-    /// Logs a message to the debug log.
-    /// </summary>
-    public static void Log(string Msg)
+    public static Bitmap RenderToBitmap(List<Viewport> Viewports, int Width = 0, int Height = 0, int XOffset = 0, int YOffset = 0)
     {
-        if (DebugLog)
-        {
-            DateTime n = DateTime.Now;
-            string str = $"[{n.Hour}:{n.Minute}:{n.Second}:{n.Millisecond}] [ODL:DEBUG] " + Msg;
-            Console.WriteLine(str);
-        }
+        if (Viewports.Count == 0) return new Bitmap(Width, Height);
+        Renderer r = Viewports[0].Renderer;
+        return r.RenderViewports(Viewports, Width, Height, XOffset, YOffset);
     }
 
     /// <summary>

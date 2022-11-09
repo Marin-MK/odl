@@ -490,11 +490,8 @@ public class Bitmap : IDisposable
         }
         else
         {
-            if (this.Surface != IntPtr.Zero)
-            {
-                SDL_FreeSurface(this.Surface);
-                if (this.Texture != IntPtr.Zero) SDL_DestroyTexture(this.Texture);
-            }
+            if (this.Surface != IntPtr.Zero) SDL_FreeSurface(this.Surface);
+            if (this.Texture != IntPtr.Zero) SDL_DestroyTexture(this.Texture);
             if (PixelHandle != IntPtr.Zero)
             {
                 Marshal.FreeHGlobal(PixelHandle);
