@@ -2,20 +2,24 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
     <Authors>Marijn Herrebout</Authors>
     <Platform>x64</Platform>
     <Version>0.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>Debug</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <Platforms>x64</Platforms>
     <Copyright>Marijn Herrebout</Copyright>
     <RepositoryUrl>https://github.com/Marin-MK/odl</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Optimize>False</Optimize>
   </PropertyGroup>
 

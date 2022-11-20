@@ -121,14 +121,14 @@ public class Bitmap : IDisposable
     /// Loads the specified file into a bitmap.
     /// </summary>
     /// <param name="Filename">The file to load into a bitmap.</param>
-    public unsafe Bitmap(string GivenFilename)
+    public unsafe Bitmap(string Filename)
     {
-        string Filename = FindRealFilename(GivenFilename);
-        if (Filename == null) throw new FileNotFoundException($"File could not be found -- {GivenFilename}");
-        (Size ImageSize, bool IsPNG) = ValidateIMG(Filename);
+        string RFilename = FindRealFilename(Filename);
+        if (RFilename == null) throw new FileNotFoundException($"File could not be found -- {Filename}");
+        (Size ImageSize, bool IsPNG) = ValidateIMG(RFilename);
         if (IsPNG && ImageSize.Width > Graphics.MaxTextureSize.Width && ImageSize.Height > Graphics.MaxTextureSize.Height)
         {
-            (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(Filename);
+            (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(RFilename);
             byte[] bytes = data.Bytes;
             int width = data.Width;
             int height = data.Height;
@@ -159,7 +159,7 @@ public class Bitmap : IDisposable
         }
         else if (IsPNG && ImageSize.Height > Graphics.MaxTextureSize.Height)
         {
-            (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(Filename);
+            (byte[] Bytes, int Width, int Height) data = decodl.PNGDecoder.Decode(RFilename);
             byte[] bytes = data.Bytes;
             int width = data.Width;
             int height = data.Height;
@@ -184,7 +184,7 @@ public class Bitmap : IDisposable
         }
         else
         {
-            this.Surface = IMG_Load(Filename);
+            this.Surface = IMG_Load(RFilename);
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
