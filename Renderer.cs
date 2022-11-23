@@ -163,8 +163,8 @@ internal class Renderer : IDisposable
             ViewportRect.y = vp.Y - vp.OY + RenderOffsetY;
             if (vp.Width == -1) vp.Width = ViewportRect.w;
             if (vp.Height == -1) vp.Height = ViewportRect.h;
-            ViewportRect.w = vp.Width;
-            ViewportRect.h = vp.Height;
+            ViewportRect.w = (int) Math.Round(vp.Width * vp.ZoomX);
+            ViewportRect.h = (int) Math.Round(vp.Height * vp.ZoomY);
             int xoffset = 0;
             int yoffset = 0;
             if (ForceRescale)
@@ -223,14 +223,14 @@ internal class Renderer : IDisposable
                         s.X = SX + (int) Math.Round(bmp.InternalX * s.ZoomX);
                         s.Y = SY + (int) Math.Round(bmp.InternalY * s.ZoomY);
                         s.SrcRect = new Rect(0, 0, bmp.Width, bmp.Height);
-                        RenderSprite(s, bmp, xoffset, yoffset);
+                        RenderSprite(vp, s, bmp, xoffset, yoffset);
                     }
                     s.X = SX;
                     s.Y = SY;
                 }
                 else
                 {
-                    RenderSprite(s, s.Bitmap, xoffset, yoffset);
+                    RenderSprite(vp, s, s.Bitmap, xoffset, yoffset);
                 }
             }
         }
@@ -240,7 +240,7 @@ internal class Renderer : IDisposable
     /// Renders an individual sprite.
     /// </summary>
     /// <param name="s">The sprite to render.</param>
-    private void RenderSprite(Sprite s, Bitmap bmp, int XOffset, int YOffset)
+    private void RenderSprite(Viewport vp, Sprite s, Bitmap bmp, int XOffset, int YOffset)
     {
         IntPtr Texture = bmp.Texture;
         
@@ -270,18 +270,14 @@ internal class Renderer : IDisposable
             Src.y = 0;
             Src.w = 1;
             Src.h = 1;
-            Dest.w = ((SolidBitmap) bmp).BitmapWidth;
-            Dest.h = ((SolidBitmap) bmp).BitmapHeight;
+            Dest.w = (int) Math.Round(((SolidBitmap) bmp).BitmapWidth * s.ZoomX * vp.ZoomX);
+            Dest.h = (int) Math.Round(((SolidBitmap) bmp).BitmapHeight * s.ZoomY * vp.ZoomY);
         }
         else
         {
             Src = s.SrcRect.SDL_Rect;
-
-            // Additional checks, since ZoomX/ZoomY are 1 99% of the time, this way it skips the extra calculation.
-            if (s.ZoomX == 1) Dest.w = Src.w;
-            else Dest.w = (int) Math.Round(Src.w * s.ZoomX);
-            if (s.ZoomY == 1) Dest.h = Src.h;
-            else Dest.h = (int) Math.Round(Src.h * s.ZoomY);
+            Dest.w = (int) Math.Round(Src.w * s.ZoomX * vp.ZoomX);
+            Dest.h = (int) Math.Round(Src.h * s.ZoomY * vp.ZoomY);
         }
 
         if (!bmp.Locked && !(bmp is SolidBitmap))
@@ -292,8 +288,10 @@ internal class Renderer : IDisposable
         {
             int oxoffset = s.FactorZoomIntoOrigin ? (int) Math.Round(s.OX * s.ZoomX) : s.OX;
             int oyoffset = s.FactorZoomIntoOrigin ? (int) Math.Round(s.OY * s.ZoomY) : s.OY;
-            Dest.x = p.X - oxoffset + XOffset;
-            Dest.y = p.Y - oyoffset + YOffset;
+            int vpoxdiff = (int) Math.Round((1 - vp.ZoomX) * (p.X + oxoffset));
+            int vpoydiff = (int) Math.Round((1 - vp.ZoomY) * (p.Y + oyoffset));
+            Dest.x = p.X - oxoffset + XOffset - vpoxdiff;
+            Dest.y = p.Y - oyoffset + YOffset - vpoydiff;
 
             if (s.Angle % 360 == 0 && s.OX == 0 && s.OY == 0 && !s.MirrorX && !s.MirrorY)
             {

@@ -146,7 +146,7 @@ public static class Graphics
                     }
                 }
             }
-            
+
         }
         else if (NativeLibrary.Platform != NativeLibraryLoader.Platform.Linux)
         {
@@ -205,6 +205,11 @@ public static class Graphics
         if (Viewports.Count == 0) return new Bitmap(Width, Height);
         Renderer r = Viewports[0].Renderer;
         return r.RenderViewports(Viewports, Width, Height, XOffset, YOffset);
+    }
+
+    public static Bitmap RenderToBitmap(int Width = 0, int Height = 0, int XOffset = 0, int YOffset = 0)
+    {
+        return RenderToBitmap(Windows[0].Renderer.Viewports, Width, Height, XOffset, YOffset);
     }
 
     /// <summary>
