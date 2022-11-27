@@ -114,13 +114,15 @@ public class TextEventArgs : BaseEventArgs
     public string OldText { get; }
     public bool Backspace { get; }
     public bool Delete { get; }
+    public bool Tab { get; }
 
-    public TextEventArgs(string Text, string OldText, bool Backspace = false, bool Delete = false)
+    public TextEventArgs(string Text, string OldText, bool Backspace = false, bool Delete = false, bool Tab = false)
     {
         this.Text = Text;
         this.OldText = OldText;
         this.Backspace = Backspace;
         this.Delete = Delete;
+        this.Tab = Tab;
     }
 }
 

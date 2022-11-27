@@ -489,12 +489,14 @@ public static class Graphics
                     string txt = "";
                     bool backspace = false;
                     bool delete = false;
+                    bool tab = false;
                     if (sym1 == SDL_Keycode.SDLK_RETURN) txt = "\n";
                     if (sym1 == SDL_Keycode.SDLK_BACKSPACE) backspace = true;
                     if (sym1 == SDL_Keycode.SDLK_DELETE) delete = true;
-                    if (txt.Length > 0 || backspace || delete)
+                    if (sym1 == SDL_Keycode.SDLK_TAB) tab = true;
+                    if (txt.Length > 0 || backspace || delete || tab)
                     {
-                        w.OnTextInput?.Invoke(new TextEventArgs(txt, null, backspace, delete));
+                        w.OnTextInput?.Invoke(new TextEventArgs(txt, null, backspace, delete, tab));
                     }
                     break;
                 case SDL_EventType.SDL_KEYUP:
