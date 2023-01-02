@@ -362,7 +362,6 @@ public class Bitmap : IDisposable
             for (int i = 0; i < 3; i++)
             {
                 byte bt = br.ReadByte();
-                global::System.Console.WriteLine(bt);
                 if (bt != jpegsignature[i])
                 {
                     validjpeg = false;
@@ -614,24 +613,34 @@ public class Bitmap : IDisposable
         else
         {
             if (!RGBA8 && !ABGR8) ConvertToABGR8();
+            int num = 0;
             if (RGBA8)
             {
-                PixelPointer[Width * Y * 4 + X * 4] = a;
-                PixelPointer[Width * Y * 4 + X * 4 + 1] = b;
-                PixelPointer[Width * Y * 4 + X * 4 + 2] = g;
-                PixelPointer[Width * Y * 4 + X * 4 + 3] = r;
+                num = (r << 24) + (g << 16) + (b << 8) + a;
             }
             else
             {
-                PixelPointer[Width * Y * 4 + X * 4] = r;
-                PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
-                PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
-                PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
+                num = (a << 24) + (b << 16) + (g << 8) + r;
             }
+            Marshal.WriteInt32((nint) PixelPointer + Width * Y * 4 + X * 4, num);
         }
         if (this.Renderer != null) this.Renderer.Update();
     }
 
+    #region SetPixelFast Overloads
+    /// <summary>
+    /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous. This overload does not change the alpha value of the pixel.
+    /// </summary>
+    /// <param name="X">The X position in the bitmap.</param>
+    /// <param name="Y">The Y position in the bitmap.</param>
+    /// <param name="r">The Red component of the color to set the pixel to.</param>
+    /// <param name="g">The Green component of the color to set the pixel to.</param>
+    /// <param name="b">The Blue component of the color to set the pixel to.</param>
+    public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b)
+    {
+        SetPixelFast(X, Y, r, g, b, 255);
+    }
+    #endregion
     /// <summary>
     /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous.
     /// </summary>
@@ -643,25 +652,8 @@ public class Bitmap : IDisposable
     /// <param name="a">The Alpha component of the color to set the pixel to.</param>
     public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b, byte a)
     {
-        PixelPointer[Width * Y * 4 + X * 4] = r;
-        PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
-        PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
-        PixelPointer[Width * Y * 4 + X * 4 + 3] = a;
-    }
-
-    /// <summary>
-    /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous. This overload does not change the alpha value of the pixel.
-    /// </summary>
-    /// <param name="X">The X position in the bitmap.</param>
-    /// <param name="Y">The Y position in the bitmap.</param>
-    /// <param name="r">The Red component of the color to set the pixel to.</param>
-    /// <param name="g">The Green component of the color to set the pixel to.</param>
-    /// <param name="b">The Blue component of the color to set the pixel to.</param>
-    public virtual unsafe void SetPixelFast(int X, int Y, byte r, byte g, byte b)
-    {
-        PixelPointer[Width * Y * 4 + X * 4] = r;
-        PixelPointer[Width * Y * 4 + X * 4 + 1] = g;
-        PixelPointer[Width * Y * 4 + X * 4 + 2] = b;
+        int num = (a << 24) + (b << 16) + (g << 8) + r;
+        Marshal.WriteInt32((nint) PixelPointer + Width * Y * 4 + X * 4, num);
     }
 
     #region GetPixel Overloads
@@ -691,22 +683,23 @@ public class Bitmap : IDisposable
         else
         {
             if (!RGBA8 && !ABGR8) ConvertToABGR8();
+            int num = Marshal.ReadInt32((nint) PixelPointer + Width * Y * 4 + X * 4);
             if (RGBA8)
             {
                 return new Color(
-                    PixelPointer[Width * Y * 4 + X * 4 + 3],
-                    PixelPointer[Width * Y * 4 + X * 4 + 2],
-                    PixelPointer[Width * Y * 4 + X * 4 + 1],
-                    PixelPointer[Width * Y * 4 + X * 4]
+                    (byte) ((num >> 24) & 0xFF),
+                    (byte) ((num >> 16) & 0xFF),
+                    (byte) ((num >> 8) & 0xFF),
+                    (byte) (num & 0xFF)
                 );
             }
             else
             {
                 return new Color(
-                    PixelPointer[Width * Y * 4 + X * 4],
-                    PixelPointer[Width * Y * 4 + X * 4 + 1],
-                    PixelPointer[Width * Y * 4 + X * 4 + 2],
-                    PixelPointer[Width * Y * 4 + X * 4 + 3]
+                    (byte) (num & 0xFF),
+                    (byte) ((num >> 8) & 0xFF),
+                    (byte) ((num >> 16) & 0xFF),
+                    (byte) ((num >> 24) & 0xFF)
                 );
             }
         }
@@ -719,11 +712,12 @@ public class Bitmap : IDisposable
     /// <param name="Y">The Y position in the bitmap.</param>
     public virtual unsafe Color GetPixelFast(int X, int Y)
     {
+        int num = Marshal.ReadInt32((nint) PixelPointer, Width * Y * 4 + X * 4);
         return new Color(
-            PixelPointer[Width * Y * 4 + X * 4],
-            PixelPointer[Width * Y * 4 + X * 4 + 1],
-            PixelPointer[Width * Y * 4 + X * 4 + 2],
-            PixelPointer[Width * Y * 4 + X * 4 + 3]
+            (byte) (num & 0xFF),
+            (byte) ((num >> 8) & 0xFF),
+            (byte) ((num >> 16) & 0xFF),
+            (byte) ((num >> 24) & 0xFF)
         );
     }
 
@@ -3303,7 +3297,7 @@ public class Bitmap : IDisposable
             (byte) Math.Round(f1 * c1.Blue + (1 - f1) * c2.Blue),
             (byte) Math.Round(f1 * c1.Alpha + (1 - f1) * c2.Alpha)
         );
-    } 
+    }
 
     /// <summary>
     /// Converts the bitmap to an ABGR8 format.
