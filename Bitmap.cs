@@ -3300,6 +3300,31 @@ public class Bitmap : IDisposable
     }
 
     /// <summary>
+    /// Changes the size of the bitmap without scaling or interpolation.
+    /// </summary>
+    /// <param name="NewSize">The new size of the bitmap.</param>
+    /// <returns>The resized bitmap.</returns>
+    public Bitmap Resize(Size NewSize)
+    {
+        return Resize(NewSize.Width, NewSize.Height);
+    }
+
+    /// <summary>
+    /// Changes the size of the bitmap without scaling or interpolation.
+    /// </summary>
+    /// <param name="NewWidth">The new width of the bitmap.</param>
+    /// <param name="NewHeight">The new height of the bitmap.</param>
+    /// <returns>The resized bitmap.</returns>
+    public Bitmap Resize(int NewWidth, int NewHeight)
+    {
+        Bitmap NewBitmap = new Bitmap(NewWidth, NewHeight);
+        NewBitmap.Unlock();
+        NewBitmap.Build(this);
+        NewBitmap.Lock();
+        return NewBitmap;
+    }
+
+    /// <summary>
     /// Converts the bitmap to an ABGR8 format.
     /// </summary>
     protected virtual void ConvertToABGR8()
