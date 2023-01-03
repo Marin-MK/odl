@@ -3325,6 +3325,31 @@ public class Bitmap : IDisposable
     }
 
     /// <summary>
+    /// Changes the size of the bitmap without scaling or interpolation. Slower than <see cref="Resize(int, int)"/>, but lossless.
+    /// </summary>
+    /// <param name="NewWidth">The new width of the bitmap.</param>
+    /// <param name="NewHeight">The new height of the bitmap.</param>
+    /// <returns>The resized bitmap.</returns>
+    public unsafe Bitmap ResizeWithoutBuild(int NewWidth, int NewHeight)
+    {
+        nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
+        for (int y = 0; y < this.Height; y++)
+        {
+            for (int x = 0; x < this.Width; x++)
+            {
+                if (x >= NewWidth || y >= NewHeight) continue;
+                byte rbyte = PixelPointer[y * this.Width * 4 + x * 4];
+                byte gbyte = PixelPointer[y * this.Width * 4 + x * 4 + 1];
+                byte bbyte = PixelPointer[y * this.Width * 4 + x * 4 + 2];
+                byte abyte = PixelPointer[y * this.Width * 4 + x * 4 + 3];
+                int num = (abyte << 24) + (bbyte << 16) + (gbyte << 8) + rbyte;
+                Marshal.WriteInt32(PixelHandle + y * NewWidth * 4 + x * 4, num);
+            }
+        }
+        return new Bitmap(PixelHandle, NewWidth, NewHeight);
+    }
+
+    /// <summary>
     /// Converts the bitmap to an ABGR8 format.
     /// </summary>
     protected virtual void ConvertToABGR8()
