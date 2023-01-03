@@ -3350,6 +3350,30 @@ public class Bitmap : IDisposable
     }
 
     /// <summary>
+    /// Shifts a region in the bitmap up or down depending on the configuration. Shifts across the entire width of the bitmap.
+    /// </summary>
+    /// <param name="StartY">The Y position to start shifting at.</param>
+    /// <param name="RowCount">The number of rows to include in the shift.</param>
+    /// <param name="YShift">The difference with the <paramref name="StartY"/> variable for the new position of the region.</param>
+    /// <param name="ClearOrigin">Whether to clear the original region before copying it.</param>
+    public unsafe void ShiftVertically(int StartY, int RowCount, int YShift, bool ClearOrigin)
+    {
+        if (StartY < 0) throw new Exception($"Cannot shift image with a region with a y coord less than 0, but got {StartY}.");
+        if (StartY + YShift < 0) throw new Exception($"Cannot shift image y coord to less than 0, but got {StartY + YShift}.");
+        if (StartY + RowCount > Height) throw new Exception($"Image shift cannot exceed bitmap height of {Height}, but got {StartY + RowCount}.");
+        if (StartY + RowCount + YShift > Height) throw new Exception($"Cannot shift image y coord to more than bitmap height of {Height}, but got {StartY + RowCount + YShift}.");
+        int StartPos = StartY * Width * 4;
+        int Length = RowCount * Width * 4;
+        int Shift = YShift * Width * 4;
+        nint _tempptr = Marshal.AllocHGlobal(Length);
+        void* temp = (void*) _tempptr;
+        Buffer.MemoryCopy((void*) (PixelPointer + StartPos), temp, Length, Length);
+        if (ClearOrigin) Marshal.Copy(new byte[Length], 0, (nint) (PixelPointer + StartPos), Length);
+        Buffer.MemoryCopy(temp, (void*) (PixelPointer + StartPos + Shift), Length, Length);
+        Marshal.FreeHGlobal(_tempptr);
+    }
+
+    /// <summary>
     /// Converts the bitmap to an ABGR8 format.
     /// </summary>
     protected virtual void ConvertToABGR8()
