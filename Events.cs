@@ -10,6 +10,7 @@ public delegate void TimespanEvent(TimespanEventArgs Args);
 public delegate void StringEvent(StringEventArgs Args);
 public delegate void DirectionEvent(DirectionEventArgs Args);
 public delegate void ObjectEvent(ObjectEventArgs Args);
+public delegate void GenericObjectEvent<T>(GenericObjectEventArgs<T> Args);
 public delegate void ErrorEvent(ErrorEventArgs Args);
 
 public class BaseEventArgs
@@ -177,5 +178,22 @@ public class ErrorEventArgs : BaseEventArgs
     public ErrorEventArgs(Exception Exception)
     {
         this.Exception = Exception;
+    }
+}
+
+public class GenericObjectEventArgs<T> : BaseEventArgs
+{
+    public T Object;
+    public T? OldObject;
+
+    public GenericObjectEventArgs(T Object)
+    {
+        this.Object = Object;
+    }
+
+    public GenericObjectEventArgs(T Object, T OldObject)
+    {
+        this.Object = Object;
+        this.OldObject = OldObject;
     }
 }
