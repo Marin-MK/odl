@@ -63,7 +63,7 @@ public class Bitmap : IDisposable
     {
         get
         {
-            return (byte*)SurfaceObject.pixels;
+            return (byte*) SurfaceObject.pixels;
         }
     }
     /// <summary>
@@ -3332,16 +3332,34 @@ public class Bitmap : IDisposable
     /// <returns>The resized bitmap.</returns>
     public unsafe Bitmap ResizeWithoutBuild(int NewWidth, int NewHeight)
     {
+        if (!ABGR8) ConvertToABGR8();
         nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
         for (int y = 0; y < this.Height; y++)
         {
             for (int x = 0; x < this.Width; x++)
             {
                 if (x >= NewWidth || y >= NewHeight) continue;
-                byte rbyte = PixelPointer[y * this.Width * 4 + x * 4];
-                byte gbyte = PixelPointer[y * this.Width * 4 + x * 4 + 1];
-                byte bbyte = PixelPointer[y * this.Width * 4 + x * 4 + 2];
-                byte abyte = PixelPointer[y * this.Width * 4 + x * 4 + 3];
+                byte rbyte = 0;
+                byte gbyte = 0;
+                byte bbyte = 0;
+                byte abyte = 0;
+                if (IsChunky)
+                {
+                    Bitmap ibmp = GetBitmapFromCoordinate(x, y);
+                    int ix = x - ibmp.InternalX;
+                    int iy = y - ibmp.InternalY;
+                    rbyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4];
+                    gbyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4 + 1];
+                    bbyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4 + 2];
+                    abyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4 + 3];
+                }
+                else
+                {
+                    rbyte = PixelPointer[y * this.Width * 4 + x * 4];
+                    gbyte = PixelPointer[y * this.Width * 4 + x * 4 + 1];
+                    bbyte = PixelPointer[y * this.Width * 4 + x * 4 + 2];
+                    abyte = PixelPointer[y * this.Width * 4 + x * 4 + 3];
+                }
                 int num = (abyte << 24) + (bbyte << 16) + (gbyte << 8) + rbyte;
                 Marshal.WriteInt32(PixelHandle + y * NewWidth * 4 + x * 4, num);
             }
@@ -3358,17 +3376,25 @@ public class Bitmap : IDisposable
     /// <param name="ClearOrigin">Whether to clear the original region before copying it.</param>
     public unsafe void ShiftVertically(int StartY, int RowCount, int YShift, bool ClearOrigin)
     {
+        if (Locked) throw new BitmapLockedException();
         if (StartY < 0) throw new Exception($"Cannot shift image with a region with a y coord less than 0, but got {StartY}.");
         if (StartY + YShift < 0) throw new Exception($"Cannot shift image y coord to less than 0, but got {StartY + YShift}.");
         if (StartY + RowCount > Height) throw new Exception($"Image shift cannot exceed bitmap height of {Height}, but got {StartY + RowCount}.");
         if (StartY + RowCount + YShift > Height) throw new Exception($"Cannot shift image y coord to more than bitmap height of {Height}, but got {StartY + RowCount + YShift}.");
+        if (!ABGR8) ConvertToABGR8();
         int StartPos = StartY * Width * 4;
         int Length = RowCount * Width * 4;
         int Shift = YShift * Width * 4;
         nint _tempptr = Marshal.AllocHGlobal(Length);
         void* temp = (void*) _tempptr;
         Buffer.MemoryCopy((void*) (PixelPointer + StartPos), temp, Length, Length);
-        if (ClearOrigin) Marshal.Copy(new byte[Length], 0, (nint) (PixelPointer + StartPos), Length);
+        if (ClearOrigin)
+        {
+            // Use a span to fill a certain region of the array with 0 to avoid allocating memory
+            byte* offset = PixelPointer + StartPos;
+            Span<byte> span = new Span<byte>(offset, Length);
+            span.Fill(0);
+        }
         Buffer.MemoryCopy(temp, (void*) (PixelPointer + StartPos + Shift), Length, Length);
         Marshal.FreeHGlobal(_tempptr);
     }
