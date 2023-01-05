@@ -3130,7 +3130,6 @@ public class Bitmap : IDisposable
             throw new Exception("Region out of bounds");
         if (Locked) throw new BitmapLockedException();
         if (!ABGR8) ConvertToABGR8();
-        // TODO: Solve with memory/block copying for performance improvement vs. individual byte accesses
         Stack<Queue<Color>> Colors = new Stack<Queue<Color>>();
         for (int dx = X; dx < X + Width; dx++)
         {
@@ -3151,7 +3150,7 @@ public class Bitmap : IDisposable
             }
         }
     }
-    
+
     /// <summary>
     /// Applies a box blur filter on the original image.
     /// </summary>
