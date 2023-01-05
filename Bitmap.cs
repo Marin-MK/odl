@@ -3335,6 +3335,7 @@ public class Bitmap : IDisposable
     /// <returns>The resized bitmap.</returns>
     public unsafe Bitmap ResizeWithoutBuild(int NewWidth, int NewHeight)
     {
+        //return Resize(NewWidth, NewHeight, this.ChunkSize);
         if (!ABGR8) ConvertToABGR8();
         nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
         for (int y = 0; y < this.Height; y++)
@@ -3502,6 +3503,15 @@ public class Bitmap : IDisposable
     {
         if (!Locked) throw new Exception("Bitmap was already unlocked and cannot be unlocked again.");
         this.Locked = false;
+    }
+
+    /// <summary>
+    /// Unlocks the bitmap and immediately locks it.
+    /// </summary>
+    public virtual void Relock()
+    {
+        this.Unlock();
+        this.Lock();
     }
 
     /// <summary>
