@@ -143,6 +143,12 @@ internal class ResizeBitmapBenchmarks
         bmp.Dispose();
     }
 
+    [Benchmark]
+    public void ResizeBuild()
+    {
+        Bitmap bmp = _bitmap.Resize(NewWidth, NewHeight);
+    }
+
     [AfterAll]
     public void Cleanup()
     {
