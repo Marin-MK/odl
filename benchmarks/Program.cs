@@ -24,7 +24,7 @@ internal class Program
         Window win = new Window();
         win.Initialize();
 
-        BenchmarkRunner.Run<ResizeBitmapBenchmarks>();
+        BenchmarkRunner.Run<FlipVerticallyBenchmarks>();
 
         win.Dispose();
 
