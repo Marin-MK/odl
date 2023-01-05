@@ -136,7 +136,7 @@ public class SolidBitmap : Bitmap
     {
         throw new MethodNotSupportedException(this);
     }
-    public override void Build(Rect DestRect, Bitmap SrcBitmap, Rect SrcRect)
+    public override void Build(Rect DestRect, Bitmap SrcBitmap, Rect SrcRect, BlendMode BlendMode = BlendMode.Blend)
     {
         throw new MethodNotSupportedException(this);
     }
