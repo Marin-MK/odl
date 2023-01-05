@@ -641,6 +641,16 @@ public class Bitmap : IDisposable
     {
         SetPixelFast(X, Y, r, g, b, 255);
     }
+    /// <summary>
+    /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous. This overload does not change the alpha value of the pixel.
+    /// </summary>
+    /// <param name="X">The X position in the bitmap.</param>
+    /// <param name="Y">The Y position in the bitmap.</param>
+    /// <param name="Color">The color to set the pixel to.</param>
+    public virtual unsafe void SetPixelFast(int X, int Y, Color Color)
+    {
+        SetPixelFast(X, Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+    }
     #endregion
     /// <summary>
     /// Performs purely byte assignment, and no safety or validity checks. Faster when used in bulk, but more dangerous.
@@ -3335,8 +3345,25 @@ public class Bitmap : IDisposable
     /// <returns>The resized bitmap.</returns>
     public unsafe Bitmap ResizeWithoutBuild(int NewWidth, int NewHeight)
     {
-        //return Resize(NewWidth, NewHeight, this.ChunkSize);
-        if (!ABGR8) ConvertToABGR8();
+        if (IsChunky) throw new NotImplementedException();
+        nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
+        int srcWidth = this.Width * 4;
+        int destWidth = NewWidth * 4;
+        if (destWidth < srcWidth) srcWidth = destWidth;
+        if (srcWidth < destWidth) destWidth = srcWidth;
+        int minHeight = NewHeight;
+        if (this.Height < minHeight) minHeight = this.Height;
+        Span<byte> srcSpan = new Span<byte>((void*) this.PixelPointer, srcWidth);
+        Span<byte> destSpan = new Span<byte>((void*) PixelHandle, destWidth);
+        for (int y = 0; y < minHeight; y++)
+        {
+            srcSpan.CopyTo(destSpan);
+            srcSpan = new Span<byte>((void*) (this.PixelPointer + y * this.Width * 4), srcWidth);
+            destSpan = new Span<byte>((void*) (PixelHandle + y * NewWidth * 4), destWidth);
+        }
+        Bitmap bmp = new Bitmap(PixelHandle, NewWidth, NewHeight);
+        return bmp;
+        /*if (!ABGR8) ConvertToABGR8();
         nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
         for (int y = 0; y < this.Height; y++)
         {
@@ -3368,7 +3395,7 @@ public class Bitmap : IDisposable
                 Marshal.WriteInt32(PixelHandle + y * NewWidth * 4 + x * 4, num);
             }
         }
-        return new Bitmap(PixelHandle, NewWidth, NewHeight);
+        return new Bitmap(PixelHandle, NewWidth, NewHeight);*/
     }
 
     /// <summary>
