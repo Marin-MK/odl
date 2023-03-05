@@ -98,15 +98,6 @@ public class Bitmap : IDisposable
     public int InternalY = 0;
 
     /// <summary>
-    /// Whether this bitmap is in RGBA8 format (non-standard).
-    /// </summary>
-    public bool RGBA8 { get; protected set; } = false;
-    /// <summary>
-    /// Whether this bitmap is in ABGR8 format (standard).
-    /// </summary>
-    public bool ABGR8 { get; protected set; } = true;
-
-    /// <summary>
     /// Used only for bitmaps created with a byte array.
     /// </summary>
     IntPtr PixelHandle = IntPtr.Zero;
@@ -155,8 +146,6 @@ public class Bitmap : IDisposable
             }
             this.Width = width;
             this.Height = height;
-            RGBA8 = InternalBitmaps[0].RGBA8;
-            ABGR8 = InternalBitmaps[0].ABGR8;
         }
         else if (IsPNG && ImageSize.Height > Graphics.MaxTextureSize.Height)
         {
@@ -180,8 +169,6 @@ public class Bitmap : IDisposable
             }
             this.Width = width;
             this.Height = height;
-            RGBA8 = InternalBitmaps[0].RGBA8;
-            ABGR8 = InternalBitmaps[0].ABGR8;
         }
         else
         {
@@ -189,12 +176,14 @@ public class Bitmap : IDisposable
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
-            SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
-            RGBA8 = format.format == SDL_PixelFormatEnum.SDL_PIXELFORMAT_RGBA8888;
-            ABGR8 = format.format == SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888;
         }
         this.Lock();
         BitmapList.Add(this);
+        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888)
+        {
+            ConvertToABGR8();
+        }
     }
 
     protected Bitmap() { }
@@ -215,7 +204,6 @@ public class Bitmap : IDisposable
             throw new Exception($"Bitmap ({Width},{Height}) exceeded maximum possible texture size ({Graphics.MaxTextureSize.Width},{Graphics.MaxTextureSize.Height})");
         }
         this.Surface = SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 32, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
-        //this.Surface = SDL_CreateRGBSurface(0, Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
         this.Width = SurfaceObject.w;
         this.Height = SurfaceObject.h;
@@ -613,16 +601,7 @@ public class Bitmap : IDisposable
         }
         else
         {
-            if (!RGBA8 && !ABGR8) ConvertToABGR8();
-            int num = 0;
-            if (RGBA8)
-            {
-                num = (r << 24) + (g << 16) + (b << 8) + a;
-            }
-            else
-            {
-                num = (a << 24) + (b << 16) + (g << 8) + r;
-            }
+            int num = (a << 24) + (b << 16) + (g << 8) + r;
             Marshal.WriteInt32((nint) PixelPointer + Width * Y * 4 + X * 4, num);
         }
         if (this.Renderer != null) this.Renderer.Update();
@@ -693,26 +672,13 @@ public class Bitmap : IDisposable
         }
         else
         {
-            if (!RGBA8 && !ABGR8) ConvertToABGR8();
             int num = Marshal.ReadInt32((nint) PixelPointer + Width * Y * 4 + X * 4);
-            if (RGBA8)
-            {
-                return new Color(
-                    (byte) ((num >> 24) & 0xFF),
-                    (byte) ((num >> 16) & 0xFF),
-                    (byte) ((num >> 8) & 0xFF),
-                    (byte) (num & 0xFF)
-                );
-            }
-            else
-            {
-                return new Color(
-                    (byte) (num & 0xFF),
-                    (byte) ((num >> 8) & 0xFF),
-                    (byte) ((num >> 16) & 0xFF),
-                    (byte) ((num >> 24) & 0xFF)
-                );
-            }
+            return new Color(
+                (byte) (num & 0xFF),
+                (byte) ((num >> 8) & 0xFF),
+                (byte) ((num >> 16) & 0xFF),
+                (byte) ((num >> 24) & 0xFF)
+            );
         }
     }
 
@@ -3173,7 +3139,6 @@ public class Bitmap : IDisposable
         if (X < 0 || Y < 0 || X + Width > this.Width || Y + Height > this.Height || this.Width < 0 || this.Height < 0)
             throw new Exception("Region out of bounds");
         if (Locked) throw new BitmapLockedException();
-        if (!ABGR8) ConvertToABGR8();
         int BufferSize = Width * 4;
         nint BufferPtr = Marshal.AllocHGlobal(BufferSize);
         nint Top = (nint) (PixelPointer + Y * this.Width * 4 + X * 4);
@@ -3204,7 +3169,6 @@ public class Bitmap : IDisposable
         if (X < 0 || Y < 0 || X + Width > this.Width || Y + Height > this.Height || this.Width < 0 || this.Height < 0)
             throw new Exception("Region out of bounds");
         if (Locked) throw new BitmapLockedException();
-        if (!ABGR8) ConvertToABGR8();
         Stack<Queue<Color>> Colors = new Stack<Queue<Color>>();
         for (int dx = X; dx < X + Width; dx++)
         {
@@ -3535,7 +3499,6 @@ public class Bitmap : IDisposable
             }
             return;
         }
-        if (!ABGR8) ConvertToABGR8();
         int StartPos = StartY * Width * 4;
         int Length = RowCount * Width * 4;
         int Shift = YShift * Width * 4;
@@ -3566,8 +3529,6 @@ public class Bitmap : IDisposable
         IntPtr oldsurface = this.Surface;
         this.Surface = SDL_ConvertSurfaceFormat(this.Surface, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888, 0);
         this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-        RGBA8 = false;
-        ABGR8 = true;
         SDL_FreeSurface(oldsurface);
         if (this.Renderer != null) this.Renderer.Update();
     }
@@ -3626,7 +3587,6 @@ public class Bitmap : IDisposable
         else
         {
             decodl.PNGEncoder encoder = new decodl.PNGEncoder(PixelPointer, (uint) Width, (uint) Height);
-            encoder.InvertData = RGBA8;
             encoder.ColorType = Transparency ? decodl.ColorTypes.RGBA : decodl.ColorTypes.RGB;
             if (Indexed)
             {
@@ -3662,7 +3622,6 @@ public class Bitmap : IDisposable
     /// <returns>A new bitmap with the hue applied.</returns>
     public virtual Bitmap ApplyHue(int Hue)
     {
-        if (!ABGR8) ConvertToABGR8();
         Bitmap bmp = new Bitmap(Width, Height);
         bmp.Unlock();
         for (int y = 0; y < Height; y++)
@@ -3691,7 +3650,6 @@ public class Bitmap : IDisposable
     /// <returns>A new bitmap with the hue applied.</returns>
     public virtual Bitmap ApplyHue(int Hue, int OX, int OY, int Width, int Height)
     {
-        if (!ABGR8) ConvertToABGR8();
         Bitmap bmp = new Bitmap(Width, Height);
         bmp.Unlock();
         for (int y = OY; y < Height; y++)
