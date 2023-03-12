@@ -649,7 +649,7 @@ public class Window : IDisposable
     {
         BoolEventArgs e = new BoolEventArgs();
         this.OnClosing(e);
-        if (e.Value)
+        if (!e.Value)
         {
             this.Dispose();
             SDL_DestroyWindow(this.SDL_Window);
