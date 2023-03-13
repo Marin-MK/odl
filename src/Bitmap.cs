@@ -1862,6 +1862,7 @@ public class Bitmap : IDisposable
             SrcRect.Width -= amt;
             DestRect.X += amt;
             DestRect.Width -= amt;
+            if (DestRect.Width <= 0 || SrcRect.Width <= 0) return;
         }
         if (DestRect.Y < 0)
         {
@@ -1870,6 +1871,7 @@ public class Bitmap : IDisposable
             SrcRect.Height -= amt;
             DestRect.Y += amt;
             DestRect.Height -= amt;
+            if (DestRect.Height <= 0 || SrcRect.Height <= 0) return;
         }
         if (DestRect.X + DestRect.Width > this.Width)
         {
