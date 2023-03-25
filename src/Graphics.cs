@@ -46,6 +46,11 @@ public static class Graphics
     /// </summary>
     public static bool LoadedJPEG = false;
 
+    /// <summary>
+    /// A simple logger with a WriteLine method.
+    /// </summary>
+    public static ILogger Logger;
+
     private static Platform? _platform;
     /// <summary>
     /// The current OS.
@@ -92,10 +97,10 @@ public static class Graphics
     {
         PathPlatformInfo Path = PathInfo.GetPlatform(NativeLibrary.Platform);
 
-        Console.WriteLine("Loading graphical components...");
+        Logger?.WriteLine("Loading graphical components...");
 
         SDL.Load(Path.Get("libsdl2"), Path.Get("libz"));
-        Console.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
+        Logger?.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
 
         if (Path.Has("libjpeg"))
         {
@@ -104,10 +109,10 @@ public static class Graphics
         }
 
         SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
-        Console.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
+        Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
 
         SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
-        Console.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
+        Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
 
         if (NativeLibrary.Platform == NativeLibraryLoader.Platform.Windows)
         {
@@ -118,8 +123,8 @@ public static class Graphics
             {
                 // -1 unaware, -2 aware, -3 per monitor aware, -4 per monitor aware v2 (?), -5 unaware gdi scaled (?)
                 bool ret = user32.GetFunction<SetProcessDpiAwarenessContextDelegate>("SetProcessDpiAwarenessContext").Invoke(-4);
-                if (ret) Console.WriteLine("Set DPI awareness per monitor v2 (v10.1607+)");
-                else Console.WriteLine("Failed to set DPI awareness per monitor v2 (v10.1607+)");
+                if (ret) Logger?.WriteLine("Set DPI awareness per monitor v2 (v10.1607+)");
+                else Logger?.WriteLine("Failed to set DPI awareness per monitor v2 (v10.1607+)");
             }
             else
             {
@@ -130,8 +135,8 @@ public static class Graphics
                 {
                     // 0 unaware, 1 aware, 2 per monitor aware
                     int ret = shcore.GetFunction<SetProcessDpiAwarenessDelegate>("SetProcessDpiAwareness").Invoke(2);
-                    if (ret == 0) Console.WriteLine("Set DPI awareness per monitor (v8.1+)");
-                    else Console.WriteLine("Failed to set DPI awareness per monitor (v8.1+)");
+                    if (ret == 0) Logger?.WriteLine("Set DPI awareness per monitor (v8.1+)");
+                    else Logger?.WriteLine("Failed to set DPI awareness per monitor (v8.1+)");
                 }
                 else
                 {
@@ -141,8 +146,8 @@ public static class Graphics
                     {
                         // Fully aware; not per monitor.
                         bool ret = user32.GetFunction<SetProcessDPIAwareDelegate>("SetProcessDPIAware").Invoke();
-                        if (ret) Console.WriteLine("Set DPI awareness globally");
-                        else Console.WriteLine("Failed to set DPI awareness globally");
+                        if (ret) Logger?.WriteLine("Set DPI awareness globally");
+                        else Logger?.WriteLine("Failed to set DPI awareness globally");
                     }
                 }
             }
@@ -164,7 +169,7 @@ public static class Graphics
 
         int maj, min, pat;
         TTF_GetFreeTypeVersion(out maj, out min, out pat);
-        Console.WriteLine($"FreeType ({maj}.{min}.{pat})");
+        Logger?.WriteLine($"FreeType ({maj}.{min}.{pat})");
 
         int screens = SDL_GetNumVideoDisplays();
         for (int i = 0; i < screens; i++)
@@ -564,12 +569,13 @@ public static class Graphics
         {
             // Remove the callback before calling it, so that if Graphics.Update() happens in our callback, we
             // don't call the callback again in an infinite loop.
+            Action Callback;
             lock (ScheduledCallbacks)
             {
-                Action Callback = ScheduledCallbacks[0];
+                Callback = ScheduledCallbacks[0];
                 ScheduledCallbacks.RemoveAt(0);
-                Callback();
             }
+            Callback();
         }
         if (ShowFrames)
         {
@@ -632,7 +638,21 @@ public enum RenderDriver
     OpenGLES2,
     Direct3D,
     Direct3D11,
+    Direct3D12,
     Vulkan,
     Metal,
     Software
+}
+
+public interface ILogger
+{
+    void Write(string message, params object[] args);
+
+    void WriteLine(string message, params object[] args);
+
+    void WriteLine();
+
+    void Warn(string message, params object[] args);
+
+    void Error(string message, params object[] args);
 }

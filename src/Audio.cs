@@ -21,7 +21,7 @@ public static class Audio
     {
         PathPlatformInfo Path = PathInfo.GetPlatform(NativeLibrary.Platform);
 
-        Console.WriteLine("Loading audio components...");
+        Graphics.Logger?.WriteLine("Loading audio components...");
 
         NativeLibrary bass = NativeLibrary.Load(Path.Get("bass"));
 
@@ -82,17 +82,17 @@ public static class Audio
 
         BASS_Init(-1, 44100, 0, IntPtr.Zero);
         uint bassversion = BASS_GetVersion();
-        Console.WriteLine($"Loaded BASS ({StringifyVersion(bassversion)})");
+        Graphics.Logger?.WriteLine($"Loaded BASS ({StringifyVersion(bassversion)})");
         if (UsingBassFX)
         {
             BASS_PluginLoad(Path.Get("bass_fx"));
             uint fxversion = BASS_FX_GetVersion();
-            Console.WriteLine($"Loaded BASS_FX ({StringifyVersion(fxversion)})");
+            Graphics.Logger?.WriteLine($"Loaded BASS_FX ({StringifyVersion(fxversion)})");
         }
         if (UsingBassMidi)
         {
             int midihandle = BASS_PluginLoad(Path.Get("bass_midi"));
-            Console.WriteLine($"Loaded BASS_MIDI");
+            Graphics.Logger?.WriteLine($"Loaded BASS_MIDI");
         }
         Initialized = true;
     }

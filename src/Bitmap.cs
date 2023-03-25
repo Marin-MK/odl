@@ -373,7 +373,7 @@ public class Bitmap : IDisposable
     {
         if (!Disposed || this.Surface != IntPtr.Zero || this.Texture != IntPtr.Zero)
         {
-            Console.WriteLine($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
+            Graphics.Logger?.Error($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
         }
         if (BitmapList.Contains(this)) BitmapList.Remove(this);
     }

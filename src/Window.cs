@@ -223,7 +223,7 @@ public class Window : IDisposable
         }
 
         int count = SDL_GetNumRenderDrivers();
-        Console.Write("Supported drivers: ");
+        Graphics.Logger?.Write("Supported drivers: ");
         int OptimalIndex = -1;
         List<string> drivers = new List<string>();
         for (int i = 0; i < count; i++)
@@ -233,8 +233,8 @@ public class Window : IDisposable
             string intname = System.Runtime.InteropServices.Marshal.PtrToStringUTF8(driverinfo.name);
             string drivername = GetFullDriverName(intname);
             drivers.Add(drivername);
-            Console.Write(drivername);
-            if (i != count - 1) Console.Write(", ");
+            Graphics.Logger?.Write(drivername);
+            if (i != count - 1) Graphics.Logger?.Write(", ");
             bool viable = true;
             if (HardwareAcceleration && (driverinfo.flags & (uint) SDL_RendererFlags.SDL_RENDERER_ACCELERATED) == 0) viable = false;
             if (VSync && (driverinfo.flags & (uint) SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC) == 0) viable = false;
@@ -246,6 +246,7 @@ public class Window : IDisposable
                 RenderDriver.OpenGLES2 => intname == "opengles2",
                 RenderDriver.Direct3D => intname == "direct3d",
                 RenderDriver.Direct3D11 => intname == "direct3d11",
+                RenderDriver.Direct3D12 => intname == "direct3d12",
                 RenderDriver.Vulkan => intname == "vulkan",
                 RenderDriver.Metal => intname == "metal",
                 RenderDriver.Software => intname == "software",
@@ -254,7 +255,7 @@ public class Window : IDisposable
             };
             if (viable && IsPreferred) OptimalIndex = i;
         }
-        Console.WriteLine();
+        Graphics.Logger?.WriteLine();
 
         SDL_RendererFlags renderflags = SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE;
         if (HardwareAcceleration) renderflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
@@ -262,7 +263,7 @@ public class Window : IDisposable
         this.Renderer = new Renderer(this, SDL_CreateRenderer(this.SDL_Window, OptimalIndex, renderflags));
         SDL_RendererInfo info = new SDL_RendererInfo();
         SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
-        Console.WriteLine($"Using {GetFullDriverName(System.Runtime.InteropServices.Marshal.PtrToStringUTF8(info.name))}");
+        Graphics.Logger?.WriteLine($"Using {GetFullDriverName(System.Runtime.InteropServices.Marshal.PtrToStringUTF8(info.name))}");
 
         // As long as the viewport when drawing with OpenGL remains underneath the title bar (and as long as I can't be bothered to fix it and don't need GLSL shaders per se),
         // I won't bother trying to fix it, and thus OpenGL will use the default renderer too. Therefore this is commented out.
@@ -273,7 +274,7 @@ public class Window : IDisposable
             if (info.max_texture_width == 0) info.max_texture_width = 16384;
             if (info.max_texture_height == 0) info.max_texture_height = 16384;
             Graphics.MaxTextureSize = new Size(info.max_texture_width, info.max_texture_height);
-            Console.WriteLine($"Maximum Texture Size: {info.max_texture_width}x{info.max_texture_height}");
+            Graphics.Logger?.WriteLine($"Maximum Texture Size: {info.max_texture_width}x{info.max_texture_height}");
         }
 
         this.Viewport = new Viewport(this, 0, 0, this.Width, this.Height);
@@ -697,6 +698,7 @@ public class Window : IDisposable
             "opengles2" => "OpenGLES2",
             "direct3d" => "Direct3D",
             "direct3d11" => "Direct3D11",
+            "direct3d12" => "Direct3D12",
             "vulkan" => "Vulkan",
             "metal" => "Metal",
             "software" => "Software",
