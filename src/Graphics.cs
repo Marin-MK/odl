@@ -46,6 +46,8 @@ public static class Graphics
     /// </summary>
     public static bool LoadedJPEG = false;
 
+    public static ConsoleLogger ConsoleLogger = new ConsoleLogger();
+
     /// <summary>
     /// A simple logger with a WriteLine method.
     /// </summary>
@@ -655,4 +657,40 @@ public interface ILogger
     void Warn(string message, params object[] args);
 
     void Error(string message, params object[] args);
+}
+
+public class ConsoleLogger : ILogger
+{
+    StreamWriter stream;
+
+    public ConsoleLogger()
+    {
+        stream = new StreamWriter(Console.OpenStandardOutput());
+        stream.AutoFlush = true;
+    }
+
+    public void Write(string message, params object[] args)
+    {
+        stream.Write(message, args);
+    }
+
+    public void WriteLine(string message, params object[] args)
+    {
+        stream.WriteLine(message, args);
+    }
+
+    public void WriteLine()
+    {
+        stream.WriteLine();
+    }
+
+    public void Warn(string message, params object[] args)
+    {
+        stream.WriteLine("[WARNING] " + message, args);
+    }
+
+    public void Error(string message, params object[] args)
+    {
+        stream.WriteLine("[ERROR] " + message, args);
+    }
 }

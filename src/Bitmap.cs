@@ -176,14 +176,11 @@ public class Bitmap : IDisposable
             this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
             this.Width = SurfaceObject.w;
             this.Height = SurfaceObject.h;
+            SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+            if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
         }
         this.Lock();
         BitmapList.Add(this);
-        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
-        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888)
-        {
-            ConvertToABGR8();
-        }
     }
 
     protected Bitmap() { }
@@ -209,6 +206,8 @@ public class Bitmap : IDisposable
         this.Height = SurfaceObject.h;
         if (!(this is SolidBitmap)) this.Lock();
         BitmapList.Add(this);
+        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
     }
 
     public Bitmap(int Width, int Height, Size ChunkSize) : this(Width, Height, ChunkSize.Width, ChunkSize.Height) { }
@@ -252,6 +251,8 @@ public class Bitmap : IDisposable
         this.Height = SurfaceObject.h;
         this.Lock();
         BitmapList.Add(this);
+        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
     }
 
     /// <summary>
@@ -271,6 +272,8 @@ public class Bitmap : IDisposable
         this.Height = this.SurfaceObject.h;
         this.Lock();
         BitmapList.Add(this);
+        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
     }
 
     /// <summary>
@@ -297,6 +300,8 @@ public class Bitmap : IDisposable
         this.Height = SurfaceObject.h;
         this.Lock();
         BitmapList.Add(this);
+        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
     }
 
     /// <summary>
@@ -317,6 +322,8 @@ public class Bitmap : IDisposable
         this.Height = SurfaceObject.h;
         this.Lock();
         BitmapList.Add(this);
+        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
     }
 
     protected (Size Size, bool IsPNG) ValidateIMG(string Filename)
@@ -410,7 +417,7 @@ public class Bitmap : IDisposable
         if (!File.Exists(Filename)) return false;
         string fullfilepath = Path.GetFullPath(Filename);
         while (fullfilepath.Contains('\\')) fullfilepath = fullfilepath.Replace('\\', '/');
-        string dirname = Path.GetDirectoryName(Filename);
+        string dirname = Path.GetDirectoryName(fullfilepath);
         string[] files = Directory.GetFiles(dirname);
         for (int i = 0; i < files.Length; i++)
         {
