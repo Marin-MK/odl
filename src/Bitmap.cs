@@ -3383,7 +3383,7 @@ public class Bitmap : IDisposable
     }
 
     /// <summary>
-    /// Changes the size of the bitmap without scaling or interpolation. Slower than <see cref="Resize(int, int)"/>, but lossless.
+    /// Changes the size of the bitmap without scaling or interpolation.
     /// </summary>
     /// <param name="NewWidth">The new width of the bitmap.</param>
     /// <param name="NewHeight">The new height of the bitmap.</param>
@@ -3392,19 +3392,16 @@ public class Bitmap : IDisposable
     {
         if (IsChunky) throw new NotImplementedException();
         nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
-        int srcWidth = this.Width * 4;
-        int destWidth = NewWidth * 4;
-        if (destWidth < srcWidth) srcWidth = destWidth;
-        if (srcWidth < destWidth) destWidth = srcWidth;
+        int copyWidth = Math.Min(NewWidth, this.Width) * 4;
         int minHeight = NewHeight;
         if (this.Height < minHeight) minHeight = this.Height;
-        Span<byte> srcSpan = new Span<byte>((void*) this.PixelPointer, srcWidth);
-        Span<byte> destSpan = new Span<byte>((void*) PixelHandle, destWidth);
+        Span<byte> srcSpan = new Span<byte>((void*) this.PixelPointer, copyWidth);
+        Span<byte> destSpan = new Span<byte>((void*) PixelHandle, copyWidth);
         for (int y = 0; y < minHeight; y++)
         {
             srcSpan.CopyTo(destSpan);
-            srcSpan = new Span<byte>((void*) (this.PixelPointer + y * this.Width * 4), srcWidth);
-            destSpan = new Span<byte>((void*) (PixelHandle + y * NewWidth * 4), destWidth);
+            srcSpan = new Span<byte>((void*) (this.PixelPointer + y * this.Width * 4), copyWidth);
+            destSpan = new Span<byte>((void*) (PixelHandle + y * NewWidth * 4), copyWidth);
         }
         Bitmap bmp = new Bitmap(PixelHandle, NewWidth, NewHeight);
         return bmp;

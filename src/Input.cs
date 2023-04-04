@@ -37,7 +37,7 @@ public static class Input
         if (code == Keycode.ALT) return Trigger(Convert.ToInt64(SDL_Keycode.SDLK_LALT)) || Trigger(Convert.ToInt64(SDL_Keycode.SDLK_RALT));
         return Trigger(Convert.ToInt64(code));
     }
-    public static bool Trigger(long Code)
+    private static bool Trigger(long Code)
     {
         return !OldKeysDown.Contains(Code) && KeysDown.Contains(Code);
     }
@@ -49,7 +49,7 @@ public static class Input
         if (code == Keycode.ALT) return Press(Convert.ToInt64(SDL_Keycode.SDLK_LALT)) || Press(Convert.ToInt64(SDL_Keycode.SDLK_RALT));
         return Press(Convert.ToInt64(code));
     }
-    public static bool Press(long Code)
+    private static bool Press(long Code)
     {
         return KeysDown.Contains(Code);
     }
