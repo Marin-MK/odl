@@ -152,24 +152,30 @@ public class Color : ICloneable
     /// <param name="Color">A tuple containing the HSL values.</param>
     public void SetHSL((float H, float S, float L) Color)
     {
-        float H = Color.H;
-        float S = Color.S;
-        float L = Color.L;
-        float C = (1 - Math.Abs(2 * L - 1)) * S;
-        float X = C * (1 - Math.Abs((H / 60) % 2 - 1));
-        float m = L - C / 2;
-        (float R, float G, float B) Converted = H switch
+        Color newColor = FromHSL(Color.H, Color.S, Color.L);
+        this.Red = newColor.Red;
+        this.Green = newColor.Green;
+        this.Blue = newColor.Blue;
+    }
+
+    public static Color FromHSL(float h, float s, float l)
+    {
+        float C = (1 - Math.Abs(2 * l - 1)) * s;
+        float X = C * (1 - Math.Abs((h / 60) % 2 - 1));
+        float m = l - C / 2;
+        (float R, float G, float B) Converted = (h % 360) switch
         {
             >= 0 and < 60 => (C, X, 0),
             >= 60 and < 120 => (X, C, 0),
             >= 120 and < 180 => (0, C, X),
             >= 180 and < 240 => (0, X, C),
-            >= 240 and < 320 => (X, 0, C),
-            >= 320 and < 360 => (C, 0, X),
+            >= 240 and < 300 => (X, 0, C),
+            >= 300 and < 360 => (C, 0, X),
             _ => throw new Exception("Invalid color")
         };
-        this.Red = (byte) Math.Round(255 * (Converted.R + m));
-        this.Green = (byte) Math.Round(255 * (Converted.G + m));
-        this.Blue = (byte) Math.Round(255 * (Converted.B + m));
+        byte red = (byte)Math.Round(255 * (Converted.R + m));
+        byte green = (byte)Math.Round(255 * (Converted.G + m));
+        byte blue = (byte)Math.Round(255 * (Converted.B + m));
+        return new Color(red, green, blue);
     }
 }
