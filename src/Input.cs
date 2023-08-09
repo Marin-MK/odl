@@ -7,7 +7,7 @@ namespace odl;
 public static class Input
 {
     public static IntPtr Cursor;
-    public static CursorType? SystemCursor;
+    public static CursorType? SystemCursor = CursorType.Arrow;
 
     public static List<long> OldKeysDown = new List<long>();
     public static List<long> KeysDown = new List<long>();
