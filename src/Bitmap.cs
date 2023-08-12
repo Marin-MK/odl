@@ -3374,7 +3374,7 @@ public class Bitmap : IDisposable
     public Bitmap Resize(int NewWidth, int NewHeight, Size? ChunkSize = null)
     {
         Bitmap NewBitmap = null;
-        if (ChunkSize == null) NewBitmap = new Bitmap(NewWidth, NewHeight);
+        if (ChunkSize == null) NewBitmap = new Bitmap(NewWidth, NewHeight, this.ChunkSize);
         else NewBitmap = new Bitmap(NewWidth, NewHeight, ChunkSize);
         NewBitmap.Unlock();
         NewBitmap.Build(this, BlendMode.None);
@@ -3405,39 +3405,6 @@ public class Bitmap : IDisposable
         }
         Bitmap bmp = new Bitmap(PixelHandle, NewWidth, NewHeight);
         return bmp;
-        /*if (!ABGR8) ConvertToABGR8();
-        nint PixelHandle = Marshal.AllocHGlobal(NewWidth * NewHeight * 4);
-        for (int y = 0; y < this.Height; y++)
-        {
-            for (int x = 0; x < this.Width; x++)
-            {
-                if (x >= NewWidth || y >= NewHeight) continue;
-                byte rbyte = 0;
-                byte gbyte = 0;
-                byte bbyte = 0;
-                byte abyte = 0;
-                if (IsChunky)
-                {
-                    Bitmap ibmp = GetBitmapFromCoordinate(x, y);
-                    int ix = x - ibmp.InternalX;
-                    int iy = y - ibmp.InternalY;
-                    rbyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4];
-                    gbyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4 + 1];
-                    bbyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4 + 2];
-                    abyte = ibmp.PixelPointer[iy * ibmp.Width * 4 + ix * 4 + 3];
-                }
-                else
-                {
-                    rbyte = PixelPointer[y * this.Width * 4 + x * 4];
-                    gbyte = PixelPointer[y * this.Width * 4 + x * 4 + 1];
-                    bbyte = PixelPointer[y * this.Width * 4 + x * 4 + 2];
-                    abyte = PixelPointer[y * this.Width * 4 + x * 4 + 3];
-                }
-                int num = (abyte << 24) + (bbyte << 16) + (gbyte << 8) + rbyte;
-                Marshal.WriteInt32(PixelHandle + y * NewWidth * 4 + x * 4, num);
-            }
-        }
-        return new Bitmap(PixelHandle, NewWidth, NewHeight);*/
     }
 
     /// <summary>
