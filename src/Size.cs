@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace odl;
+﻿namespace odl;
 
 public class Size
 {
