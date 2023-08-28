@@ -26,7 +26,6 @@
 	</PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BasicBenchmarks\BasicBenchmarks.csproj" />
         <ProjectReference Include="..\decodl\decodl.csproj" />
         <ProjectReference Include="..\NativeLibraryLoader\NativeLibraryLoader.csproj" />
     </ItemGroup>
