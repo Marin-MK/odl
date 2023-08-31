@@ -45,6 +45,14 @@ public static class Graphics
     /// Whether or not the JPEG libary was loaded.
     /// </summary>
     public static bool LoadedJPEG = false;
+    /// <summary>
+    /// Whether or not SDL_image was loaded.
+    /// </summary>
+    public static bool LoadedSDLImage = false;
+    /// <summary>
+    /// Whether or not SDL_ttf was loaded.
+    /// </summary>
+    public static bool LoadedSDLTTF = false;
 
     public static ConsoleLogger ConsoleLogger = new ConsoleLogger();
 
@@ -110,11 +118,29 @@ public static class Graphics
             LoadedJPEG = true;
         }
 
-        SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
-        Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
+        if (Path.Has("libsdl2_image"))
+        {
+            SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
+            Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
+            LoadedSDLImage = true;
+        }
+        else
+        {
+            Logger?.Warn("No SDL2_image path was specified.");
+            LoadedSDLImage = false;
+        }
 
-        SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
-        Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
+        if (Path.Has("libsdl2_ttf"))
+        {
+            SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
+            Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
+            LoadedSDLTTF = true;
+        }
+        else
+        {
+            Logger?.Warn("No SDL2_ttf path was specified.");
+            LoadedSDLTTF = false;
+        }
 
         if (NativeLibrary.Platform == NativeLibraryLoader.Platform.Windows)
         {
@@ -162,16 +188,16 @@ public static class Graphics
 
         uint IMG_Flags = IMG_INIT_PNG;
         if (LoadedJPEG) IMG_Flags |= IMG_INIT_JPG;
-        if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
-            IMG_Init(IMG_Flags) != (int)IMG_Flags ||
-            TTF_Init() < 0)
-        {
-            throw new Exception(SDL_GetError());
-        }
+        if (SDL_Init(SDL_INIT_EVERYTHING) < 0) throw new Exception(SDL_GetError());
+        if (LoadedSDLImage && IMG_Init(IMG_Flags) != (int) IMG_Flags) throw new Exception(SDL_GetError());
 
-        int maj, min, pat;
-        TTF_GetFreeTypeVersion(out maj, out min, out pat);
-        Logger?.WriteLine($"FreeType ({maj}.{min}.{pat})");
+        if (LoadedSDLTTF)
+        {
+            if (TTF_Init() < 0) throw new Exception(SDL_GetError());
+            int maj, min, pat;
+            TTF_GetFreeTypeVersion(out maj, out min, out pat);
+            Logger?.WriteLine($"FreeType ({maj}.{min}.{pat})");
+        }
 
         int screens = SDL_GetNumVideoDisplays();
         for (int i = 0; i < screens; i++)
@@ -615,9 +641,9 @@ public static class Graphics
             Font.Cache[i].Dispose();
         }
         Font.Cache.Clear();
-        IMG_Quit();
+        if (LoadedSDLImage) IMG_Quit();
         SDL_Quit();
-        TTF_Quit();
+        if (LoadedSDLTTF) TTF_Quit();
         Initialized = false;
     }
 }
