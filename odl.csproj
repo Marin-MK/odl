@@ -30,4 +30,7 @@
         <ProjectReference Include="..\NativeLibraryLoader\NativeLibraryLoader.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="src\resolvers\" />
+    </ItemGroup>
 </Project>

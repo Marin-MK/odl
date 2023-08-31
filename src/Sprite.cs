@@ -222,7 +222,7 @@ public class Sprite : IDisposable
     {
         if (!Disposed)
         {
-            Graphics.Logger?.Error($"An undisposed sprite is being collected by the GC! This is likely a memory leak!");
+            ODL.Logger?.Error($"An undisposed sprite is being collected by the GC! This is likely a memory leak!");
         }
     }
 

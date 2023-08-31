@@ -115,8 +115,8 @@ public class Bitmap : IDisposable
     /// <param name="Filename">The file to load into a bitmap.</param>
     public unsafe Bitmap(string Filename)
     {
-        string RFilename = FindRealFilename(Filename);
-        if (RFilename == null) throw new FileNotFoundException($"File could not be found -- {Filename}");
+        string? RFilename = ODL.ImageResolver.ResolveFilename(Filename);
+        if (RFilename is null) throw new FileNotFoundException($"File could not be found -- '{Filename}'");
         (Size ImageSize, bool IsPNG) = ValidateIMG(RFilename);
         if (IsPNG && ImageSize.Width > Graphics.MaxTextureSize.Width && ImageSize.Height > Graphics.MaxTextureSize.Height)
         {
@@ -380,51 +380,9 @@ public class Bitmap : IDisposable
     {
         if (!Disposed || this.Surface != IntPtr.Zero || this.Texture != IntPtr.Zero)
         {
-            Graphics.Logger?.Error($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
+            ODL.Logger?.Error($"An undisposed bitmap is being collected by the GC! This is a memory leak!\n    Bitmap info: Size ({Width},{Height})");
         }
         if (BitmapList.Contains(this)) BitmapList.Remove(this);
-    }
-
-    public static string FindRealFilename(string Filename)
-    {
-        while (Filename.Contains('\\')) Filename = Filename.Replace('\\', '/');
-        if (!FileExistsCaseSensitive(Filename))
-        {
-            if (FileExistsCaseSensitive(Filename + ".png")) Filename += ".png";
-            else if (FileExistsCaseSensitive(Filename + ".PNG")) Filename += ".PNG";
-            else if (Filename.EndsWith(".png") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "PNG"))
-                Filename = Filename.Substring(0, Filename.Length - 3) + "PNG";
-            else if (FileExistsCaseSensitive(Filename + ".jpg")) Filename += ".jpg";
-            else if (FileExistsCaseSensitive(Filename + ".jpeg")) Filename += ".jpeg";
-            else if (FileExistsCaseSensitive(Filename + ".JPG")) Filename += ".JPG";
-            else if (FileExistsCaseSensitive(Filename + ".JPEG")) Filename += ".JPEG";
-            else if (Filename.EndsWith(".jpg") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 3) + "JPG"))
-                Filename = Filename.Substring(0, Filename.Length - 3) + "JPG";
-            else if (Filename.EndsWith(".jpeg") && FileExistsCaseSensitive(Filename.Substring(0, Filename.Length - 4) + "JPEG"))
-                Filename = Filename.Substring(0, Filename.Length - 4) + "JPEG";
-            else return null;
-        }
-        return Filename;
-    }
-
-    /// <summary>
-    /// Case-sensitive version of File.Exists, but slower.
-    /// </summary>
-    /// <param name="Filename">The file to look for.</param>
-    /// <returns>Whether the file exists.</returns>
-    public static bool FileExistsCaseSensitive(string Filename)
-    {
-        if (!File.Exists(Filename)) return false;
-        string fullfilepath = Path.GetFullPath(Filename);
-        while (fullfilepath.Contains('\\')) fullfilepath = fullfilepath.Replace('\\', '/');
-        string dirname = Path.GetDirectoryName(fullfilepath);
-        string[] files = Directory.GetFiles(dirname);
-        for (int i = 0; i < files.Length; i++)
-        {
-            files[i] = Path.GetFullPath(files[i]);
-            while (files[i].Contains('\\')) files[i] = files[i].Replace('\\', '/');
-        }
-        return dirname != null && Array.Exists(files, e => e == fullfilepath);
     }
 
     /// <summary>

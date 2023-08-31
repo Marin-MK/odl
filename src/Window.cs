@@ -223,7 +223,7 @@ public class Window : IDisposable
         }
 
         int count = SDL_GetNumRenderDrivers();
-        Graphics.Logger?.Write("Supported drivers: ");
+        ODL.Logger?.Write("Supported drivers: ");
         int OptimalIndex = -1;
         List<string> drivers = new List<string>();
         for (int i = 0; i < count; i++)
@@ -233,8 +233,8 @@ public class Window : IDisposable
             string intname = System.Runtime.InteropServices.Marshal.PtrToStringUTF8(driverinfo.name);
             string drivername = GetFullDriverName(intname);
             drivers.Add(drivername);
-            Graphics.Logger?.Write(drivername);
-            if (i != count - 1) Graphics.Logger?.Write(", ");
+            ODL.Logger?.Write(drivername);
+            if (i != count - 1) ODL.Logger?.Write(", ");
             bool viable = true;
             if (HardwareAcceleration && (driverinfo.flags & (uint) SDL_RendererFlags.SDL_RENDERER_ACCELERATED) == 0) viable = false;
             if (VSync && (driverinfo.flags & (uint) SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC) == 0) viable = false;
@@ -255,7 +255,7 @@ public class Window : IDisposable
             };
             if (viable && IsPreferred) OptimalIndex = i;
         }
-        Graphics.Logger?.WriteLine();
+        ODL.Logger?.WriteLine();
 
         SDL_RendererFlags renderflags = SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE;
         if (HardwareAcceleration) renderflags |= SDL_RendererFlags.SDL_RENDERER_ACCELERATED;
@@ -263,7 +263,7 @@ public class Window : IDisposable
         this.Renderer = new Renderer(this, SDL_CreateRenderer(this.SDL_Window, OptimalIndex, renderflags));
         SDL_RendererInfo info = new SDL_RendererInfo();
         SDL_GetRendererInfo(this.Renderer.SDL_Renderer, out info);
-        Graphics.Logger?.WriteLine($"Using {GetFullDriverName(System.Runtime.InteropServices.Marshal.PtrToStringUTF8(info.name))}");
+        ODL.Logger?.WriteLine($"Using {GetFullDriverName(System.Runtime.InteropServices.Marshal.PtrToStringUTF8(info.name))}");
 
         // As long as the viewport when drawing with OpenGL remains underneath the title bar (and as long as I can't be bothered to fix it and don't need GLSL shaders per se),
         // I won't bother trying to fix it, and thus OpenGL will use the default renderer too. Therefore this is commented out.
@@ -274,7 +274,7 @@ public class Window : IDisposable
             if (info.max_texture_width == 0) info.max_texture_width = 16384;
             if (info.max_texture_height == 0) info.max_texture_height = 16384;
             Graphics.MaxTextureSize = new Size(info.max_texture_width, info.max_texture_height);
-            Graphics.Logger?.WriteLine($"Maximum Texture Size: {info.max_texture_width}x{info.max_texture_height}");
+            ODL.Logger?.WriteLine($"Maximum Texture Size: {info.max_texture_width}x{info.max_texture_height}");
         }
 
         this.Viewport = new Viewport(this, 0, 0, this.Width, this.Height);

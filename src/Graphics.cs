@@ -54,47 +54,10 @@ public static class Graphics
     /// </summary>
     public static bool LoadedSDLTTF = false;
 
-    public static ConsoleLogger ConsoleLogger = new ConsoleLogger();
-
-    /// <summary>
-    /// A simple logger with a WriteLine method.
-    /// </summary>
-    public static ILogger Logger;
-
-    private static Platform? _platform;
-    /// <summary>
-    /// The current OS.
-    /// </summary>
-    public static Platform Platform
-    {
-        get
-        {
-            if (_platform != null) return (Platform)_platform;
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)) _platform = Platform.Windows;
-            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX)) _platform = Platform.MacOS;
-            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)) _platform = Platform.Linux;
-            else _platform = Platform.Unknown;
-            return (Platform)_platform;
-        }
-    }
-
     /// <summary>
     /// Callbacks that were added from threads other than Main, required for execution on the Main thread.
     /// </summary>
     private static List<Action> ScheduledCallbacks = new List<Action>();
-
-    private static ObjectCollection CurrentObjects;
-
-    public static void MarkObjects()
-    {
-        CurrentObjects = new ObjectCollection(Windows[0]);
-    }
-
-    public static void ShowDifferences()
-    {
-        if (CurrentObjects == null) return;
-        CurrentObjects.CompareWith(new ObjectCollection(Windows[0]));
-    }
 
     delegate bool SetProcessDPIAwareDelegate();
     delegate bool SetProcessDpiAwarenessContextDelegate(long value);
@@ -107,38 +70,40 @@ public static class Graphics
     {
         PathPlatformInfo Path = PathInfo.GetPlatform(NativeLibrary.Platform);
 
-        Logger?.WriteLine("Loading graphical components...");
+        ODL.Logger?.WriteLine("Loading graphical components...");
 
         SDL.Load(Path.Get("libsdl2"), Path.Get("libz"));
-        Logger?.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
+        ODL.Logger?.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
 
         if (Path.Has("libjpeg"))
         {
             NativeLibrary.Load(Path.Get("libjpeg"));
             LoadedJPEG = true;
+            ODL.ImageResolver.AddExtension(".jpg");
+            ODL.ImageResolver.AddExtension(".jpeg");
         }
 
         if (Path.Has("libsdl2_image"))
         {
             SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
-            Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
+            ODL.Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
             LoadedSDLImage = true;
         }
         else
         {
-            Logger?.Warn("No SDL2_image path was specified.");
+            ODL.Logger?.Warn("No SDL2_image path was specified.");
             LoadedSDLImage = false;
         }
 
         if (Path.Has("libsdl2_ttf"))
         {
             SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
-            Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
+            ODL.Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
             LoadedSDLTTF = true;
         }
         else
         {
-            Logger?.Warn("No SDL2_ttf path was specified.");
+            ODL.Logger?.Warn("No SDL2_ttf path was specified.");
             LoadedSDLTTF = false;
         }
 
@@ -151,8 +116,8 @@ public static class Graphics
             {
                 // -1 unaware, -2 aware, -3 per monitor aware, -4 per monitor aware v2 (?), -5 unaware gdi scaled (?)
                 bool ret = user32.GetFunction<SetProcessDpiAwarenessContextDelegate>("SetProcessDpiAwarenessContext").Invoke(-4);
-                if (ret) Logger?.WriteLine("Set DPI awareness per monitor v2 (v10.1607+)");
-                else Logger?.WriteLine("Failed to set DPI awareness per monitor v2 (v10.1607+)");
+                if (ret) ODL.Logger?.WriteLine("Set DPI awareness per monitor v2 (v10.1607+)");
+                else ODL.Logger?.WriteLine("Failed to set DPI awareness per monitor v2 (v10.1607+)");
             }
             else
             {
@@ -163,8 +128,8 @@ public static class Graphics
                 {
                     // 0 unaware, 1 aware, 2 per monitor aware
                     int ret = shcore.GetFunction<SetProcessDpiAwarenessDelegate>("SetProcessDpiAwareness").Invoke(2);
-                    if (ret == 0) Logger?.WriteLine("Set DPI awareness per monitor (v8.1+)");
-                    else Logger?.WriteLine("Failed to set DPI awareness per monitor (v8.1+)");
+                    if (ret == 0) ODL.Logger?.WriteLine("Set DPI awareness per monitor (v8.1+)");
+                    else ODL.Logger?.WriteLine("Failed to set DPI awareness per monitor (v8.1+)");
                 }
                 else
                 {
@@ -174,8 +139,8 @@ public static class Graphics
                     {
                         // Fully aware; not per monitor.
                         bool ret = user32.GetFunction<SetProcessDPIAwareDelegate>("SetProcessDPIAware").Invoke();
-                        if (ret) Logger?.WriteLine("Set DPI awareness globally");
-                        else Logger?.WriteLine("Failed to set DPI awareness globally");
+                        if (ret) ODL.Logger?.WriteLine("Set DPI awareness globally");
+                        else ODL.Logger?.WriteLine("Failed to set DPI awareness globally");
                     }
                 }
             }
@@ -196,7 +161,7 @@ public static class Graphics
             if (TTF_Init() < 0) throw new Exception(SDL_GetError());
             int maj, min, pat;
             TTF_GetFreeTypeVersion(out maj, out min, out pat);
-            Logger?.WriteLine($"FreeType ({maj}.{min}.{pat})");
+            ODL.Logger?.WriteLine($"FreeType ({maj}.{min}.{pat})");
         }
 
         int screens = SDL_GetNumVideoDisplays();
@@ -636,26 +601,12 @@ public static class Graphics
     /// </summary>
     public static void Stop()
     {
-        for (int i = 0; i < Font.Cache.Count; i++)
-        {
-            Font.Cache[i].Dispose();
-        }
-        Font.Cache.Clear();
+        FontCache.Clear();
         if (LoadedSDLImage) IMG_Quit();
         SDL_Quit();
         if (LoadedSDLTTF) TTF_Quit();
         Initialized = false;
     }
-}
-
-public enum Platform
-{
-    Unknown,
-    Windows,
-    Linux,
-    MacOS,
-    IOS,
-    Android
 }
 
 public enum RenderDriver
@@ -670,53 +621,4 @@ public enum RenderDriver
     Vulkan,
     Metal,
     Software
-}
-
-public interface ILogger
-{
-    void Write(string message, params object[] args);
-
-    void WriteLine(string message, params object[] args);
-
-    void WriteLine();
-
-    void Warn(string message, params object[] args);
-
-    void Error(string message, params object[] args);
-}
-
-public class ConsoleLogger : ILogger
-{
-    StreamWriter stream;
-
-    public ConsoleLogger()
-    {
-        stream = new StreamWriter(Console.OpenStandardOutput());
-        stream.AutoFlush = true;
-    }
-
-    public void Write(string message, params object[] args)
-    {
-        stream.Write(message, args);
-    }
-
-    public void WriteLine(string message, params object[] args)
-    {
-        stream.WriteLine(message, args);
-    }
-
-    public void WriteLine()
-    {
-        stream.WriteLine();
-    }
-
-    public void Warn(string message, params object[] args)
-    {
-        stream.WriteLine("[WARNING] " + message, args);
-    }
-
-    public void Error(string message, params object[] args)
-    {
-        stream.WriteLine("[ERROR] " + message, args);
-    }
 }

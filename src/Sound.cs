@@ -187,14 +187,8 @@ public class Sound
     public unsafe Sound(string Filename, int Volume = 100, double Pitch = 0)
     {
         if (Pitch != 0 && !Audio.UsingBassFX) throw new Exception("Pitch module was not initialized.");
-        string OriginalFilename = Filename;
-        if (!File.Exists(Filename))
-        {
-            if (File.Exists(Filename + ".ogg")) Filename += ".ogg";
-            else if (File.Exists(Filename + ".wav")) Filename += ".wav";
-            else if (File.Exists(Filename + ".mp3")) Filename += ".mp3";
-            else if (File.Exists(Filename + ".mid")) Filename += ".mid";
-        }
+        AudioResolver ar = new AudioResolver();
+        this.Filename = ar.ResolveFilename(Filename);
         Audio.BASS_Flag flags = Audio.UsingBassFX ? Audio.BASS_Flag.BASS_STREAM_DECODE : Audio.BASS_Flag.BASS_STREAM_AUTOFREE;
         if (Filename.EndsWith(".mid")) this.Stream = Audio.BASS_MIDI_StreamCreateFile(false, Filename, 0, 0, flags, 0);
         else this.Stream = Audio.BASS_StreamCreateFile(false, Filename, 0, 0, flags);
@@ -226,7 +220,6 @@ public class Sound
         this.OriginalSampleRate = (int)sr;
         this.Length = Audio.BASS_ChannelGetLength(this.Stream) / 4;
         _SampleRate = (int)sr;
-        this.Filename = OriginalFilename;
         this.Volume = Volume;
         this.Pitch = Pitch;
     }

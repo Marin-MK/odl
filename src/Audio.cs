@@ -21,7 +21,7 @@ public static class Audio
     {
         PathPlatformInfo Path = PathInfo.GetPlatform(NativeLibrary.Platform);
 
-        Graphics.Logger?.WriteLine("Loading audio components...");
+        ODL.Logger?.WriteLine("Loading audio components...");
 
         NativeLibrary bass = NativeLibrary.Load(Path.Get("bass"));
 
@@ -40,7 +40,7 @@ public static class Audio
             UsingBassMidi = true;
         }
 
-        if (Graphics.Platform != Platform.Windows && Graphics.Platform != Platform.Linux)
+        if (!ODL.OnWindows && !ODL.OnLinux)
         {
             throw new NativeLibrary.UnsupportedPlatformException();
         }
@@ -82,17 +82,17 @@ public static class Audio
 
         BASS_Init(-1, 44100, 0, IntPtr.Zero);
         uint bassversion = BASS_GetVersion();
-        Graphics.Logger?.WriteLine($"Loaded BASS ({StringifyVersion(bassversion)})");
+        ODL.Logger?.WriteLine($"Loaded BASS ({StringifyVersion(bassversion)})");
         if (UsingBassFX)
         {
             BASS_PluginLoad(Path.Get("bass_fx"));
             uint fxversion = BASS_FX_GetVersion();
-            Graphics.Logger?.WriteLine($"Loaded BASS_FX ({StringifyVersion(fxversion)})");
+            ODL.Logger?.WriteLine($"Loaded BASS_FX ({StringifyVersion(fxversion)})");
         }
         if (UsingBassMidi)
         {
             int midihandle = BASS_PluginLoad(Path.Get("bass_midi"));
-            Graphics.Logger?.WriteLine($"Loaded BASS_MIDI");
+            ODL.Logger?.WriteLine($"Loaded BASS_MIDI");
         }
         Initialized = true;
     }

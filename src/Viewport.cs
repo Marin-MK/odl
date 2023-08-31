@@ -128,7 +128,7 @@ public class Viewport : IDisposable
     {
         if (!Disposed)
         {
-            Graphics.Logger?.Error($"An undisposed viewport is being collected by the GC! This is likely a memory leak!");
+            ODL.Logger?.Error($"An undisposed viewport is being collected by the GC! This is likely a memory leak!");
         }
     }
 
