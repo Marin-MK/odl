@@ -179,31 +179,7 @@ public partial class Bitmap : IDisposable
 
     protected Bitmap() { }
 
-    /// <summary>
-    /// Creates a new bitmap with the given size.
-    /// </summary>
-    /// <param name="Width">The width of the new bitmap.</param>
-    /// <param name="Height">The height of the new bitmap.</param>
-    public Bitmap(int Width, int Height)
-    {
-        if (Width < 1 || Height < 1)
-        {
-            throw new Exception($"Invalid Bitmap size ({Width},{Height}) -- must be at least (1,1)");
-        }
-        if (Width > Graphics.MaxTextureSize.Width || Height > Graphics.MaxTextureSize.Height)
-        {
-            throw new Exception($"Bitmap ({Width},{Height}) exceeded maximum possible texture size ({Graphics.MaxTextureSize.Width},{Graphics.MaxTextureSize.Height})");
-        }
-        this.Surface = SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 32, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
-        this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
-        this.Width = SurfaceObject.w;
-        this.Height = SurfaceObject.h;
-        if (!(this is SolidBitmap)) this.Lock();
-        BitmapList.Add(this);
-        SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
-        if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
-    }
-
+    public Bitmap(int Width, int Height) : this(Width, Height, Graphics.MaxTextureSize) { }
     public Bitmap(int Width, int Height, Size ChunkSize) : this(Width, Height, ChunkSize.Width, ChunkSize.Height) { }
     public Bitmap(int Width, int Height, int ChunkWidth, int ChunkHeight)
     {
@@ -211,26 +187,41 @@ public partial class Bitmap : IDisposable
         {
             throw new Exception($"Invalid Bitmap size ({Width},{Height}) -- must be at least (1,1)");
         }
-        this.Width = Width;
-        this.Height = Height;
-        this.ChunkSize = ChunkSize;
-        int ChunkCountHor = (int)Math.Ceiling((double)Width / ChunkWidth);
-        int ChunkCountVer = (int)Math.Ceiling((double)Height / ChunkHeight);
-        for (int x = 0; x < ChunkCountHor; x++)
+        if (Width > ChunkWidth || Height > ChunkHeight)
         {
-            for (int y = 0; y < ChunkCountVer; y++)
+            ODL.Logger?.WriteLine("Creating chunky bitmap");
+            this.Width = Width;
+            this.Height = Height;
+            this.ChunkSize = ChunkSize;
+            int ChunkCountHor = (int)Math.Ceiling((double)Width / ChunkWidth);
+            int ChunkCountVer = (int)Math.Ceiling((double)Height / ChunkHeight);
+            for (int x = 0; x < ChunkCountHor; x++)
             {
-                int w = Math.Min(ChunkWidth, Width - x * ChunkWidth);
-                int h = Math.Min(ChunkHeight, Height - y * ChunkHeight);
-                Bitmap b = new Bitmap(w, h);
-                b.InternalX = x * ChunkWidth;
-                b.InternalY = y * ChunkHeight;
-                InternalBitmaps.Add(b);
+                for (int y = 0; y < ChunkCountVer; y++)
+                {
+                    int w = Math.Min(ChunkWidth, Width - x * ChunkWidth);
+                    int h = Math.Min(ChunkHeight, Height - y * ChunkHeight);
+                    Bitmap b = new Bitmap(w, h);
+                    b.InternalX = x * ChunkWidth;
+                    b.InternalY = y * ChunkHeight;
+                    InternalBitmaps.Add(b);
+                }
             }
+            this.ChunkSize = new Size(ChunkWidth, ChunkHeight);
+            this.Lock();
+            BitmapList.Add(this);
         }
-        this.ChunkSize = new Size(ChunkWidth, ChunkHeight);
-        this.Lock();
-        BitmapList.Add(this);
+        else
+        {
+            this.Surface = SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 32, SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888);
+            this.SurfaceObject = Marshal.PtrToStructure<SDL_Surface>(this.Surface);
+            this.Width = SurfaceObject.w;
+            this.Height = SurfaceObject.h;
+            if (!(this is SolidBitmap)) this.Lock();
+            BitmapList.Add(this);
+            SDL_PixelFormat format = Marshal.PtrToStructure<SDL_PixelFormat>(this.SurfaceObject.format);
+            if (format.format != SDL_PixelFormatEnum.SDL_PIXELFORMAT_ABGR8888) ConvertToABGR8();
+        }
     }
 
     /// <summary>
