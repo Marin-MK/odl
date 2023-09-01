@@ -107,7 +107,7 @@ public static class Graphics
             LoadedSDLTTF = false;
         }
 
-        if (NativeLibrary.Platform == NativeLibraryLoader.Platform.Windows)
+        if (ODL.OnWindows)
         {
             // DPI-aware per monitor
             // Windows 10.1607+
@@ -144,11 +144,6 @@ public static class Graphics
                     }
                 }
             }
-
-        }
-        else if (NativeLibrary.Platform != NativeLibraryLoader.Platform.Linux)
-        {
-            throw new NativeLibrary.UnsupportedPlatformException();
         }
 
         uint IMG_Flags = IMG_INIT_PNG;

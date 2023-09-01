@@ -32,5 +32,9 @@
 
     <ItemGroup>
       <None Remove="src\resolvers\" />
+      <None Remove="src\bitmap\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="src\bitmap\" />
     </ItemGroup>
 </Project>

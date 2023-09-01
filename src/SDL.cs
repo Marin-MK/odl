@@ -32,6 +32,7 @@ public class SDL : NativeLibrary
         SDL_GetWindowFlags = GetFunction<SDL_UIntPtr>("SDL_GetWindowFlags");
         FUNC_SDL_SetHint = GetFunction<SDL_SDLBoolPtrPtr>("SDL_SetHint");
         FUNC_SDL_GetHint = GetFunction<SDL_PtrPtr>("SDL_GetHint");
+        FUNC_SDL_SetHintWithPriority = GetFunction<SDL_SDLBoolPtrPtrInt>("SDL_SetHintWithPriority");
         SDL_GetWindowPosition = GetFunction<SDL_VoidPtrOutIntOutInt>("SDL_GetWindowPosition");
         SDL_SetWindowPosition = GetFunction<SDL_VoidPtrIntInt>("SDL_SetWindowPosition");
         SDL_SetWindowResizable = GetFunction<SDL_VoidPtrSDLBool>("SDL_SetWindowResizable");
@@ -126,6 +127,7 @@ public class SDL : NativeLibrary
     public delegate IntPtr SDL_PtrPtrIntRendererFlags(IntPtr IntPtr, int Int, SDL_RendererFlags UInt);
     public delegate IntPtr SDL_UIntPtr(IntPtr IntPtr);
     public delegate SDL_bool SDL_SDLBoolPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
+    public delegate SDL_bool SDL_SDLBoolPtrPtrInt(IntPtr IntPtr1, IntPtr IntPtr2, int Int1);
     public delegate void SDL_VoidPtrOutIntOutInt(IntPtr IntPtr, out int Int1, out int Int2);
     public delegate void SDL_VoidPtrSDLBool(IntPtr IntPtr, SDL_bool Bool);
     public delegate void SDL_VoidPtrPtr(IntPtr IntPtr1, IntPtr IntPtr2);
@@ -202,6 +204,7 @@ public class SDL : NativeLibrary
     private static SDL_PtrStrIntIntIntIntWindowFlags FUNC_SDL_CreateWindow;
     private static SDL_SDLBoolPtrPtr FUNC_SDL_SetHint;
     private static SDL_PtrPtr FUNC_SDL_GetHint;
+    private static SDL_SDLBoolPtrPtrInt FUNC_SDL_SetHintWithPriority;
     private static SDL_VoidPtrPtr FUNC_SDL_SetWindowTitle;
     private static SDL_Ptr FUNC_SDL_GetClipboardText;
     private static SDL_IntPtr FUNC_SDL_SetClipboardText;
@@ -231,6 +234,10 @@ public class SDL : NativeLibrary
     public static string SDL_GetHint(string Name)
     {
         return PtrToStrUTF8(FUNC_SDL_GetHint(StrUTF8ToPtr(Name)));
+    }
+    public static SDL_bool SDL_SetHintWithPriority(string Name, string Value, SDL_HintPriority Priority)
+    {
+        return FUNC_SDL_SetHintWithPriority(StrUTF8ToPtr(Name), StrUTF8ToPtr(Value), (int)Priority);
     }
     public static SDL_VoidPtrOutIntOutInt SDL_GetWindowPosition;
     public static SDL_VoidPtrIntInt SDL_SetWindowPosition;
@@ -1596,6 +1603,13 @@ public class SDL : NativeLibrary
         SDL_FLASH_CANCEl,
         SDL_FLASH_BRIEFLY,
         SDL_FLASH_UNTIL_FOCUSED
+    }
+
+    public enum SDL_HintPriority
+    {
+        SDL_HINT_DEFAULT,
+        SDL_HINT_NORMAL,
+        SDL_HINT_OVERRIDE
     }
     #endregion
 

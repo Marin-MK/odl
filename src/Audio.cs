@@ -40,11 +40,6 @@ public static class Audio
             UsingBassMidi = true;
         }
 
-        if (!ODL.OnWindows && !ODL.OnLinux)
-        {
-            throw new NativeLibrary.UnsupportedPlatformException();
-        }
-
         BASS_Init = bass.GetFunction<BASS_BoolIntIntUIntUIntPtr>("BASS_Init");
         BASS_GetVersion = bass.GetFunction<BASS_UInt>("BASS_GetVersion");
         BASS_Free = bass.GetFunction<BASS_Bool>("BASS_Free");

@@ -13,6 +13,7 @@ benchmarks/Program.cs
 *.sln.docstates
 
 line_count.rb
+.DS_Store
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

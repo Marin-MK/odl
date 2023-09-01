@@ -5,7 +5,7 @@ using static odl.SDL2.SDL;
 
 namespace odl;
 
-internal class Renderer : IDisposable
+public class Renderer : IDisposable
 {
     private static int CreationCounter = 0;
 

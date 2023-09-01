@@ -16,6 +16,8 @@ public class FontResolver : FileResolver
 			AddPath("/usr/local/share/fonts");
 			AddPath("~/.fonts");
 		}
+		string fontPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+		if (!ContainsPath(fontPath)) AddPath(fontPath);
 		AddExtension(".ttf");
 	}
 }

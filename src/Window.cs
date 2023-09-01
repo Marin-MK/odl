@@ -17,7 +17,7 @@ public class Window : IDisposable
     /// <summary>
     /// The renderer of this window.
     /// </summary>
-    internal Renderer Renderer { get; private set; }
+    public Renderer Renderer { get; private set; }
 
     /// <summary>
     /// The Parent window of this window, or null if parentless.
@@ -206,7 +206,8 @@ public class Window : IDisposable
         if (HardwareAcceleration && PreferredDriver == RenderDriver.Software) throw new Exception("Cannot use Software renderer with hardware acceleration.");
         _StartTime = DateTime.Now;
 
-        SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+        SDL_WindowFlags flags = SDL_WindowFlags.SDL_WINDOW_HIDDEN;
+        if (ODL.OnWindows) flags |= SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
         if (Borderless) flags |= SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
         if (PreferredDriver == RenderDriver.OpenGL) flags |= SDL_WindowFlags.SDL_WINDOW_OPENGL;
         this.SDL_Window = SDL_CreateWindow(this.Text, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
