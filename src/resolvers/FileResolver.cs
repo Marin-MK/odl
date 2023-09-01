@@ -7,11 +7,25 @@ using System.Threading.Tasks;
 
 namespace odl;
 
+/// <summary>
+/// Resolves relative filenames into absolute filenames if they exist.
+/// </summary>
 public class FileResolver
 {
+    /// <summary>
+    /// A list of registered folders to search through when resolving files.
+    /// </summary>
     private List<string> FolderPaths = new List<string>();
+    /// <summary>
+    /// A list of registered extensions to try when resolving files.
+    /// </summary>
     private List<string> Extensions = new List<string>();
 
+    /// <summary>
+    /// Registers a folder to use for resolving files.
+    /// </summary>
+    /// <param name="path">The folder to look in.</param>
+    /// <exception cref="FileResolverException">If the path was already registered.</exception>
     public void AddPath(string path)
     {
         path = path.Replace('\\', '/');
@@ -19,11 +33,21 @@ public class FileResolver
         FolderPaths.Add(path);
     }
 
+    /// <summary>
+    /// Whether a folder was already registered.
+    /// </summary>
+    /// <param name="path">The folder to test.</param>
+    /// <returns>Whether the specified folder was already registered.</returns>
     public bool ContainsPath(string path)
     {
         return FolderPaths.Contains(path.Replace('\\', '/'));
     }
 
+    /// <summary>
+    /// Deregisters the folder for resolving files.
+    /// </summary>
+    /// <param name="path">The folder to deregister.</param>
+    /// <exception cref="FileResolverException">If the path was not registered to begin with.</exception>
     public void RemovePath(string path)
     {
         path = path.Replace('\\', '/');
@@ -31,6 +55,11 @@ public class FileResolver
         FolderPaths.Remove(path);
     }
 
+    /// <summary>
+    /// Registers an extension to look for when resolving files.
+    /// </summary>
+    /// <param name="ext">The extension to register. May or may not start with '.'</param>
+    /// <exception cref="FileResolverException">If the extension is invalid or already registered.</exception>
     public void AddExtension(string ext)
     {
         if (string.IsNullOrEmpty(ext) || ext == ".") throw new FileResolverException("Cannot add null or empty extensions.");
@@ -40,6 +69,11 @@ public class FileResolver
         Extensions.Add(ext);
     }
 
+    /// <summary>
+    /// Whether the extension was already registered.
+    /// </summary>
+    /// <param name="ext">The extension to test.</param>
+    /// <returns>Whether the specified extension was already registered.</returns>
     public bool ContainsExtension(string ext)
     {
         if (!ext.StartsWith(".")) ext = "." + ext;
@@ -47,6 +81,11 @@ public class FileResolver
         return Extensions.Contains(ext);
     }
 
+    /// <summary>
+    /// Deregisters the extension for resolving files.
+    /// </summary>
+    /// <param name="ext">The extension to deregister.</param>
+    /// <exception cref="FileResolverException">If the extension is invalid or not registered.</exception>
     public void RemoveExtension(string ext)
     {
         if (string.IsNullOrEmpty(ext) || ext == ".") throw new FileResolverException($"Cannot remove null or empty extensions.");
@@ -56,12 +95,23 @@ public class FileResolver
         Extensions.Remove(ext);
     }
 
-    public string ResolveFilename(string filename)
+    /// <summary>
+    /// Resolves a full filename based on a partial filename by looking through all registered folders and extensions with the default resolver strategy.
+    /// </summary>
+    /// <param name="filename"><The (partial) filename to resolve./param>
+    /// <returns>The resolved filename, or null if it could not be found.</returns>
+    public string? ResolveFilename(string filename)
     {
         return ResolveFilename(filename, FileResolverStrategy.Default);
     }
 
-    public string ResolveFilename(string filename, FileResolverStrategy strategy)
+    /// <summary>
+    /// Resolves a full filename based on a partial filename by looking through all registered folders and extensions with the specified resolver strategy.
+    /// </summary>
+    /// <param name="filename"><The (partial) filename to resolve./param>
+    /// <param name="strategy">The strategy to use for resolving the filename.</param>
+    /// <returns>The resolved filename, or null if it could not be found.</returns>
+    public string? ResolveFilename(string filename, FileResolverStrategy strategy)
     {
         string? parentFolder = Path.GetDirectoryName(filename);
         string? result = null;
@@ -81,7 +131,14 @@ public class FileResolver
         return null;
     }
 
-    public string ResolveFilename(string folder, string filename, FileResolverStrategy strategy)
+    /// <summary>
+    /// Resolves a full filename based on a partial filename by looking through the specified folder for all extensions with the specified resolver strategy.
+    /// </summary>
+    /// <param name="folder">The folder to look through.</param>
+    /// <param name="filename"><The (partial) filename to resolve./param>
+    /// <param name="strategy">The strategy to use for resolving the filename.</param>
+    /// <returns>The resolved filename, or null if it could not be found.</returns>
+    public string? ResolveFilename(string folder, string filename, FileResolverStrategy strategy)
     {
         bool tryWithExtension = (strategy & FileResolverStrategy.TryWithExtension) != 0;
         bool caseInsensitive = (strategy & FileResolverStrategy.CaseInsensitive) != 0;
@@ -128,16 +185,40 @@ public class FileResolver
     }
 }
 
+/// <summary>
+/// Describes the strategy to use when attempting to resolve files.
+/// </summary>
 public enum FileResolverStrategy
 {
+    /// <summary>
+    /// The most strict resolver strategy that only resolves an exact match.
+    /// </summary>
     Strict = 0,
+    /// <summary>
+    /// Checks the specified filename and tries to append all registered extensions if it was not found.
+    /// </summary>
     TryWithExtension = 1,
+    /// <summary>
+    /// Checks the specified filename and retries case-insensitively if it was not found.
+    /// </summary>
     CaseInsensitive = 2,
+    /// <summary>
+    /// Checks the specified filename and counts partial matches if it was not found.
+    /// </summary>
     PartialMatches = 4,
+    /// <summary>
+    /// Extends the search into subdirectories if it was not found.
+    /// </summary>
     IncludeSubdirectories = 8,
-    Default = 15
+    /// <summary>
+    /// The default resolver strategy, which combines <see cref="TryWithExtension"/>, <see cref="CaseInsensitive"/>, <see cref="PartialMatches"/> and <see cref="IncludeSubdirectories"/>.
+    /// </summary>
+    Default = TryWithExtension | CaseInsensitive | PartialMatches | IncludeSubdirectories
 }
 
+/// <summary>
+/// Describes exceptions that occur during the process of resolving a file.
+/// </summary>
 public class FileResolverException : Exception
 {
     public FileResolverException(string message) : base(message) { }
