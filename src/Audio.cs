@@ -23,11 +23,13 @@ public static class Audio
 
         ODL.Logger?.WriteLine("Loading audio components...");
 
+        ODL.Logger?.WriteLine("Loading BASS...");
         NativeLibrary bass = NativeLibrary.Load(Path.Get("bass"));
 
         NativeLibrary bass_fx = null;
         if (Path.Has("bass_fx"))
         {
+            ODL.Logger?.WriteLine("Loading BASS_FX...");
             bass_fx = NativeLibrary.Load(Path.Get("bass_fx"));
             BASS_FX_GetVersion = bass_fx.GetFunction<BASS_UInt>("BASS_FX_GetVersion");
             UsingBassFX = true;
@@ -36,6 +38,7 @@ public static class Audio
         NativeLibrary bass_midi = null;
         if (Path.Has("bass_midi"))
         {
+            ODL.Logger?.WriteLine("Loading BASS_MIDI...");
             bass_midi = NativeLibrary.Load(Path.Get("bass_midi"));
             UsingBassMidi = true;
         }

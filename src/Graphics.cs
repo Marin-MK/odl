@@ -72,19 +72,23 @@ public static class Graphics
 
         ODL.Logger?.WriteLine("Loading graphical components...");
 
+        ODL.Logger?.WriteLine("Loading SDL2...");
         SDL.Load(Path.Get("libsdl2"), Path.Get("libz"));
         ODL.Logger?.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
 
         if (Path.Has("libjpeg"))
         {
+            ODL.Logger?.WriteLine("Loading libjpeg...");
             NativeLibrary.Load(Path.Get("libjpeg"));
             LoadedJPEG = true;
             ODL.ImageResolver.AddExtension(".jpg");
             ODL.ImageResolver.AddExtension(".jpeg");
+            ODL.Logger?.WriteLine("Loaded libjpeg");
         }
 
         if (Path.Has("libsdl2_image"))
         {
+            ODL.Logger?.WriteLine("Loading SDL2_image...");
             SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
             ODL.Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
             LoadedSDLImage = true;
@@ -97,6 +101,7 @@ public static class Graphics
 
         if (Path.Has("libsdl2_ttf"))
         {
+            ODL.Logger?.WriteLine("Loading SDL2_ttf...");
             SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
             ODL.Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
             LoadedSDLTTF = true;
@@ -115,7 +120,7 @@ public static class Graphics
             if (user32.HasFunction("SetProcessDpiAwarenessContext"))
             {
                 // -1 unaware, -2 aware, -3 per monitor aware, -4 per monitor aware v2 (?), -5 unaware gdi scaled (?)
-                bool ret = user32.GetFunction<SetProcessDpiAwarenessContextDelegate>("SetProcessDpiAwarenessContext").Invoke(-4);
+                bool ret = user32.GetFunction<SetProcessDpiAwarenessContextDelegate>("SetProcessDpiAwarenessContext")(-4);
                 if (ret) ODL.Logger?.WriteLine("Set DPI awareness per monitor v2 (v10.1607+)");
                 else ODL.Logger?.WriteLine("Failed to set DPI awareness per monitor v2 (v10.1607+)");
             }
@@ -127,7 +132,7 @@ public static class Graphics
                 if (shcore.HasFunction("SetProcessDpiAwareness"))
                 {
                     // 0 unaware, 1 aware, 2 per monitor aware
-                    int ret = shcore.GetFunction<SetProcessDpiAwarenessDelegate>("SetProcessDpiAwareness").Invoke(2);
+                    int ret = shcore.GetFunction<SetProcessDpiAwarenessDelegate>("SetProcessDpiAwareness")(2);
                     if (ret == 0) ODL.Logger?.WriteLine("Set DPI awareness per monitor (v8.1+)");
                     else ODL.Logger?.WriteLine("Failed to set DPI awareness per monitor (v8.1+)");
                 }
@@ -138,7 +143,7 @@ public static class Graphics
                     if (user32.HasFunction("SetProcessDPIAware"))
                     {
                         // Fully aware; not per monitor.
-                        bool ret = user32.GetFunction<SetProcessDPIAwareDelegate>("SetProcessDPIAware").Invoke();
+                        bool ret = user32.GetFunction<SetProcessDPIAwareDelegate>("SetProcessDPIAware")();
                         if (ret) ODL.Logger?.WriteLine("Set DPI awareness globally");
                         else ODL.Logger?.WriteLine("Failed to set DPI awareness globally");
                     }
@@ -148,15 +153,24 @@ public static class Graphics
 
         uint IMG_Flags = IMG_INIT_PNG;
         if (LoadedJPEG) IMG_Flags |= IMG_INIT_JPG;
+        ODL.Logger?.WriteLine("Initializing SDL...");
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) throw new Exception(SDL_GetError());
-        if (LoadedSDLImage && IMG_Init(IMG_Flags) != (int) IMG_Flags) throw new Exception(SDL_GetError());
+        ODL.Logger?.WriteLine("Initialized SDL");
+        if (LoadedSDLImage)
+        {
+            ODL.Logger?.WriteLine("Initializing SDL2_image...");
+            if (IMG_Init(IMG_Flags) != (int) IMG_Flags) throw new Exception(SDL_GetError());
+            ODL.Logger?.WriteLine("Initialized SDL2_image");
+        }
 
         if (LoadedSDLTTF)
         {
+            ODL.Logger?.WriteLine("Initializing SDL2_ttf...");
             if (TTF_Init() < 0) throw new Exception(SDL_GetError());
             int maj, min, pat;
             TTF_GetFreeTypeVersion(out maj, out min, out pat);
-            ODL.Logger?.WriteLine($"FreeType ({maj}.{min}.{pat})");
+            ODL.Logger?.WriteLine("Initialized SDL2_ttf");
+            ODL.Logger?.WriteLine($"Loaded FreeType ({maj}.{min}.{pat})");
         }
 
         int screens = SDL_GetNumVideoDisplays();

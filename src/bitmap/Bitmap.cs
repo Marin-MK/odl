@@ -189,7 +189,6 @@ public partial class Bitmap : IDisposable
         }
         if (Width > ChunkWidth || Height > ChunkHeight)
         {
-            ODL.Logger?.WriteLine("Creating chunky bitmap");
             this.Width = Width;
             this.Height = Height;
             this.ChunkSize = ChunkSize;
