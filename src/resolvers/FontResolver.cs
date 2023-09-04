@@ -16,6 +16,10 @@ public class FontResolver : FileResolver
 			AddPath("/usr/local/share/fonts");
 			AddPath("~/.fonts");
 		}
+		else if (ODL.OnMacOS)
+		{
+			AddPath("/System/Library/Fonts");
+		}
 		string fontPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
 		if (!ContainsPath(fontPath)) AddPath(fontPath);
 		AddExtension(".ttf");

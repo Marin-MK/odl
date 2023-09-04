@@ -15,7 +15,7 @@ public class FileResolver
     /// <summary>
     /// A list of registered folders to search through when resolving files.
     /// </summary>
-    private List<string> FolderPaths = new List<string>();
+    public List<string> FolderPaths = new List<string>();
     /// <summary>
     /// A list of registered extensions to try when resolving files.
     /// </summary>
@@ -121,14 +121,14 @@ public class FileResolver
             result = ResolveFilename(parentFolder, filenameEnding, strategy);
             if (result is not null) return result;
         }
-        result = ResolveFilename(Directory.GetCurrentDirectory(), filename, strategy);
-        if (result is not null) return result;
         foreach (string filePath in FolderPaths)
         {
+            if (!Directory.Exists(filePath)) continue;
             result = ResolveFilename(filePath, filename, strategy);
             if (result is not null) return result;
         }
-        return null;
+        result = ResolveFilename(Directory.GetCurrentDirectory(), filename, strategy);
+        return result;        
     }
 
     /// <summary>
@@ -180,6 +180,21 @@ public class FileResolver
                 string result = ResolveFilename(Path.Combine(folder, directory), filename, strategy);
                 if (result is not null) return result;
             }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Attempts to resolve the first available filename.
+    /// </summary>
+    /// <param name="filenames">A list of possible filenames to try to resolve.</param>
+    /// <returns>The first resolved filename, or null if none could be resolved.</returns>
+    public string? ResolveFilenames(params string[] filenames)
+    {
+        foreach (string filename in filenames)
+        {
+            string? result = ResolveFilename(filename);
+            if (result is not null) return result;
         }
         return null;
     }
