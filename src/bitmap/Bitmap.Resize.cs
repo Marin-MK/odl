@@ -12,7 +12,7 @@ public partial class Bitmap
     /// <returns>The resized bitmap.</returns>
     public Bitmap Resize(Size NewSize, Size? ChunkSize = null)
     {
-        return Resize(NewSize.Width, NewSize.Height, ChunkSize);
+        return Resize(NewSize.Width, NewSize.Height, ChunkSize ?? Graphics.MaxTextureSize);
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ public partial class Bitmap
     public Bitmap Resize(int NewWidth, int NewHeight, Size? ChunkSize = null)
     {
         Bitmap NewBitmap = null;
-        if (ChunkSize == null) NewBitmap = new Bitmap(NewWidth, NewHeight, this.ChunkSize);
+        if (ChunkSize == null) NewBitmap = new Bitmap(NewWidth, NewHeight, this.ChunkSize ?? Graphics.MaxTextureSize);
         else NewBitmap = new Bitmap(NewWidth, NewHeight, ChunkSize);
         NewBitmap.Unlock();
         NewBitmap.Build(this, BlendMode.None);
