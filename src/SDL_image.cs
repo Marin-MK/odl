@@ -9,13 +9,13 @@ public class SDL_image : NativeLibrary
 
     public static SDL.SDL_Version Version;
 
-    public new static SDL_image Load(string Library, params string[] PreloadLibraries)
+    public new static SDL_image Load(string Library)
     {
-        Main = new SDL_image(Library, PreloadLibraries);
+        Main = new SDL_image(Library);
         return Main;
     }
 
-    unsafe protected SDL_image(string Library, params string[] PreloadLibraries) : base(Library, PreloadLibraries)
+    unsafe protected SDL_image(string Library) : base(Library)
     {
         IMG_Init = GetFunction<IMG_IntUInt>("IMG_Init");
         IMG_Linked_Version = GetFunction<IMG_Version>("IMG_Linked_Version");

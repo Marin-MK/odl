@@ -73,7 +73,8 @@ public static class Graphics
         ODL.Logger?.WriteLine("Loading graphical components...");
 
         ODL.Logger?.WriteLine("Loading SDL2...");
-        SDL.Load(Path.Get("libsdl2"), Path.Get("libz"));
+        NativeLibrary.Load(Path.Get("libz"));
+        SDL.Load(Path.Get("libsdl2"));
         ODL.Logger?.WriteLine($"Loaded SDL2 ({SDL.Version.major}.{SDL.Version.minor}.{SDL.Version.patch})");
 
         if (Path.Has("libjpeg"))
@@ -89,7 +90,8 @@ public static class Graphics
         if (Path.Has("libsdl2_image"))
         {
             ODL.Logger?.WriteLine("Loading SDL2_image...");
-            SDL_image.Load(Path.Get("libsdl2_image"), Path.Get("libpng"));
+            NativeLibrary.Load(Path.Get("libpng"));
+            SDL_image.Load(Path.Get("libsdl2_image"));
             ODL.Logger?.WriteLine($"Loaded SDL2_image ({SDL_image.Version.major}.{SDL_image.Version.minor}.{SDL_image.Version.patch})");
             LoadedSDLImage = true;
         }
@@ -102,7 +104,8 @@ public static class Graphics
         if (Path.Has("libsdl2_ttf"))
         {
             ODL.Logger?.WriteLine("Loading SDL2_ttf...");
-            SDL_ttf.Load(Path.Get("libsdl2_ttf"), Path.Get("libfreetype"));
+            NativeLibrary.Load(Path.Get("libfreetype"));
+            SDL_ttf.Load(Path.Get("libsdl2_ttf"));
             ODL.Logger?.WriteLine($"Loaded SDL2_ttf ({SDL_ttf.Version.major}.{SDL_ttf.Version.minor}.{SDL_ttf.Version.patch})");
             LoadedSDLTTF = true;
         }

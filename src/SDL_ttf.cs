@@ -9,13 +9,13 @@ internal class SDL_ttf : NativeLibrary
 
     internal static SDL.SDL_Version Version;
 
-    public new static SDL_ttf Load(string Library, params string[] PreloadLibraries)
+    public new static SDL_ttf Load(string Library)
     {
-        Main = new SDL_ttf(Library, PreloadLibraries);
+        Main = new SDL_ttf(Library);
         return Main;
     }
 
-    unsafe protected SDL_ttf(string Library, params string[] PreloadLibraries) : base(Library, PreloadLibraries)
+    unsafe protected SDL_ttf(string Library) : base(Library)
     {
         TTF_Init = GetFunction<TTF_Int>("TTF_Init");
         TTF_Linked_Version = GetFunction<TTF_Version>("TTF_Linked_Version");

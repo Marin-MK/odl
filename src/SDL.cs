@@ -12,13 +12,13 @@ public class SDL : NativeLibrary
 
     public static SDL_Version Version = new SDL_Version();
 
-    public new static SDL Load(string Library, params string[] PreloadLibraries)
+    public new static SDL Load(string Library)
     {
-        Main = new SDL(Library, PreloadLibraries);
+        Main = new SDL(Library);
         return Main;
     }
 
-    protected SDL(string Library, params string[] PreloadLibraries) : base(Library, PreloadLibraries)
+    protected SDL(string Library) : base(Library)
     {
         SDL_Init = GetFunction<SDL_IntUInt>("SDL_Init");
         SDL_GetVersion = GetFunction<SDL_VoidVersion>("SDL_GetVersion");
