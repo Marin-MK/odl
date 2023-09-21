@@ -14,8 +14,9 @@ public partial class Bitmap
         this.Locked = true;
         if (IsChunky)
         {
-            foreach (Bitmap b in this.InternalBitmaps)
+            for (int i = 0; i < InternalBitmaps.Count; i++)
             {
+                Bitmap b = InternalBitmaps[i];
                 if (!b.Locked && b.Renderer != null)
                 {
                     b.Lock();

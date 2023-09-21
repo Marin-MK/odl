@@ -140,6 +140,7 @@ public class FileResolver
     /// <returns>The resolved filename, or null if it could not be found.</returns>
     public string? ResolveFilename(string folder, string filename, FileResolverStrategy strategy)
     {
+        if (string.IsNullOrEmpty(filename)) return null;
         bool tryWithExtension = (strategy & FileResolverStrategy.TryWithExtension) != 0;
         bool caseInsensitive = (strategy & FileResolverStrategy.CaseInsensitive) != 0;
         bool partialMatches = (strategy & FileResolverStrategy.PartialMatches) != 0;
